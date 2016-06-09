@@ -12,6 +12,10 @@
 #define PLUGINPROCESSOR_H_INCLUDED
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include <atomic>
+#include "Gist/src/Gist.h"
+
+
 
 
 //==============================================================================
@@ -56,9 +60,16 @@ public:
     void getStateInformation (MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
+    //JWM - Test function to get spectral centroid value in GUI
+    float getSpectralCentroid() const;
+
 private:
     //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BeatboxVoxAudioProcessor)
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BeatboxVoxAudioProcessor);
+
+    //Gist audio feature extraction / analysis object.
+    Gist<float> gist;
+    std::atomic<float> spectralCentroid;
 };
 
 

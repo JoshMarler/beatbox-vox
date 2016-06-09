@@ -18,7 +18,8 @@
 //==============================================================================
 /**
 */
-class BeatboxVoxAudioProcessorEditor  : public AudioProcessorEditor
+class BeatboxVoxAudioProcessorEditor  : public AudioProcessorEditor, 
+                                        private Timer
 {
 public:
     BeatboxVoxAudioProcessorEditor (BeatboxVoxAudioProcessor&);
@@ -27,11 +28,15 @@ public:
     //==============================================================================
     void paint (Graphics&) override;
     void resized() override;
+    void timerCallback() override;
 
 private:
-    // This reference is provided as a quick way for your editor to
-    // access the processor object that created it.
-    BeatboxVoxAudioProcessor& processor;
+    BeatboxVoxAudioProcessor& getProcessor() const
+    {
+        return static_cast<BeatboxVoxAudioProcessor&> (processor);
+    }
+    //JWM - Test label for displaying a Gist feature. 
+    Label spectralCentroidLabel;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BeatboxVoxAudioProcessorEditor)
 };

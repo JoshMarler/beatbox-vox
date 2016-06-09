@@ -5,11 +5,59 @@
               buildVST="1" buildVST3="1" buildAU="0" buildAUv3="0" buildRTAS="0"
               buildAAX="0" pluginName="BeatboxVox" pluginDesc="BeatboxVox"
               pluginManufacturer="RudeAudio" pluginManufacturerCode="RUDE"
-              pluginCode="Bvox" pluginChannelConfigs="" pluginIsSynth="1" pluginWantsMidiIn="0"
+              pluginCode="Bvox" pluginChannelConfigs="" pluginIsSynth="0" pluginWantsMidiIn="0"
               pluginProducesMidiOut="0" pluginIsMidiEffectPlugin="0" pluginEditorRequiresKeys="0"
               pluginAUExportPrefix="BeatboxVoxAU" pluginRTASCategory="" aaxIdentifier="com.yourcompany.BeatboxVox"
               pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="4.2.1">
   <MAINGROUP id="z3DhfV" name="BeatboxVox">
+    <GROUP id="{3040E391-9B17-F5A0-86E3-DD4BAE9A2C03}" name="Gist">
+      <GROUP id="{473C0305-BB58-020B-ED11-DA1FA24AE8BF}" name="libs">
+        <GROUP id="{CD4B6134-D937-CBAC-CF79-39EB99AF7BC7}" name="kiss_fft130">
+          <FILE id="gqpzlz" name="_kiss_fft_guts.h" compile="0" resource="0"
+                file="Source/Gist/libs/kiss_fft130/_kiss_fft_guts.h"/>
+          <FILE id="a9Zvq0" name="COPYING" compile="0" resource="1" file="Source/Gist/libs/kiss_fft130/COPYING"/>
+          <FILE id="GBUxWT" name="kiss_fft.c" compile="1" resource="0" file="Source/Gist/libs/kiss_fft130/kiss_fft.c"/>
+          <FILE id="NBpoSt" name="kiss_fft.h" compile="0" resource="0" file="Source/Gist/libs/kiss_fft130/kiss_fft.h"/>
+          <FILE id="X3CEYL" name="kissfft.hh" compile="0" resource="0" file="Source/Gist/libs/kiss_fft130/kissfft.hh"/>
+          <FILE id="BNMpma" name="README" compile="0" resource="1" file="Source/Gist/libs/kiss_fft130/README"/>
+        </GROUP>
+      </GROUP>
+      <GROUP id="{58757D7F-EA15-E7C1-D41A-CB781C3B09AB}" name="src">
+        <GROUP id="{2A293593-1997-E3C3-63D7-5D92B190E307}" name="core">
+          <FILE id="OXygAE" name="CoreFrequencyDomainFeatures.cpp" compile="1"
+                resource="0" file="Source/Gist/src/core/CoreFrequencyDomainFeatures.cpp"/>
+          <FILE id="tcV8SL" name="CoreFrequencyDomainFeatures.h" compile="0"
+                resource="0" file="Source/Gist/src/core/CoreFrequencyDomainFeatures.h"/>
+          <FILE id="sg8M5s" name="CoreTimeDomainFeatures.cpp" compile="1" resource="0"
+                file="Source/Gist/src/core/CoreTimeDomainFeatures.cpp"/>
+          <FILE id="RpSk6T" name="CoreTimeDomainFeatures.h" compile="0" resource="0"
+                file="Source/Gist/src/core/CoreTimeDomainFeatures.h"/>
+        </GROUP>
+        <GROUP id="{0B6161C3-057B-8948-8BA8-D2668D1B2EBA}" name="fft">
+          <FILE id="nlpNga" name="AccelerateFFT.cpp" compile="0" resource="0"
+                file="Source/Gist/src/fft/AccelerateFFT.cpp"/>
+          <FILE id="s1eRFl" name="AccelerateFFT.h" compile="0" resource="0" file="Source/Gist/src/fft/AccelerateFFT.h"/>
+        </GROUP>
+        <GROUP id="{F28A0572-0B7B-56B5-39E2-9EA797C8FAD1}" name="mfcc">
+          <FILE id="ihL46Z" name="MFCC.cpp" compile="1" resource="0" file="Source/Gist/src/mfcc/MFCC.cpp"/>
+          <FILE id="P94Be7" name="MFCC.h" compile="0" resource="0" file="Source/Gist/src/mfcc/MFCC.h"/>
+        </GROUP>
+        <GROUP id="{7E909F31-C528-F548-0221-21E60B4D2CF6}" name="onset-detection-functions">
+          <FILE id="nHX0vy" name="OnsetDetectionFunction.cpp" compile="1" resource="0"
+                file="Source/Gist/src/onset-detection-functions/OnsetDetectionFunction.cpp"/>
+          <FILE id="Uvs3lt" name="OnsetDetectionFunction.h" compile="0" resource="0"
+                file="Source/Gist/src/onset-detection-functions/OnsetDetectionFunction.h"/>
+        </GROUP>
+        <GROUP id="{9180136F-CE8D-2988-A2A0-898AA7FDC7D5}" name="pitch">
+          <FILE id="kwlRol" name="Yin.cpp" compile="1" resource="0" file="Source/Gist/src/pitch/Yin.cpp"/>
+          <FILE id="b14DBU" name="Yin.h" compile="0" resource="0" file="Source/Gist/src/pitch/Yin.h"/>
+        </GROUP>
+        <FILE id="xvEF6a" name="Gist.cpp" compile="1" resource="0" file="Source/Gist/src/Gist.cpp"/>
+        <FILE id="DEGzaE" name="Gist.h" compile="0" resource="0" file="Source/Gist/src/Gist.h"/>
+      </GROUP>
+      <FILE id="rS7rfu" name="LICENSE.txt" compile="0" resource="1" file="Source/Gist/LICENSE.txt"/>
+      <FILE id="tamIXT" name="README.md" compile="0" resource="1" file="Source/Gist/README.md"/>
+    </GROUP>
     <GROUP id="{B8A10E5D-D185-1FFC-CC44-E732222EC3EB}" name="Source">
       <FILE id="gujfVz" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
@@ -21,7 +69,8 @@
     </GROUP>
   </MAINGROUP>
   <EXPORTFORMATS>
-    <LINUX_MAKE targetFolder="Builds/LinuxMakefile" vstFolder="" cppLanguageStandard="-std=c++14">
+    <LINUX_MAKE targetFolder="Builds/LinuxMakefile" vstFolder="" cppLanguageStandard="-std=c++14"
+                extraCompilerFlags="" extraDefs="USE_KISS_FFT=1&#10;">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/" isDebug="1" optimisation="1"
                        targetName="BeatboxVox" binaryPath="~/AudioPlugins/vst/"/>
