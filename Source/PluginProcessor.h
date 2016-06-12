@@ -7,15 +7,16 @@
 
   ==============================================================================
 */
-
 #ifndef PLUGINPROCESSOR_H_INCLUDED
 #define PLUGINPROCESSOR_H_INCLUDED
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include <atomic>
+#include <mlpack/core.hpp>
+#include <mlpack/methods/naive_bayes/naive_bayes_classifier.hpp>
 #include "Gist/src/Gist.h"
 
-
+using namespace mlpack::naive_bayes;
 
 
 //==============================================================================
@@ -69,7 +70,9 @@ private:
 
     //Gist audio feature extraction / analysis object.
     Gist<float> gist;
+    NaiveBayesClassifier<> nbc;
     std::atomic<float> spectralCentroid;
+
 };
 
 

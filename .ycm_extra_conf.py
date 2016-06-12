@@ -34,7 +34,7 @@ import os
 import ycm_core
 
 flags = [
-    '-std=c++11',
+    '-std=c++14',
     '-x', 'c++',
     '-I','./ClangCompleter',
     '-I', '/home/joshuamarler/JUCE/modules',

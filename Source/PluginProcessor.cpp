@@ -13,7 +13,7 @@
 
 
 //==============================================================================
-BeatboxVoxAudioProcessor::BeatboxVoxAudioProcessor() : gist(512, 44100), spectralCentroid(0.0)
+BeatboxVoxAudioProcessor::BeatboxVoxAudioProcessor() : gist(512, 44100), nbc(), spectralCentroid(0.0)
 { 
 }
 
@@ -128,6 +128,7 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     //Gist analysis performed
     gist.processAudioFrame(buffer.getWritePointer(0), buffer.getNumSamples());
     spectralCentroid.store(gist.spectralCentroid());
+    
     
     // This is the place where you'd normally do the guts of your plugin's
     // audio processing...
