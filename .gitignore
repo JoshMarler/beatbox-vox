@@ -1,0 +1,7 @@
+# Files and folder to ignore in repo
+Builds/
+JuceLibraryCode/
+Source/Gist/documentation
+Source/Gist/python-module
+Source/Gist/test
+*.pyc

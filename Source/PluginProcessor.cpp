@@ -15,6 +15,7 @@
 //==============================================================================
 BeatboxVoxAudioProcessor::BeatboxVoxAudioProcessor() : gist(512, 44100), nbc(), spectralCentroid(0.0)
 { 
+        
 }
 
 BeatboxVoxAudioProcessor::~BeatboxVoxAudioProcessor()

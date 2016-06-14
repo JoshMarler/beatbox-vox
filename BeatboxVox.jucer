@@ -74,9 +74,11 @@
                 extraLinkerFlags="">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/&#10;/usr/lib&#10;/usr/local/lib"
-                       isDebug="1" optimisation="1" targetName="BeatboxVox" binaryPath="~/AudioPlugins/vst/"/>
+                       isDebug="1" optimisation="1" targetName="BeatboxVox" binaryPath="~/AudioPlugins/vst/"
+                       headerPath=""/>
         <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/&#10;/usr/lib&#10;/usr/local/lib"
-                       isDebug="0" optimisation="3" targetName="BeatboxVox" binaryPath="~/AudioPlugins/vst/"/>
+                       isDebug="0" optimisation="3" targetName="BeatboxVox" binaryPath="~/AudioPlugins/vst/"
+                       headerPath=""/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../JUCE/modules"/>
