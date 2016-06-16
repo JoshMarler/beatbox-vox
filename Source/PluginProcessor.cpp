@@ -128,7 +128,7 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
 
     //Gist analysis performed
     gist.processAudioFrame(buffer.getWritePointer(0), buffer.getNumSamples());
-    spectralCentroid.store(gist.spectralCentroid());
+    spectralCentroid.store(gist.spectralCrest());
     
     
     // This is the place where you'd normally do the guts of your plugin's

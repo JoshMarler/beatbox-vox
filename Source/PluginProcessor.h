@@ -12,8 +12,8 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include <atomic>
-#include <mlpack/core.hpp>
-#include <mlpack/methods/naive_bayes/naive_bayes_classifier.hpp>
+#include "mlpack/core.hpp"
+#include "mlpack/methods/naive_bayes/naive_bayes_classifier.hpp"
 #include "Gist/src/Gist.h"
 
 using namespace mlpack::naive_bayes;
