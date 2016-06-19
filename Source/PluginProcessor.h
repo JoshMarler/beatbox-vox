@@ -17,6 +17,7 @@
 #include "Gist/src/Gist.h"
 
 using namespace mlpack::naive_bayes;
+using namespace arma;
 
 
 //==============================================================================
@@ -73,6 +74,8 @@ private:
     NaiveBayesClassifier<> nbc;
     std::atomic<float> spectralCentroid;
 
+    //Test matrix for prototyping - 3 rows (2 features and last row for labels) - 2 cols (2 instances)
+    fmat::fixed<3, 2> testMatrix;
 };
 
 

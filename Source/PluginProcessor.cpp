@@ -13,9 +13,9 @@
 
 
 //==============================================================================
-BeatboxVoxAudioProcessor::BeatboxVoxAudioProcessor() : gist(512, 44100), nbc(), spectralCentroid(0.0)
+BeatboxVoxAudioProcessor::BeatboxVoxAudioProcessor() : gist(512, 44100), nbc(), spectralCentroid(0.0f)
 { 
-        
+    
 }
 
 BeatboxVoxAudioProcessor::~BeatboxVoxAudioProcessor()
@@ -82,6 +82,12 @@ void BeatboxVoxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
     // initialisation that you need..
     gist.setSamplingFrequency(sampleRate);
     gist.setAudioFrameSize(samplesPerBlock);
+
+    //Testing matrix init - initialzing with rows - testMatrix(2, 0) == row 2 element 0 (third row, first element)
+    testMatrix = {{20, 10}, {30, 10}, {1, 2}};
+    auto sampleOneLabel = testMatrix(2, 0);
+    auto sampleTwoLabel = testMatrix(2,1);
+    auto colOne = testMatrix.col(1);
 }
 
 void BeatboxVoxAudioProcessor::releaseResources()

@@ -35,13 +35,16 @@ import ycm_core
 
 flags = [
     '-std=c++14',
+    '-stdlib=libstdc++'
     '-x', 'c++',
     '-I','./ClangCompleter',
-    '-I', '/home/joshuamarler/JUCE/modules',
-    '-I', 'JuceLibraryCode',
+    '-I', '/home/joshua/JUCE/modules',
+    '-I', '../beatbox-vox/JuceLibraryCode',
     '-I', '/home/joshuamarler/SDKs/VST3',
     '-I', '/usr/include/freetype2',
-    '-I' '../BeatboxVox/Source'
+    '-I' '../beatbox-vox/Source/'
+    '-I', '/usr/local/include/'
+    '-I', '/usr/include/armadillo_bits/'
     '-isystem', '/usr/bin/../lib/gcc/x86_64-linux-gnu/5.3.1/../../../../include/c++/5.3.1',
     '-isystem', '/usr/bin/../lib/gcc/x86_64-linux-gnu/5.3.1/../../../../include/x86_64-linux-gnu/c++/5.3.1',
     '-isystem', '/usr/bin/../lib/gcc/x86_64-linux-gnu/5.3.1/../../../../include/c++/5.3.1/backward',
