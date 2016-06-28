@@ -15,6 +15,7 @@
 #include "mlpack/core.hpp"
 #include "mlpack/methods/naive_bayes/naive_bayes_classifier.hpp"
 #include "Gist/src/Gist.h"
+#include "OnsetDetection/OnsetDetector.h"
 
 using namespace mlpack::naive_bayes;
 using namespace arma;
@@ -69,8 +70,19 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BeatboxVoxAudioProcessor);
 
-    //Gist audio feature extraction / analysis object.
-    Gist<float> gist;
+    //Onset Detector object for peak picking.
+    OnsetDetector onsetDetector;
+    
+    //Vector to hold mag spectrum
+    std::vector<float> magSpectrum;
+
+    //Gist audio feature extraction / analysis objects.
+    Gist<float> gistMFCC;
+    Gist<float> gistOnset;
+    
+    //Previous spectral difference value for last audio frame
+    float prevSpecDiff = 0.0;
+
     NaiveBayesClassifier<> nbc;
     std::atomic<float> spectralCentroid;
 

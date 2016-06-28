@@ -13,7 +13,12 @@
 
 
 //==============================================================================
-BeatboxVoxAudioProcessor::BeatboxVoxAudioProcessor() : gist(512, 44100), nbc(), spectralCentroid(0.0f)
+BeatboxVoxAudioProcessor::BeatboxVoxAudioProcessor() 
+    : onsetDetector(),
+      gistMFCC(512, 44100),
+      gistOnset(512, 44100),
+      nbc(), 
+      spectralCentroid(0.0f)
 { 
     
 }
@@ -80,8 +85,17 @@ void BeatboxVoxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
-    gist.setSamplingFrequency(sampleRate);
-    gist.setAudioFrameSize(samplesPerBlock);
+    gistMFCC.setSamplingFrequency(sampleRate);
+    gistMFCC.setAudioFrameSize(samplesPerBlock);
+
+    gistOnset.setSamplingFrequency(sampleRate);
+    gistOnset.setAudioFrameSize(samplesPerBlock);
+    
+    magSpectrum.resize(samplesPerBlock / 2);
+    for (auto val : magSpectrum)
+    {
+        val = 0.0;
+    }
 
     //Testing matrix init - initialzing with rows - testMatrix(2, 0) == row 2 element 0 (third row, first element)
     testMatrix = {{20, 10}, {30, 10}, {1, 2}};
@@ -133,10 +147,27 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     }
 
     //Gist analysis performed
-    gist.processAudioFrame(buffer.getWritePointer(0), buffer.getNumSamples());
-    spectralCentroid.store(gist.spectralCrest());
+    gistOnset.processAudioFrame(buffer.getWritePointer(0), buffer.getNumSamples());
     
+    magSpectrum = gistOnset.getMagnitudeSpectrum();
+    float hfc = gistOnset.highFrequencyContent();
     
+    bool hasOnset = onsetDetector.checkForOnset(hfc);
+
+    if (hasOnset)
+    {
+        float currentVal = spectralCentroid.load();
+        if (currentVal == 0.0f || currentVal != std::numeric_limits<float>::max())
+        {
+            spectralCentroid.store(currentVal + 1);
+        }
+        else if (currentVal != std::numeric_limits<float>::min())
+        {
+            spectralCentroid.store(currentVal + 1);
+        }
+    }
+
+
     // This is the place where you'd normally do the guts of your plugin's
     // audio processing...
     for (int channel = 0; channel < totalNumInputChannels; ++channel)

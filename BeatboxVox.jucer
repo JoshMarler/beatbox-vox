@@ -5,9 +5,10 @@
               buildVST="1" buildVST3="1" buildAU="0" buildAUv3="0" buildRTAS="0"
               buildAAX="0" pluginName="BeatboxVox" pluginDesc="BeatboxVox"
               pluginManufacturer="RudeAudio" pluginManufacturerCode="RUDE"
-              pluginCode="Bvox" pluginChannelConfigs="" pluginIsSynth="0" pluginWantsMidiIn="0"
-              pluginProducesMidiOut="0" pluginIsMidiEffectPlugin="0" pluginEditorRequiresKeys="0"
-              pluginAUExportPrefix="BeatboxVoxAU" pluginRTASCategory="" aaxIdentifier="com.yourcompany.BeatboxVox"
+              pluginCode="Bvox" pluginChannelConfigs="1, 1" pluginIsSynth="0"
+              pluginWantsMidiIn="0" pluginProducesMidiOut="0" pluginIsMidiEffectPlugin="0"
+              pluginEditorRequiresKeys="0" pluginAUExportPrefix="BeatboxVoxAU"
+              pluginRTASCategory="" aaxIdentifier="com.yourcompany.BeatboxVox"
               pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="4.2.1">
   <MAINGROUP id="z3DhfV" name="BeatboxVox">
     <GROUP id="{3040E391-9B17-F5A0-86E3-DD4BAE9A2C03}" name="Gist">
@@ -59,6 +60,16 @@
       <FILE id="tamIXT" name="README.md" compile="0" resource="1" file="Source/Gist/README.md"/>
     </GROUP>
     <GROUP id="{B8A10E5D-D185-1FFC-CC44-E732222EC3EB}" name="Source">
+      <GROUP id="{31C6B736-7801-C82D-AD83-0743F7D6CF76}" name="MathHelpers">
+        <FILE id="GS8s6s" name="MathHelpers.cpp" compile="1" resource="0" file="Source/MathHelpers/MathHelpers.cpp"/>
+        <FILE id="HUVMN9" name="MathHelpers.h" compile="0" resource="0" file="Source/MathHelpers/MathHelpers.h"/>
+      </GROUP>
+      <GROUP id="{F05EADBF-4998-574C-2A49-63C94209C97F}" name="OnsetDetection">
+        <FILE id="al8RyO" name="OnsetDetector.cpp" compile="1" resource="0"
+              file="Source/OnsetDetection/OnsetDetector.cpp"/>
+        <FILE id="eJcgvS" name="OnsetDetector.h" compile="0" resource="0" file="Source/OnsetDetection/OnsetDetector.h"/>
+      </GROUP>
+      <FILE id="tJbDF9" name="SinewaveSynth.h" compile="0" resource="0" file="Source/SinewaveSynth.h"/>
       <FILE id="gujfVz" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="OdJYlG" name="PluginProcessor.h" compile="0" resource="0"
@@ -74,10 +85,10 @@
                 extraLinkerFlags="">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/&#10;/usr/lib/&#10;/usr/local/lib/"
-                       isDebug="1" optimisation="1" targetName="BeatboxVox" binaryPath="~/audioplugins/vst"
+                       isDebug="1" optimisation="1" targetName="BeatboxVox" binaryPath="~/AudioPlugins/vst"
                        headerPath="/usr/local/include&#10;/usr/include/armadillo_bits"/>
         <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/&#10;/usr/lib/&#10;/usr/local/lib/"
-                       isDebug="0" optimisation="3" targetName="BeatboxVox" binaryPath="~/audioplugins/vst"
+                       isDebug="0" optimisation="3" targetName="BeatboxVox" binaryPath="~/AudioPlugins/vst"
                        headerPath="/usr/local/include&#10;/usr/include/armadillo_bits"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
