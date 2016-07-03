@@ -8,7 +8,7 @@
   ==============================================================================
 */
 
-
+#include "JuceHeader.h"
 /** A demo synth sound that's just a basic sine wave.. */
 class SineWaveSound : public SynthesiserSound
 {

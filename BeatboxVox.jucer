@@ -6,7 +6,7 @@
               buildAAX="0" pluginName="BeatboxVox" pluginDesc="BeatboxVox"
               pluginManufacturer="RudeAudio" pluginManufacturerCode="RUDE"
               pluginCode="Bvox" pluginChannelConfigs="1, 1" pluginIsSynth="0"
-              pluginWantsMidiIn="0" pluginProducesMidiOut="0" pluginIsMidiEffectPlugin="0"
+              pluginWantsMidiIn="0" pluginProducesMidiOut="1" pluginIsMidiEffectPlugin="0"
               pluginEditorRequiresKeys="0" pluginAUExportPrefix="BeatboxVoxAU"
               pluginRTASCategory="" aaxIdentifier="com.yourcompany.BeatboxVox"
               pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="4.2.1">

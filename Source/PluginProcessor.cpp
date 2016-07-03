@@ -17,10 +17,11 @@ BeatboxVoxAudioProcessor::BeatboxVoxAudioProcessor()
     : onsetDetector(),
       gistMFCC(512, 44100),
       gistOnset(512, 44100),
+      startTime(Time::getMillisecondCounterHiRes() * 0.001),
       nbc(), 
       spectralCentroid(0.0f)
 { 
-    
+    initialiseSynth(); 
 }
 
 BeatboxVoxAudioProcessor::~BeatboxVoxAudioProcessor()
@@ -80,6 +81,16 @@ void BeatboxVoxAudioProcessor::changeProgramName (int index, const String& newNa
 {
 }
 
+void BeatboxVoxAudioProcessor::initialiseSynth ()
+{
+    const int numVoices = 4;    
+
+    for (auto i = numVoices; --i >= 0;)
+            sineSynth.addVoice(new SineWaveVoice());
+
+    sineSynth.addSound(new SineWaveSound());
+}
+
 //==============================================================================
 void BeatboxVoxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerBlock)
 {
@@ -96,6 +107,8 @@ void BeatboxVoxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
     {
         val = 0.0;
     }
+
+    sineSynth.setCurrentPlaybackSampleRate(sampleRate);
 
     //Testing matrix init - initialzing with rows - testMatrix(2, 0) == row 2 element 0 (third row, first element)
     testMatrix = {{20, 10}, {30, 10}, {1, 2}};
@@ -124,7 +137,7 @@ bool BeatboxVoxAudioProcessor::setPreferredBusArrangement (bool isInput, int bus
     if (isInput || (numChannels != 1 && numChannels != 2))
         return false;
    #else
-    if (numChannels != 1 && numChannels != 2)
+    if (numChannels != 1 && numChannels != 2)120
         return false;
 
     if (! AudioProcessor::setPreferredBusArrangement (! isInput, bus, preferredSet))
@@ -139,16 +152,10 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
 {
     const int totalNumInputChannels  = getTotalNumInputChannels();
     const int totalNumOutputChannels = getTotalNumOutputChannels();
-
-
-    for (int i = getTotalNumInputChannels(); i < getTotalNumOutputChannels(); ++i)
-    {
-        buffer.clear(i, 0, buffer.getNumSamples());
-    }
+    const float sampleRate = getSampleRate();
 
     //Gist analysis performed
     gistOnset.processAudioFrame(buffer.getWritePointer(0), buffer.getNumSamples());
-    
     magSpectrum = gistOnset.getMagnitudeSpectrum();
     float hfc = gistOnset.highFrequencyContent();
     
@@ -156,30 +163,37 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
 
     if (hasOnset)
     {
+        MidiMessage midiNoteOn = MidiMessage::noteOn(1, 70, (uint8) 100);
+        midiNoteOn.setTimeStamp(Time::getMillisecondCounterHiRes() * 0.001 - startTime);
+        midiMessages.addEvent(midiNoteOn, (int) (midiNoteOn.getTimeStamp() * sampleRate));
+
+        MidiMessage midiNoteOff = (MidiMessage::noteOff(midiNoteOn.getChannel(), midiNoteOn.getNoteNumber()));
+        midiNoteOff.setTimeStamp(midiNoteOn.getTimeStamp() + 3.35);
+        midiMessages.addEvent(midiNoteOff, (int) (midiNoteOff.getTimeStamp() * sampleRate));        
+                
         float currentVal = spectralCentroid.load();
-        if (currentVal == 0.0f || currentVal != std::numeric_limits<float>::max())
+        if (currentVal < std::numeric_limits<float>::max())
         {
             spectralCentroid.store(currentVal + 1);
         }
-        else if (currentVal != std::numeric_limits<float>::min())
+        else if (currentVal > std::numeric_limits<float>::min())
         {
-            spectralCentroid.store(currentVal + 1);
+            spectralCentroid.store(currentVal - 1);
         }
     }
 
-
-    // This is the place where you'd normally do the guts of your plugin's
-    // audio processing...
-    for (int channel = 0; channel < totalNumInputChannels; ++channel)
+    //Render note on sine synth with the ODS triggered MIDI.
+    sineSynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+    
+    for (auto i = 0; i < totalNumOutputChannels; i++)
     {
-        float* channelData = buffer.getWritePointer (channel);
-        
-        for(int i = 0; i < buffer.getNumSamples(); i++)
-        {
-            channelData[i] = channelData[i] * 1.0; 
-        }
+        buffer.applyGain(i, 0, buffer.getNumSamples(), 1.0f);
     }
 
+    for (int i = getTotalNumInputChannels(); i < getTotalNumOutputChannels(); ++i)
+    {
+        buffer.clear(i, 0, buffer.getNumSamples());
+    }
 }
 
 float BeatboxVoxAudioProcessor::getSpectralCentroid() const

@@ -16,6 +16,7 @@
 #include "mlpack/methods/naive_bayes/naive_bayes_classifier.hpp"
 #include "Gist/src/Gist.h"
 #include "OnsetDetection/OnsetDetector.h"
+#include "SinewaveSynth.h"
 
 using namespace mlpack::naive_bayes;
 using namespace arma;
@@ -66,6 +67,9 @@ public:
     //JWM - Test function to get spectral centroid value in GUI
     float getSpectralCentroid() const;
 
+    //Initialise the test synth object
+    void initialiseSynth();
+
 private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BeatboxVoxAudioProcessor);
@@ -73,6 +77,9 @@ private:
     //Onset Detector object for peak picking.
     OnsetDetector onsetDetector;
     
+    //Sinewave synth for flam/OSD Testing
+    Synthesiser sineSynth;
+
     //Vector to hold mag spectrum
     std::vector<float> magSpectrum;
 
@@ -82,6 +89,9 @@ private:
     
     //Previous spectral difference value for last audio frame
     float prevSpecDiff = 0.0;
+    
+    //Start time of the plugin for use in creating MIDI messages.
+    double startTime;
 
     NaiveBayesClassifier<> nbc;
     std::atomic<float> spectralCentroid;
