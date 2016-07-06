@@ -75,29 +75,26 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BeatboxVoxAudioProcessor);
 
     //Onset Detector object for peak picking.
-    OnsetDetector onsetDetector;
+    std::unique_ptr<OnsetDetector> onsetDetector;
     
     //Sinewave synth for flam/OSD Testing
-    Synthesiser sineSynth;
+    std::unique_ptr<Synthesiser> sineSynth;
 
     //Vector to hold mag spectrum
     std::vector<float> magSpectrum;
 
     //Gist audio feature extraction / analysis objects.
-    Gist<float> gistMFCC;
-    Gist<float> gistOnset;
+    //std::unique_ptr<Gist<float>> gistMFCC;
+    std::unique_ptr<Gist<float>> gistOnset;
     
-    //Previous spectral difference value for last audio frame
-    float prevSpecDiff = 0.0;
-    
-    //Start time of the plugin for use in creating MIDI messages.
-    double startTime;
+    int startTime = 0;
 
-    NaiveBayesClassifier<> nbc;
+    //std::unique_ptr<NaiveBayesClassifier<>> nbc;
+    
     std::atomic<float> spectralCentroid;
 
     //Test matrix for prototyping - 3 rows (2 features and last row for labels) - 2 cols (2 instances)
-    fmat::fixed<3, 2> testMatrix;
+    //fmat::fixed<3, 2> testMatrix;
 };
 
 

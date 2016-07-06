@@ -16,7 +16,7 @@
 namespace MathHelpers
 {
     template<typename FloatType>
-    float getMean(std::vector<FloatType> vec)
+    FloatType getMean(std::vector<FloatType> vec)
     {
         auto sum = std::accumulate(vec.cbegin(), vec.cend(), 0.0);
         return sum / vec.size();       

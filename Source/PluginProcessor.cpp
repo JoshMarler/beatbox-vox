@@ -14,18 +14,20 @@
 
 //==============================================================================
 BeatboxVoxAudioProcessor::BeatboxVoxAudioProcessor() 
-    : onsetDetector(),
-      gistMFCC(512, 44100),
-      gistOnset(512, 44100),
-      startTime(Time::getMillisecondCounterHiRes() * 0.001),
-      nbc(), 
+    : onsetDetector(std::make_unique<OnsetDetector>()),
+      sineSynth(std::make_unique<Synthesiser>()),
+      //gistMFCC(std::make_unique<Gist<float>>(512, 44100)),
+      gistOnset(std::make_unique<Gist<float>>(512, 44100)),
+     //nbc(std::make_unique<NaiveBayesClassifier<>>()), 
       spectralCentroid(0.0f)
+      
 { 
     initialiseSynth(); 
 }
 
 BeatboxVoxAudioProcessor::~BeatboxVoxAudioProcessor()
 {
+    float debug = 0.0;
 }
 
 //==============================================================================
@@ -83,12 +85,12 @@ void BeatboxVoxAudioProcessor::changeProgramName (int index, const String& newNa
 
 void BeatboxVoxAudioProcessor::initialiseSynth ()
 {
-    const int numVoices = 4;    
+    const int numVoices = 1;    
 
     for (auto i = numVoices; --i >= 0;)
-            sineSynth.addVoice(new SineWaveVoice());
+            sineSynth->addVoice(new SineWaveVoice());
 
-    sineSynth.addSound(new SineWaveSound());
+    sineSynth->addSound(new SineWaveSound());
 }
 
 //==============================================================================
@@ -96,25 +98,22 @@ void BeatboxVoxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
-    gistMFCC.setSamplingFrequency(sampleRate);
-    gistMFCC.setAudioFrameSize(samplesPerBlock);
+    //gistMFCC->setSamplingFrequency(sampleRate);
+    //gistMFCC->setAudioFrameSize(samplesPerBlock);
 
-    gistOnset.setSamplingFrequency(sampleRate);
-    gistOnset.setAudioFrameSize(samplesPerBlock);
+    gistOnset->setSamplingFrequency(sampleRate);
+    gistOnset->setAudioFrameSize(samplesPerBlock);
     
     magSpectrum.resize(samplesPerBlock / 2);
-    for (auto val : magSpectrum)
-    {
-        val = 0.0;
-    }
+    std::fill(magSpectrum.begin(), magSpectrum.end(), 0.0f);
 
-    sineSynth.setCurrentPlaybackSampleRate(sampleRate);
+    sineSynth->setCurrentPlaybackSampleRate(sampleRate);
 
     //Testing matrix init - initialzing with rows - testMatrix(2, 0) == row 2 element 0 (third row, first element)
-    testMatrix = {{20, 10}, {30, 10}, {1, 2}};
-    auto sampleOneLabel = testMatrix(2, 0);
-    auto sampleTwoLabel = testMatrix(2,1);
-    auto colOne = testMatrix.col(1);
+    //testMatrix = {{20, 10}, {30, 10}, {1, 2}};
+    //auto sampleOneLabel = testMatrix(2, 0);
+    //auto sampleTwoLabel = testMatrix(2,1);
+    //auto colOne = testMatrix.col(1);
 }
 
 void BeatboxVoxAudioProcessor::releaseResources()
@@ -137,7 +136,7 @@ bool BeatboxVoxAudioProcessor::setPreferredBusArrangement (bool isInput, int bus
     if (isInput || (numChannels != 1 && numChannels != 2))
         return false;
    #else
-    if (numChannels != 1 && numChannels != 2)120
+    if (numChannels != 1 && numChannels != 2)
         return false;
 
     if (! AudioProcessor::setPreferredBusArrangement (! isInput, bus, preferredSet))
@@ -153,42 +152,35 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     const int totalNumInputChannels  = getTotalNumInputChannels();
     const int totalNumOutputChannels = getTotalNumOutputChannels();
     const float sampleRate = getSampleRate();
+    const int numSamples = buffer.getNumSamples();
 
-    //Gist analysis performed
-    gistOnset.processAudioFrame(buffer.getWritePointer(0), buffer.getNumSamples());
-    magSpectrum = gistOnset.getMagnitudeSpectrum();
-    float hfc = gistOnset.highFrequencyContent();
+    //Temp var for note duration
+    const int noteDuration = static_cast<int> (std::ceil(sampleRate * 1.25f));
     
-    bool hasOnset = onsetDetector.checkForOnset(hfc);
-
+    //Gist analysis performed
+    
+    gistOnset->processAudioFrame(buffer.getWritePointer(0), buffer.getNumSamples());
+    magSpectrum = gistOnset->getMagnitudeSpectrum();
+    float hfc = gistOnset->highFrequencyContent();
+    
+    bool hasOnset = onsetDetector->checkForOnset(hfc);
     if (hasOnset)
     {
-        MidiMessage midiNoteOn = MidiMessage::noteOn(1, 70, (uint8) 100);
-        midiNoteOn.setTimeStamp(Time::getMillisecondCounterHiRes() * 0.001 - startTime);
-        midiMessages.addEvent(midiNoteOn, (int) (midiNoteOn.getTimeStamp() * sampleRate));
-
-        MidiMessage midiNoteOff = (MidiMessage::noteOff(midiNoteOn.getChannel(), midiNoteOn.getNoteNumber()));
-        midiNoteOff.setTimeStamp(midiNoteOn.getTimeStamp() + 3.35);
-        midiMessages.addEvent(midiNoteOff, (int) (midiNoteOff.getTimeStamp() * sampleRate));        
-                
-        float currentVal = spectralCentroid.load();
-        if (currentVal < std::numeric_limits<float>::max())
-        {
-            spectralCentroid.store(currentVal + 1);
-        }
-        else if (currentVal > std::numeric_limits<float>::min())
-        {
-            spectralCentroid.store(currentVal - 1);
-        }
+        midiMessages.addEvent(MidiMessage::noteOn(1, 60, (uint8) 100), 0);
     }
+    
+    if ((startTime + numSamples) >= noteDuration)
+    {
+        const int offset = jmax(0, jmin((int) (noteDuration - startTime), numSamples - 1));
+        midiMessages.addEvent(MidiMessage::noteOff(1, 60), offset);
+    }
+
+    startTime = (startTime + numSamples) % noteDuration;
+    
 
     //Render note on sine synth with the ODS triggered MIDI.
-    sineSynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+    sineSynth->renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
     
-    for (auto i = 0; i < totalNumOutputChannels; i++)
-    {
-        buffer.applyGain(i, 0, buffer.getNumSamples(), 1.0f);
-    }
 
     for (int i = getTotalNumInputChannels(); i < getTotalNumOutputChannels(); ++i)
     {

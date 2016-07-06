@@ -36,7 +36,7 @@ BeatboxVoxAudioProcessorEditor::~BeatboxVoxAudioProcessorEditor()
 void BeatboxVoxAudioProcessorEditor::timerCallback()
 {
     float centroid = getProcessor().getSpectralCentroid();
-
+    
     //Set spectral centroid label
     spectralCentroidLabel.setText(String(centroid, 2), dontSendNotification);
 }
@@ -49,7 +49,6 @@ void BeatboxVoxAudioProcessorEditor::resized()
 {
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
-    
     Rectangle<int> r (getLocalBounds().reduced(8));
     spectralCentroidLabel.setBounds(r.removeFromTop(25));
 }

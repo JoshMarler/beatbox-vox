@@ -19,11 +19,7 @@ OnsetDetector::OnsetDetector()
     threshold = 0.1f;
 
     previousValues.resize(numPreviousValues);
-
-    for (auto& val : previousValues)
-    {
-       val = 0.0f;
-    }
+    std::fill(previousValues.begin(), previousValues.end(), 0.0f);   
 }
 
 OnsetDetector::~OnsetDetector()
@@ -51,7 +47,7 @@ bool OnsetDetector::checkForOnset(float featureValue)
     threshold = meanCoeff * MathHelpers::getMean(previousValues);
 
     //JWM - NOTE: Would be nice to do this with proper iterators later.
-    for (auto i = previousValues.size(); i > 0; i--)
+    for (auto i = numPreviousValues - 1; i > 0; i--)
     {
         previousValues[i] = previousValues[i - 1];
     }
