@@ -60,6 +60,12 @@
       <FILE id="tamIXT" name="README.md" compile="0" resource="1" file="Source/Gist/README.md"/>
     </GROUP>
     <GROUP id="{B8A10E5D-D185-1FFC-CC44-E732222EC3EB}" name="Source">
+      <GROUP id="{2787DE04-C09F-E428-545B-AFFF83B0B35C}" name="AudioClassify">
+        <FILE id="sBgBcY" name="AudioClassifier.cpp" compile="1" resource="0"
+              file="Source/AudioClassify/AudioClassifier.cpp"/>
+        <FILE id="M9Yauz" name="AudioClassifier.h" compile="0" resource="0"
+              file="Source/AudioClassify/AudioClassifier.h"/>
+      </GROUP>
       <GROUP id="{31C6B736-7801-C82D-AD83-0743F7D6CF76}" name="MathHelpers">
         <FILE id="GS8s6s" name="MathHelpers.cpp" compile="1" resource="0" file="Source/MathHelpers/MathHelpers.cpp"/>
         <FILE id="HUVMN9" name="MathHelpers.h" compile="0" resource="0" file="Source/MathHelpers/MathHelpers.h"/>

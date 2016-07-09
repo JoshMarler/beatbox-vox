@@ -19,7 +19,8 @@ BeatboxVoxAudioProcessor::BeatboxVoxAudioProcessor()
       //gistMFCC(std::make_unique<Gist<float>>(512, 44100)),
       gistOnset(std::make_unique<Gist<float>>(512, 44100)),
      //nbc(std::make_unique<NaiveBayesClassifier<>>()), 
-      spectralCentroid(0.0f)
+      spectralCentroid(0.0f),
+      clasifier(std::make_unique<AudioClassifier<float>>())
       
 { 
     initialiseSynth(); 
@@ -27,7 +28,6 @@ BeatboxVoxAudioProcessor::BeatboxVoxAudioProcessor()
 
 BeatboxVoxAudioProcessor::~BeatboxVoxAudioProcessor()
 {
-    float debug = 0.0;
 }
 
 //==============================================================================
@@ -91,6 +91,7 @@ void BeatboxVoxAudioProcessor::initialiseSynth ()
             sineSynth->addVoice(new SineWaveVoice());
 
     sineSynth->addSound(new SineWaveSound());
+
 }
 
 //==============================================================================
@@ -177,7 +178,6 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
 
     startTime = (startTime + numSamples) % noteDuration;
     
-
     //Render note on sine synth with the ODS triggered MIDI.
     sineSynth->renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
     

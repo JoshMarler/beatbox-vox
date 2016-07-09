@@ -14,6 +14,7 @@
 #include <atomic>
 #include "mlpack/core.hpp"
 #include "mlpack/methods/naive_bayes/naive_bayes_classifier.hpp"
+#include "AudioClassify/AudioClassifier.h"
 #include "Gist/src/Gist.h"
 #include "OnsetDetection/OnsetDetector.h"
 #include "SinewaveSynth.h"
@@ -95,6 +96,9 @@ private:
 
     //Test matrix for prototyping - 3 rows (2 features and last row for labels) - 2 cols (2 instances)
     //fmat::fixed<3, 2> testMatrix;
+    
+
+    std::unique_ptr<AudioClassifier<float>> clasifier;
 };
 
 
