@@ -11,24 +11,29 @@
 #include "OnsetDetector.h"
 
 //==============================================================================
-OnsetDetector::OnsetDetector()
+
+template<typename T>
+OnsetDetector<T>::OnsetDetector(int bufferSize)
 {
     usingLocalMaximum = true;
-    meanCoeff = 1.5f;
+    meanCoeff = 1.5;
     numPreviousValues = 10;
-    threshold = 0.1f;
+    threshold = 0.1;
 
     previousValues.resize(numPreviousValues);
-    std::fill(previousValues.begin(), previousValues.end(), 0.0f);   
+    std::fill(previousValues.begin(), previousValues.end(), 0.0);   
 }
 
-OnsetDetector::~OnsetDetector()
+template<typename T>
+OnsetDetector<T>::~OnsetDetector()
 {
 
 }
 
 //==============================================================================
-bool OnsetDetector::checkForOnset(float featureValue) 
+
+template<typename T>
+bool OnsetDetector<T>::checkForOnset(T featureValue) 
 {
     auto isOnset = false;
     
@@ -59,13 +64,27 @@ bool OnsetDetector::checkForOnset(float featureValue)
 }
 
 //=============================================================================
-bool OnsetDetector::getUsingLocalMaximum()
+
+template<typename T>
+bool OnsetDetector<T>::getUsingLocalMaximum()
 {
     return usingLocalMaximum;
 }
 
-//=============================================================================
-void OnsetDetector::setUsingLocalMaximum(bool newUsingLocalMaximum)
+
+template<typename T>
+void OnsetDetector<T>::setUsingLocalMaximum(bool newUsingLocalMaximum)
 {
     usingLocalMaximum = newUsingLocalMaximum;
 }
+
+//=============================================================================
+template<typename T>
+void OnsetDetector<T>::setCurrentODFType(AudioClassifyOptions::ODFType newODFType)
+{
+    currentODFType.store(newODFType);   
+}
+
+//=============================================================================
+template class OnsetDetector<float>;
+template class OnsetDetector<double>;

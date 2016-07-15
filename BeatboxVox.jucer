@@ -61,19 +61,26 @@
     </GROUP>
     <GROUP id="{B8A10E5D-D185-1FFC-CC44-E732222EC3EB}" name="Source">
       <GROUP id="{2787DE04-C09F-E428-545B-AFFF83B0B35C}" name="AudioClassify">
-        <FILE id="sBgBcY" name="AudioClassifier.cpp" compile="1" resource="0"
-              file="Source/AudioClassify/AudioClassifier.cpp"/>
-        <FILE id="M9Yauz" name="AudioClassifier.h" compile="0" resource="0"
-              file="Source/AudioClassify/AudioClassifier.h"/>
+        <GROUP id="{C47B4D26-FEA1-BA0B-F421-C3FDAA6E559E}" name="AudioClassifier">
+          <FILE id="Yv66dT" name="AudioClassifier.cpp" compile="1" resource="0"
+                file="Source/AudioClassify/AudioClassifier/AudioClassifier.cpp"/>
+          <FILE id="bNBoaK" name="AudioClassifier.h" compile="0" resource="0"
+                file="Source/AudioClassify/AudioClassifier/AudioClassifier.h"/>
+        </GROUP>
+        <GROUP id="{A60522AA-7BB9-E972-2556-96EDE704262E}" name="AudioClassifyOptions">
+          <FILE id="wAlQ8P" name="AudioClassifyOptions.h" compile="0" resource="0"
+                file="Source/AudioClassify/AudioClassifyOptions/AudioClassifyOptions.h"/>
+        </GROUP>
+        <GROUP id="{A974D3B7-35F6-B168-1FD6-6A1ECC1F63B9}" name="OnsetDetection">
+          <FILE id="Ri8rdY" name="OnsetDetector.cpp" compile="1" resource="0"
+                file="Source/AudioClassify/OnsetDetection/OnsetDetector.cpp"/>
+          <FILE id="pEFEKu" name="OnsetDetector.h" compile="0" resource="0" file="Source/AudioClassify/OnsetDetection/OnsetDetector.h"/>
+        </GROUP>
+        <FILE id="a81uSP" name="AudioClassify.h" compile="0" resource="0" file="Source/AudioClassify/AudioClassify.h"/>
       </GROUP>
       <GROUP id="{31C6B736-7801-C82D-AD83-0743F7D6CF76}" name="MathHelpers">
         <FILE id="GS8s6s" name="MathHelpers.cpp" compile="1" resource="0" file="Source/MathHelpers/MathHelpers.cpp"/>
         <FILE id="HUVMN9" name="MathHelpers.h" compile="0" resource="0" file="Source/MathHelpers/MathHelpers.h"/>
-      </GROUP>
-      <GROUP id="{F05EADBF-4998-574C-2A49-63C94209C97F}" name="OnsetDetection">
-        <FILE id="al8RyO" name="OnsetDetector.cpp" compile="1" resource="0"
-              file="Source/OnsetDetection/OnsetDetector.cpp"/>
-        <FILE id="eJcgvS" name="OnsetDetector.h" compile="0" resource="0" file="Source/OnsetDetection/OnsetDetector.h"/>
       </GROUP>
       <FILE id="tJbDF9" name="SinewaveSynth.h" compile="0" resource="0" file="Source/SinewaveSynth.h"/>
       <FILE id="gujfVz" name="PluginProcessor.cpp" compile="1" resource="0"

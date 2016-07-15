@@ -12,11 +12,10 @@
 
 template<typename T>
 AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate) 
-    : gistOnset(std::make_unique<Gist<T>> (initBufferSize, initSampleRate)),
-      gistFeatures(std::make_unique<Gist<T>> (initBufferSize, initSampleRate)),
+    : gistFeatures(std::make_unique<Gist<T>> (initBufferSize, initSampleRate)),
       currentTrainingSound(-1)
 {
-    auto spectralCrest = audioFeatures.find(AudioFeature::spectralCrest);
+    auto spectralCrest = audioFeatures.find(AudioClassifyOptions::AudioFeature::spectralCrest);
     spectralCrestIsEnabled = spectralCrest->second;
     float debug = 0.0;
 }

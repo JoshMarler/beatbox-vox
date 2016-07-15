@@ -14,12 +14,10 @@
 #include <atomic>
 #include "mlpack/core.hpp"
 #include "mlpack/methods/naive_bayes/naive_bayes_classifier.hpp"
-#include "AudioClassify/AudioClassifier.h"
-#include "Gist/src/Gist.h"
-#include "OnsetDetection/OnsetDetector.h"
+#include "AudioClassify/AudioClassify.h"
 #include "SinewaveSynth.h"
 
-using namespace mlpack::naive_bayes;
+using namespace mlpack;
 using namespace arma;
 
 
@@ -75,8 +73,6 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BeatboxVoxAudioProcessor);
 
-    //Onset Detector object for peak picking.
-    std::unique_ptr<OnsetDetector> onsetDetector;
     
     //Sinewave synth for flam/OSD Testing
     std::unique_ptr<Synthesiser> sineSynth;
@@ -96,9 +92,8 @@ private:
 
     //Test matrix for prototyping - 3 rows (2 features and last row for labels) - 2 cols (2 instances)
     //fmat::fixed<3, 2> testMatrix;
-    
 
-    std::unique_ptr<AudioClassifier<float>> clasifier;
+    std::unique_ptr<AudioClassify::AudioClassifier<float>> clasifier;
 };
 
 

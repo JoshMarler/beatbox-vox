@@ -14,7 +14,8 @@
 #include <map>
 #include "mlpack/core.hpp"
 #include "mlpack/methods/naive_bayes/naive_bayes_classifier.hpp"
-#include "../Gist/src/Gist.h"
+#include "../AudioClassifyOptions/AudioClassifyOptions.h"
+#include "../../Gist/src/Gist.h"
 #include "../OnsetDetection/OnsetDetector.h"
 
 using namespace arma;
@@ -47,12 +48,6 @@ public:
 
 
 
-    enum class AudioFeature: int 
-    {
-        spectralCentroid,
-        spectralCrest
-    };
-
 
 
 private:
@@ -74,9 +69,9 @@ private:
     std::unique_ptr<Gist<T>> gistOnset;
     std::unique_ptr<Gist<T>> gistFeatures; 
     
-    std::unique_ptr<OnsetDetector> osDetector;
-    
-    std::map<AudioFeature, bool> audioFeatures = {{AudioFeature::spectralCentroid, true}, {AudioFeature::spectralCrest, true}};
+    std::unique_ptr<OnsetDetector<T>> osDetector;
+        
+    std::map<AudioClassifyOptions::AudioFeature, bool> audioFeatures = {{AudioClassifyOptions::AudioFeature::spectralCentroid, true}, {AudioClassifyOptions::AudioFeature::spectralCrest, true}};
 
     std::map<int, std::string> soundLabels;
 //==============================================================================
