@@ -20,7 +20,7 @@ BeatboxVoxAudioProcessor::BeatboxVoxAudioProcessor()
       gistOnset(std::make_unique<Gist<float>>(512, 44100)),
      //nbc(std::make_unique<NaiveBayesClassifier<>>()), 
       spectralCentroid(0.0f),
-      clasifier(std::make_unique<AudioClassifier<float>>())
+      clasifier(std::make_unique<AudioClassifier<float>>(512, 44100))
       
 { 
     initialiseSynth(); 
@@ -109,6 +109,9 @@ void BeatboxVoxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
     std::fill(magSpectrum.begin(), magSpectrum.end(), 0.0f);
 
     sineSynth->setCurrentPlaybackSampleRate(sampleRate);
+
+    clasifier->setCurrentBufferSize(samplesPerBlock);
+    clasifier->setCurrentSampleRate(sampleRate);
 
     //Testing matrix init - initialzing with rows - testMatrix(2, 0) == row 2 element 0 (third row, first element)
     //testMatrix = {{20, 10}, {30, 10}, {1, 2}};

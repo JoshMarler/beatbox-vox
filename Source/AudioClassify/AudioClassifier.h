@@ -19,19 +19,37 @@
 
 using namespace arma;
 
-template<class T>
+template<typename T>
 class AudioClassifier
 {
 
 public:
 
-    AudioClassifier();
+    AudioClassifier(int initBufferSize, T initSampleRate);
 
     ~AudioClassifier();
 
+
+    void setCurrentBufferSize (int newBufferSize);
+    void setCurrentSampleRate (T newSampleRate);
+
+    //JWM - NOTE: may change this to getCurrentTrainingSoundVal rather than label - returns the numeric label value used internally by the classifier.
+    int getCurrentTrainingSoundLabel();
+    std::string getCurrentTrainingSoundName();
+
+    void setCurrentTrainingSound (int newTrainingSound);
+    void setCurrentTrainingSound (std::string newTrainingSound);
+
+    bool getClassifierReady();
+
+    
+    void processAudioBuffer (T* buffer);
+
+
+
     enum class AudioFeature: int 
     {
-        spectralCentorid,
+        spectralCentroid,
         spectralCrest
     };
 
@@ -39,14 +57,32 @@ public:
 
 private:
 
+//==============================================================================
+
+    int bufferSize;
+    T sampleRate;
+
+    bool spectralCrestIsEnabled;
+
+    //JWM - This value indicates the current sound being trained declared atomic as may be set by a GUI thread / user control 
+    std::atomic_int currentTrainingSound;
+
+    //JWM - Inidicates if the model has been trained with full training set and classifier is ready, declared atomic as may be set by a GUI thread / user control
+    std::atomic_bool classifierReady;
+
+
     std::unique_ptr<Gist<T>> gistOnset;
     std::unique_ptr<Gist<T>> gistFeatures; 
     
     std::unique_ptr<OnsetDetector> osDetector;
     
-    std::map<AudioFeature, bool> audioFeatures = {{AudioFeature::spectralCentorid, true}, {AudioFeature::spectralCrest, true}};
+    std::map<AudioFeature, bool> audioFeatures = {{AudioFeature::spectralCentroid, true}, {AudioFeature::spectralCrest, true}};
 
-    bool spectralCrestIsEnabled;
+    std::map<int, std::string> soundLabels;
+//==============================================================================
+
+    void setClassifierReady (bool ready);
+
 };
 
 
