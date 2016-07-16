@@ -12,18 +12,12 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include <atomic>
-#include "mlpack/core.hpp"
-#include "mlpack/methods/naive_bayes/naive_bayes_classifier.hpp"
-#include "AudioClassify/AudioClassify.h"
+#include "AudioClassify/src/AudioClassify.h"
 #include "SinewaveSynth.h"
-
-using namespace mlpack;
-using namespace arma;
 
 
 //==============================================================================
-/**
-*/
+
 class BeatboxVoxAudioProcessor  : public AudioProcessor
 {
 public:
@@ -77,13 +71,6 @@ private:
     //Sinewave synth for flam/OSD Testing
     std::unique_ptr<Synthesiser> sineSynth;
 
-    //Vector to hold mag spectrum
-    std::vector<float> magSpectrum;
-
-    //Gist audio feature extraction / analysis objects.
-    //std::unique_ptr<Gist<float>> gistMFCC;
-    std::unique_ptr<Gist<float>> gistOnset;
-    
     int startTime = 0;
 
     //std::unique_ptr<NaiveBayesClassifier<>> nbc;
@@ -92,8 +79,8 @@ private:
 
     //Test matrix for prototyping - 3 rows (2 features and last row for labels) - 2 cols (2 instances)
     //fmat::fixed<3, 2> testMatrix;
-
-    std::unique_ptr<AudioClassify::AudioClassifier<float>> clasifier;
+    
+    std::unique_ptr<AudioClassifier<float>> clasifier;
 };
 
 

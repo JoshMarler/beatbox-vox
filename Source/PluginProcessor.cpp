@@ -14,11 +14,7 @@
 
 //==============================================================================
 BeatboxVoxAudioProcessor::BeatboxVoxAudioProcessor() 
-    : onsetDetector(std::make_unique<OnsetDetector>()),
-      sineSynth(std::make_unique<Synthesiser>()),
-      //gistMFCC(std::make_unique<Gist<float>>(512, 44100)),
-      gistOnset(std::make_unique<Gist<float>>(512, 44100)),
-     //nbc(std::make_unique<NaiveBayesClassifier<>>()), 
+    : sineSynth(std::make_unique<Synthesiser>()),
       spectralCentroid(0.0f),
       clasifier(std::make_unique<AudioClassifier<float>>(512, 44100))
       
@@ -99,15 +95,8 @@ void BeatboxVoxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
-    //gistMFCC->setSamplingFrequency(sampleRate);
-    //gistMFCC->setAudioFrameSize(samplesPerBlock);
 
-    gistOnset->setSamplingFrequency(sampleRate);
-    gistOnset->setAudioFrameSize(samplesPerBlock);
     
-    magSpectrum.resize(samplesPerBlock / 2);
-    std::fill(magSpectrum.begin(), magSpectrum.end(), 0.0f);
-
     sineSynth->setCurrentPlaybackSampleRate(sampleRate);
 
     clasifier->setCurrentBufferSize(samplesPerBlock);
@@ -161,34 +150,28 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     //Temp var for note duration
     const int noteDuration = static_cast<int> (std::ceil(sampleRate * 1.25f));
     
-    //Gist analysis performed
+    clasifier->processAudioBuffer(buffer.getWritePointer(0));    
+    /** if (hasOnset) */
+    /** { */
+    /**     midiMessages.addEvent(MidiMessage::noteOn(1, 60, (uint8) 100), 0); */
+    /** } */
     
-    gistOnset->processAudioFrame(buffer.getWritePointer(0), buffer.getNumSamples());
-    magSpectrum = gistOnset->getMagnitudeSpectrum();
-    float hfc = gistOnset->highFrequencyContent();
-    
-    bool hasOnset = onsetDetector->checkForOnset(hfc);
-    if (hasOnset)
-    {
-        midiMessages.addEvent(MidiMessage::noteOn(1, 60, (uint8) 100), 0);
-    }
-    
-    if ((startTime + numSamples) >= noteDuration)
-    {
-        const int offset = jmax(0, jmin((int) (noteDuration - startTime), numSamples - 1));
-        midiMessages.addEvent(MidiMessage::noteOff(1, 60), offset);
-    }
+    /** if ((startTime + numSamples) >= noteDuration) */
+    /** { */
+    /**     const int offset = jmax(0, jmin((int) (noteDuration - startTime), numSamples - 1)); */
+    /**     midiMessages.addEvent(MidiMessage::noteOff(1, 60), offset); */
+    /** } */
 
-    startTime = (startTime + numSamples) % noteDuration;
+    /** startTime = (startTime + numSamples) % noteDuration; */
     
-    //Render note on sine synth with the ODS triggered MIDI.
-    sineSynth->renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+    /** //Render note on sine synth with the ODS triggered MIDI. */
+    /** sineSynth->renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples()); */
     
 
-    for (int i = getTotalNumInputChannels(); i < getTotalNumOutputChannels(); ++i)
-    {
-        buffer.clear(i, 0, buffer.getNumSamples());
-    }
+    /** for (int i = getTotalNumInputChannels(); i < getTotalNumOutputChannels(); ++i) */
+    /** { */
+    /**     buffer.clear(i, 0, buffer.getNumSamples()); */
+    /** } */
 }
 
 float BeatboxVoxAudioProcessor::getSpectralCentroid() const

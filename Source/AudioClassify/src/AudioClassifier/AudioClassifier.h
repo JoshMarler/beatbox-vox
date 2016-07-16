@@ -14,10 +14,12 @@
 #include <map>
 #include "mlpack/core.hpp"
 #include "mlpack/methods/naive_bayes/naive_bayes_classifier.hpp"
-#include "../AudioClassifyOptions/AudioClassifyOptions.h"
 #include "../../Gist/src/Gist.h"
+#include "../AudioClassifyOptions/AudioClassifyOptions.h"
 #include "../OnsetDetection/OnsetDetector.h"
 
+//JWM - need to deal with namespace conflict against juce::Timer
+//using namespace mlpack;
 using namespace arma;
 
 template<typename T>
@@ -30,10 +32,12 @@ public:
 
     ~AudioClassifier();
 
+    int getCurrentBufferSize();
+    T getCurrentSampleRate();
 
     void setCurrentBufferSize (int newBufferSize);
     void setCurrentSampleRate (T newSampleRate);
-
+    
     //JWM - NOTE: may change this to getCurrentTrainingSoundVal rather than label - returns the numeric label value used internally by the classifier.
     int getCurrentTrainingSoundLabel();
     std::string getCurrentTrainingSoundName();
@@ -48,6 +52,7 @@ public:
 
 
 
+     //nbc(std::make_unique<NaiveBayesClassifier<>>()), 
 
 
 private:
@@ -66,7 +71,9 @@ private:
     std::atomic_bool classifierReady;
 
 
-    std::unique_ptr<Gist<T>> gistOnset;
+    //Vector to hold mag spectrum
+    std::vector<T> magSpectrum;
+
     std::unique_ptr<Gist<T>> gistFeatures; 
     
     std::unique_ptr<OnsetDetector<T>> osDetector;

@@ -18,6 +18,9 @@ AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate)
     auto spectralCrest = audioFeatures.find(AudioClassifyOptions::AudioFeature::spectralCrest);
     spectralCrestIsEnabled = spectralCrest->second;
     float debug = 0.0;
+
+    setCurrentSampleRate(initSampleRate);
+    setCurrentBufferSize(initBufferSize);
 }
 
 template<typename T>
@@ -27,15 +30,32 @@ AudioClassifier<T>::~AudioClassifier()
 }
 
 template<typename T>
+int AudioClassifier<T>::getCurrentBufferSize()
+{
+    return bufferSize;
+}
+
+template<typename T>
+T AudioClassifier<T>::getCurrentSampleRate()
+{
+    return sampleRate;
+}
+
+template<typename T>
 void AudioClassifier<T>::setCurrentBufferSize (int newBufferSize)
 {
     bufferSize = newBufferSize;
+    gistFeatures->setAudioFrameSize(newBufferSize);
+
+    magSpectrum.resize(newBufferSize / 2);
+    std::fill(magSpectrum.begin(), magSpectrum.end(), 0.0f);
 }
 
 template<typename T>
 void AudioClassifier<T>::setCurrentSampleRate (T newSampleRate)
 {
     sampleRate = newSampleRate;
+    gistFeatures->setSamplingFrequency(static_cast<int>(newSampleRate));
 }
 
 template<typename T>
@@ -80,8 +100,21 @@ bool AudioClassifier<T>::getClassifierReady()
 template<typename T> 
 void AudioClassifier<T>::processAudioBuffer (T* buffer)
 {
+    const int bufferSize = getCurrentBufferSize();
 
+    gistFeatures->processAudioFrame(buffer, bufferSize);
+    magSpectrum = gistFeatures->getMagnitudeSpectrum();
+    
+    T hfc = gistFeatures->highFrequencyContent();
+    bool hasOnset = osDetector->checkForOnset(hfc);
+
+    if (hasOnset)
+    {
+        //classify
+    }
 }
+
+
 //==============================================================================
 template class AudioClassifier<float>;
 template class AudioClassifier<double>;

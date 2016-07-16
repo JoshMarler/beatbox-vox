@@ -11,12 +11,8 @@
 #ifndef AUDIOCLASSIFY_H_INCLUDED
 #define AUDIOCLASSIFY_H_INCLUDED
 
-namespace AudioClassify
-{
  #include "AudioClassifyOptions/AudioClassifyOptions.h"
  #include "AudioClassifier/AudioClassifier.h"
-
-}
 
 
 

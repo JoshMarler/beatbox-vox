@@ -10,8 +10,7 @@
 
 #ifndef AUDIOCLASSIFYOPTIONS_H_INCLUDED
 #define AUDIOCLASSIFYOPTIONS_H_INCLUDED
-
-namespace AudioClassifyOptions
+struct AudioClassifyOptions
 {
     
     enum class ClassifierType: int
@@ -33,7 +32,7 @@ namespace AudioClassifyOptions
         complexSpectralDifference,
         highFrequencyContent
     };
-}
+};
 
 
 
