@@ -21,17 +21,22 @@ template<typename T>
 class OnsetDetector
 {
     public:
-        OnsetDetector(int bufferSize);
+        OnsetDetector(int initBufferSize);
         ~OnsetDetector();
         
-        bool checkForOnset(T featureValue);
+        int getCurrentBufferSize();
+        void setCurrentBufferSize(int newBufferSize);
 
         void setUsingLocalMaximum(bool newUsingLocalMaximum);
         bool getUsingLocalMaximum();
         
         void setCurrentODFType(AudioClassifyOptions::ODFType newODFType);
         
+        bool checkForOnset(std::vector<T> magnitudeSpectrum);
+
     private:
+
+       int bufferSize; 
        int numPreviousValues;
        bool usingLocalMaximum;      
        
@@ -43,6 +48,8 @@ class OnsetDetector
        std::unique_ptr<OnsetDetectionFunction<T>> onsetDetectionFunction;
 
        std::atomic<AudioClassifyOptions::ODFType> currentODFType {AudioClassifyOptions::ODFType::spectralDifference};
+
+       bool checkForPeak(T featureValue);
 };
 
 

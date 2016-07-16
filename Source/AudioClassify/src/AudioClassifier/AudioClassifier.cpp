@@ -10,6 +10,7 @@
 
 #include "AudioClassifier.h"
 
+//==============================================================================
 template<typename T>
 AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate) 
     : gistFeatures(std::make_unique<Gist<T>> (initBufferSize, initSampleRate)),
@@ -29,6 +30,7 @@ AudioClassifier<T>::~AudioClassifier()
 
 }
 
+//==============================================================================
 template<typename T>
 int AudioClassifier<T>::getCurrentBufferSize()
 {
@@ -41,6 +43,7 @@ T AudioClassifier<T>::getCurrentSampleRate()
     return sampleRate;
 }
 
+//==============================================================================
 template<typename T>
 void AudioClassifier<T>::setCurrentBufferSize (int newBufferSize)
 {
@@ -58,6 +61,7 @@ void AudioClassifier<T>::setCurrentSampleRate (T newSampleRate)
     gistFeatures->setSamplingFrequency(static_cast<int>(newSampleRate));
 }
 
+//==============================================================================
 template<typename T>
 int AudioClassifier<T>::getCurrentTrainingSoundLabel()
 {
@@ -72,6 +76,7 @@ std::string AudioClassifier<T>::getCurrentTrainingSoundName()
     return name;
 }
 
+//==============================================================================
 template<typename T>
 void AudioClassifier<T>::setCurrentTrainingSound (int newTrainingSound)
 {
@@ -91,12 +96,23 @@ void AudioClassifier<T>::setCurrentTrainingSound (std::string newTrainingSound)
     }
 }
 
+//==============================================================================
+template<typename T>
+void AudioClassifier<T>::setTrainingSetSize(int newTrainingSetSize)
+{
+    trainingSetSize = newTrainingSetSize;
+
+    //JWM - resize the training set matrix and handle retraiing/keep data.
+}
+
+//==============================================================================
 template<typename T>
 bool AudioClassifier<T>::getClassifierReady()
 {
     return classifierReady.load();
 }
 
+//==============================================================================
 template<typename T> 
 void AudioClassifier<T>::processAudioBuffer (T* buffer)
 {
@@ -105,13 +121,20 @@ void AudioClassifier<T>::processAudioBuffer (T* buffer)
     gistFeatures->processAudioFrame(buffer, bufferSize);
     magSpectrum = gistFeatures->getMagnitudeSpectrum();
     
-    T hfc = gistFeatures->highFrequencyContent();
-    bool hasOnset = osDetector->checkForOnset(hfc);
+    bool hasOnset = osDetector->checkForOnset(magSpectrum);
 
     if (hasOnset)
     {
         //classify
     }
+}
+
+//==============================================================================
+
+template<typename T>
+void AudioClassifier<T>::configTrainingSetMatrix()
+{
+    //JWM - iterate through feature map to calculate size of matrix needed + trainingSetSize .
 }
 
 

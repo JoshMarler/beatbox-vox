@@ -45,6 +45,8 @@ public:
     void setCurrentTrainingSound (int newTrainingSound);
     void setCurrentTrainingSound (std::string newTrainingSound);
 
+    void setTrainingSetSize(int newTrainingSetSize);
+
     bool getClassifierReady();
 
     
@@ -60,6 +62,7 @@ private:
 //==============================================================================
 
     int bufferSize;
+    int trainingSetSize;
     T sampleRate;
 
     bool spectralCrestIsEnabled;
@@ -78,13 +81,24 @@ private:
     
     std::unique_ptr<OnsetDetector<T>> osDetector;
         
-    std::map<AudioClassifyOptions::AudioFeature, bool> audioFeatures = {{AudioClassifyOptions::AudioFeature::spectralCentroid, true}, {AudioClassifyOptions::AudioFeature::spectralCrest, true}};
+    std::map<AudioClassifyOptions::AudioFeature, bool> audioFeatures = {
+                                                      {AudioClassifyOptions::AudioFeature::spectralCentroid, true},
+                                                      {AudioClassifyOptions::AudioFeature::spectralCrest, true},
+                                                      {AudioClassifyOptions::AudioFeature::spectralFlatness, true},
+                                                      {AudioClassifyOptions::AudioFeature::spectralRolloff, true},
+                                                      {AudioClassifyOptions::AudioFeature::spectralKurtois, true},
+                                                      {AudioClassifyOptions::AudioFeature::mfcc, true}};
 
     std::map<int, std::string> soundLabels;
+    
+
+    Mat<T> trainingData;
 //==============================================================================
 
     void setClassifierReady (bool ready);
-
+   
+    void configTrainingSetMatrix();
+    //JWM - creates an instance column/vector to be classifier or added to training set.
 };
 
 

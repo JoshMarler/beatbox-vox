@@ -22,7 +22,11 @@ struct AudioClassifyOptions
     enum class AudioFeature: int 
     {
         spectralCentroid,
-        spectralCrest
+        spectralCrest, 
+        spectralFlatness, 
+        spectralRolloff, 
+        spectralKurtois,
+        mfcc
     };
 
     enum class ODFType: int
