@@ -12,14 +12,16 @@
 #define AUDIOCLASSIFIER_H_INCLUDED
 
 #include <map>
+#include <atomic>
 #include "mlpack/core.hpp"
 #include "mlpack/methods/naive_bayes/naive_bayes_classifier.hpp"
-#include "../../Gist/src/Gist.h"
+#include "../../Gist/src/Gist.h" 
 #include "../AudioClassifyOptions/AudioClassifyOptions.h"
 #include "../OnsetDetection/OnsetDetector.h"
 
 //JWM - need to deal with namespace conflict against juce::Timer
 //using namespace mlpack;
+using namespace mlpack::naive_bayes;
 using namespace arma;
 
 template<typename T>
@@ -42,17 +44,16 @@ public:
     int getCurrentTrainingSoundLabel();
     std::string getCurrentTrainingSoundName();
 
-    void setCurrentTrainingSound (int newTrainingSound);
-    void setCurrentTrainingSound (std::string newTrainingSound);
+    void setTraining (int trainingSound);
+    void setTraining (std::string trainingSound);
 
     void setTrainingSetSize(int newTrainingSetSize);
 
     bool getClassifierReady();
 
-    
     void processAudioBuffer (T* buffer);
 
-
+    void processCurrentInstance();
 
      //nbc(std::make_unique<NaiveBayesClassifier<>>()), 
 
@@ -62,17 +63,24 @@ private:
 //==============================================================================
 
     int bufferSize;
-    int trainingSetSize;
+    int trainingSetSize = 10;
+    int trainingCount = 0;
     T sampleRate;
 
-    bool spectralCrestIsEnabled;
+    bool training = true;
+    
+    std::atomic_bool usingSpecCentroid {true};
+    std::atomic_bool usingSpecCrest {true};
+    std::atomic_bool usingSpecFlatness {true};
+    std::atomic_bool usingSpecRolloff {true};
+    std::atomic_bool usingSpecKurtosis {true};
+    std::atomic_bool usingMfcc {true};
 
     //JWM - This value indicates the current sound being trained declared atomic as may be set by a GUI thread / user control 
     std::atomic_int currentTrainingSound;
 
     //JWM - Inidicates if the model has been trained with full training set and classifier is ready, declared atomic as may be set by a GUI thread / user control
-    std::atomic_bool classifierReady;
-
+    std::atomic_bool classifierReady {false};
 
     //Vector to hold mag spectrum
     std::vector<T> magSpectrum;
@@ -81,23 +89,19 @@ private:
     
     std::unique_ptr<OnsetDetector<T>> osDetector;
         
-    std::map<AudioClassifyOptions::AudioFeature, bool> audioFeatures = {
-                                                      {AudioClassifyOptions::AudioFeature::spectralCentroid, true},
-                                                      {AudioClassifyOptions::AudioFeature::spectralCrest, true},
-                                                      {AudioClassifyOptions::AudioFeature::spectralFlatness, true},
-                                                      {AudioClassifyOptions::AudioFeature::spectralRolloff, true},
-                                                      {AudioClassifyOptions::AudioFeature::spectralKurtois, true},
-                                                      {AudioClassifyOptions::AudioFeature::mfcc, true}};
-
     std::map<int, std::string> soundLabels;
     
-
-    Mat<T> trainingData;
+    mat trainingData;
+    Row<size_t> trainingLabels;
+    colvec currentInstanceVector;
+    
+    std::unique_ptr<NaiveBayesClassifier<>> nbc;
 //==============================================================================
 
     void setClassifierReady (bool ready);
    
     void configTrainingSetMatrix();
+    size_t calcFeatureVecSize();
     //JWM - creates an instance column/vector to be classifier or added to training set.
 };
 

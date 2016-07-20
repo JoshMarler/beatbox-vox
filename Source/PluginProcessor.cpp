@@ -149,9 +149,9 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
 
     //Temp var for note duration
     const int noteDuration = static_cast<int> (std::ceil(sampleRate * 1.25f));
+
+    clasifier->processAudioBuffer(buffer.getWritePointer(0));
     
-    clasifier->processAudioBuffer(buffer.getWritePointer(0));    
-    /** if (hasOnset) */
     /** { */
     /**     midiMessages.addEvent(MidiMessage::noteOn(1, 60, (uint8) 100), 0); */
     /** } */

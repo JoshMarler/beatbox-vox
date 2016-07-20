@@ -11,7 +11,7 @@
 #ifndef MATHHELPERS_H_INCLUDED
 #define MATHHELPERS_H_INCLUDED
 
-#include "JuceHeader.h"
+#include <algorithm>
 #include <vector>
 namespace MathHelpers
 {

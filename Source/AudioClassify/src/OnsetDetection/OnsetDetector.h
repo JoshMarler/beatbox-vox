@@ -12,6 +12,7 @@
 #define ONSETDETECTOR_H_INCLUDED
 
 #include <atomic>
+#include <memory>
 #include "../AudioClassifyOptions/AudioClassifyOptions.h"
 #include "../../MathHelpers/MathHelpers.h"
 #include "../../Gist/src/onset-detection-functions/OnsetDetectionFunction.h"
