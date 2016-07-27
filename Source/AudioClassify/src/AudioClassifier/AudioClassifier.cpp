@@ -12,20 +12,21 @@
 
 //==============================================================================
 template<typename T>
-AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate) 
+AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int initNumSounds) 
     : gistFeatures(std::make_unique<Gist<T>>(initBufferSize, initSampleRate)),
       osDetector(std::make_unique<OnsetDetector<T>>(initBufferSize)),
       currentTrainingSound(1),
       trainingData(18, trainingSetSize, fill::zeros),
+      classifyData(18, 1),
+      resultsData(1),
       trainingLabels(trainingSetSize),
       currentInstanceVector(18, fill::zeros),
-      nbc(std::make_unique<NaiveBayesClassifier<>>(18, 3))
+      nbc(std::make_unique<NaiveBayesClassifier<>>(18, initNumSounds))
 {
-    //auto spectralCrest = audioFeatures.find(AudioClassifyOptions::AudioFeature::spectralCrest);
-    //spectralCrestIsEnabled = spectralCrest->second;
-
     setCurrentSampleRate(initSampleRate);
     setCurrentBufferSize(initBufferSize);
+
+    numSounds = initNumSounds;
 }
 
 template<typename T>
@@ -67,40 +68,19 @@ void AudioClassifier<T>::setCurrentSampleRate (T newSampleRate)
 
 //==============================================================================
 template<typename T>
-int AudioClassifier<T>::getCurrentTrainingSoundLabel()
+int AudioClassifier<T>::getCurrentTrainingSound()
 {
     return currentTrainingSound.load();
 }
 
-template<typename T>
-std::string AudioClassifier<T>::getCurrentTrainingSoundName()
-{
-    std::string name = soundLabels.find(currentTrainingSound.load())->second;
-    
-    return name;
-}
-
 //==============================================================================
-template<typename T>
-void AudioClassifier<T>::setTraining (int newTrainingSound)
-{
-    currentTrainingSound.store(newTrainingSound);
-    training = true;
-}
 
-//JWM - NOTE: look into this further as may not be best way to handle labels speed wise.
+//JWM - NOTE: revist later - will need assertion if user uses sound value out of range 1 - numSOunds
 template<typename T>
-void AudioClassifier<T>::setTraining (std::string newTrainingSound)
+void AudioClassifier<T>::setTrainingSound (int trainingSound)
 {
-    for (auto it : soundLabels)
-    {
-        if (newTrainingSound.compare(it.second) == 0)
-        {
-            currentTrainingSound.store(it.first); 
-        }
-    }
-
-    training = true;
+    currentTrainingSound.store(trainingSound);
+    training.store(true);
 }
 
 //==============================================================================
@@ -128,14 +108,17 @@ void AudioClassifier<T>::processAudioBuffer (T* buffer)
     gistFeatures->processAudioFrame(buffer, bufferSize);
     magSpectrum = gistFeatures->getMagnitudeSpectrum();
     
-    bool hasOnset = osDetector->checkForOnset(magSpectrum);
+    auto hasOnset = osDetector->checkForOnset(magSpectrum);
 
     if (hasOnset)
     {
         processCurrentInstance();
 
-        if (training)
+        if (training.load())
         {
+            //JWM - may change this logic later re handling classifier is ready etc.
+            classifierReady.store(false);
+
             if (trainingCount < trainingSetSize)
             {
                 trainingData.col(trainingCount) = currentInstanceVector;
@@ -144,20 +127,25 @@ void AudioClassifier<T>::processAudioBuffer (T* buffer)
             }
             else
             {
-                mlpack::Timer::Start("timer");
+                //mlpack::Timer::Start("timer");
                 nbc->Train(trainingData, trainingLabels, false); 
-                mlpack::Timer::Stop("timer");
-                auto timeVal = mlpack::Timer::Get("timer");
-                training = false;
+                //mlpack::Timer::Stop("timer");
+                //auto timeVal = mlpack::Timer::Get("timer");
+                training.store(false);
+                classifierReady.store(true);
                 trainingCount = 0;
             }
         }
+    }
+    else
+    {
+        //JWM - Not classifying, add instance to classifyData for classify() call
+        classifyData.col(0) = currentInstanceVector;
     }
 
 }
 
 //==============================================================================
-
 template<typename T>
 void AudioClassifier<T>::processCurrentInstance()
 {
@@ -206,6 +194,24 @@ void AudioClassifier<T>::processCurrentInstance()
 }
 
 //==============================================================================
+template<typename T>
+unsigned AudioClassifier<T>::classify()
+{
+    unsigned sound = 0;
+    auto ready = classifierReady.load();
+      
+    if (!ready)
+        return -1;
+   
+    nbc->Classify(classifyData, resultsData);
+
+    sound = static_cast<unsigned>(resultsData(0));
+
+    return sound;
+}
+
+//==============================================================================
+
 template<typename T>
 void AudioClassifier<T>::configTrainingSetMatrix()
 {

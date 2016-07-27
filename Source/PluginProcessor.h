@@ -63,23 +63,27 @@ public:
     //Initialise the test synth object
     void initialiseSynth();
 
+    void triggerKickDrum(MidiBuffer& midiMessages, const int numSamples);
+
+    enum class soundLabel: unsigned
+    {
+        KickDrum = 1, 
+        SnareDrum, 
+        HiHat
+    };
+
 private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BeatboxVoxAudioProcessor);
 
+
+    int startTime = 0;
     
     //Sinewave synth for flam/OSD Testing
     std::unique_ptr<Synthesiser> sineSynth;
 
-    int startTime = 0;
-
-    //std::unique_ptr<NaiveBayesClassifier<>> nbc;
-    
     std::atomic<float> spectralCentroid;
 
-    //Test matrix for prototyping - 3 rows (2 features and last row for labels) - 2 cols (2 instances)
-    //fmat::fixed<3, 2> testMatrix;
-    
     std::unique_ptr<AudioClassifier<float>> clasifier;
 };
 

@@ -15,7 +15,7 @@
 #include <atomic>
 #include "mlpack/core.hpp"
 #include "mlpack/methods/naive_bayes/naive_bayes_classifier.hpp"
-#include "../../Gist/src/Gist.h" 
+#include "../../Gist/src/Gist.h"
 #include "../AudioClassifyOptions/AudioClassifyOptions.h"
 #include "../OnsetDetection/OnsetDetector.h"
 
@@ -30,7 +30,7 @@ class AudioClassifier
 
 public:
 
-    AudioClassifier(int initBufferSize, T initSampleRate);
+    AudioClassifier(int initBufferSize, T initSampleRate, int initNumSounds);
 
     ~AudioClassifier();
 
@@ -40,14 +40,11 @@ public:
     void setCurrentBufferSize (int newBufferSize);
     void setCurrentSampleRate (T newSampleRate);
     
-    //JWM - NOTE: may change this to getCurrentTrainingSoundVal rather than label - returns the numeric label value used internally by the classifier.
-    int getCurrentTrainingSoundLabel();
-    std::string getCurrentTrainingSoundName();
-
-    void setTraining (int trainingSound);
-    void setTraining (std::string trainingSound);
+    void setTrainingSound(int trainingSound);
+    int getCurrentTrainingSound();
 
     void setTrainingSetSize(int newTrainingSetSize);
+
 
     bool getClassifierReady();
 
@@ -55,8 +52,11 @@ public:
 
     void processCurrentInstance();
 
-     //nbc(std::make_unique<NaiveBayesClassifier<>>()), 
 
+    //JWM - This funciton will return 0 for unclassified sounds 
+    //NOTE - Need to decide how to handle response of this function when classifier not
+    //ready at compile time i.e. assertion, exception or return -1
+    unsigned classify();
 
 private:
 
@@ -65,10 +65,10 @@ private:
     int bufferSize;
     int trainingSetSize = 10;
     int trainingCount = 0;
+    int numSounds; 
+
     T sampleRate;
 
-    bool training = true;
-    
     std::atomic_bool usingSpecCentroid {true};
     std::atomic_bool usingSpecCrest {true};
     std::atomic_bool usingSpecFlatness {true};
@@ -82,6 +82,8 @@ private:
     //JWM - Inidicates if the model has been trained with full training set and classifier is ready, declared atomic as may be set by a GUI thread / user control
     std::atomic_bool classifierReady {false};
 
+    std::atomic_bool training {true};
+
     //Vector to hold mag spectrum
     std::vector<T> magSpectrum;
 
@@ -89,9 +91,14 @@ private:
     
     std::unique_ptr<OnsetDetector<T>> osDetector;
         
-    std::map<int, std::string> soundLabels;
-    
     mat trainingData;
+
+    //JWM - not ideal but mlpack does not provide method for classifying single instance column
+    //May have to reconsider use of mlpack and attempt to roll out own classifier algorithms.
+    //Alternativley submit pull request to mlpack with a classify(arma::Col data) function.
+    mat classifyData;
+    Row<size_t> resultsData;
+
     Row<size_t> trainingLabels;
     colvec currentInstanceVector;
     
@@ -101,8 +108,8 @@ private:
     void setClassifierReady (bool ready);
    
     void configTrainingSetMatrix();
+
     size_t calcFeatureVecSize();
-    //JWM - creates an instance column/vector to be classifier or added to training set.
 };
 
 

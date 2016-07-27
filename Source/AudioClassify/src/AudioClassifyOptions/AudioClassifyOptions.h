@@ -10,6 +10,7 @@
 
 #ifndef AUDIOCLASSIFYOPTIONS_H_INCLUDED
 #define AUDIOCLASSIFYOPTIONS_H_INCLUDED
+
 struct AudioClassifyOptions
 {
     

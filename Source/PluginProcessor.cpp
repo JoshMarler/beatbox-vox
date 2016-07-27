@@ -16,7 +16,7 @@
 BeatboxVoxAudioProcessor::BeatboxVoxAudioProcessor() 
     : sineSynth(std::make_unique<Synthesiser>()),
       spectralCentroid(0.0f),
-      clasifier(std::make_unique<AudioClassifier<float>>(512, 44100))
+      clasifier(std::make_unique<AudioClassifier<float>>(512, 44100, 3))
       
 { 
     initialiseSynth(); 
@@ -95,18 +95,12 @@ void BeatboxVoxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
-
     
     sineSynth->setCurrentPlaybackSampleRate(sampleRate);
 
     clasifier->setCurrentBufferSize(samplesPerBlock);
     clasifier->setCurrentSampleRate(sampleRate);
 
-    //Testing matrix init - initialzing with rows - testMatrix(2, 0) == row 2 element 0 (third row, first element)
-    //testMatrix = {{20, 10}, {30, 10}, {1, 2}};
-    //auto sampleOneLabel = testMatrix(2, 0);
-    //auto sampleTwoLabel = testMatrix(2,1);
-    //auto colOne = testMatrix.col(1);
 }
 
 void BeatboxVoxAudioProcessor::releaseResources()
@@ -115,6 +109,7 @@ void BeatboxVoxAudioProcessor::releaseResources()
     // spare memory, etc.
 }
 
+//==============================================================================
 #ifndef JucePlugin_PreferredChannelConfigurations
 bool BeatboxVoxAudioProcessor::setPreferredBusArrangement (bool isInput, int bus, const AudioChannelSet& preferredSet)
 {
@@ -140,6 +135,7 @@ bool BeatboxVoxAudioProcessor::setPreferredBusArrangement (bool isInput, int bus
 }
 #endif
 
+//==============================================================================
 void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuffer& midiMessages)
 {
     const int totalNumInputChannels  = getTotalNumInputChannels();
@@ -147,33 +143,44 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     const float sampleRate = getSampleRate();
     const int numSamples = buffer.getNumSamples();
 
-    //Temp var for note duration
-    const int noteDuration = static_cast<int> (std::ceil(sampleRate * 1.25f));
-
     clasifier->processAudioBuffer(buffer.getWritePointer(0));
-    
-    /** { */
-    /**     midiMessages.addEvent(MidiMessage::noteOn(1, 60, (uint8) 100), 0); */
-    /** } */
-    
-    /** if ((startTime + numSamples) >= noteDuration) */
-    /** { */
-    /**     const int offset = jmax(0, jmin((int) (noteDuration - startTime), numSamples - 1)); */
-    /**     midiMessages.addEvent(MidiMessage::noteOff(1, 60), offset); */
-    /** } */
 
-    /** startTime = (startTime + numSamples) % noteDuration; */
+    unsigned sound = clasifier->classify();
     
-    /** //Render note on sine synth with the ODS triggered MIDI. */
-    /** sineSynth->renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples()); */
+    switch (sound)
+    {
+        case static_cast<unsigned>(soundLabel::KickDrum) :
+            triggerKickDrum(midiMessages, numSamples);
+    }
+
+    //Render note on sine synth with the ODS triggered MIDI.
+    sineSynth->renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
     
 
-    /** for (int i = getTotalNumInputChannels(); i < getTotalNumOutputChannels(); ++i) */
-    /** { */
-    /**     buffer.clear(i, 0, buffer.getNumSamples()); */
-    /** } */
+    for (int i = getTotalNumInputChannels(); i < getTotalNumOutputChannels(); ++i)
+    {
+        buffer.clear(i, 0, buffer.getNumSamples());
+    }
 }
 
+//==============================================================================
+void BeatboxVoxAudioProcessor::triggerKickDrum(MidiBuffer& midiMessages, const int numSamples)
+{
+    float sampleRate = getSampleRate();
+    midiMessages.addEvent(MidiMessage::noteOn(1, 60, (uint8) 100), 0);
+    
+    const int noteDuration = static_cast<int> (std::ceil(sampleRate * 1.25f));
+
+    if ((startTime + numSamples) >= noteDuration)
+    {
+        const int offset = jmax(0, jmin((int) (noteDuration - startTime), numSamples - 1));
+        midiMessages.addEvent(MidiMessage::noteOff(1, 60), offset);
+    }
+    
+    startTime = (startTime + numSamples) % noteDuration;
+}
+
+//==============================================================================
 float BeatboxVoxAudioProcessor::getSpectralCentroid() const
 {
     return spectralCentroid.load();
