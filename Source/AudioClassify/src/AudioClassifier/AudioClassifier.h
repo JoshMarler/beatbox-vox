@@ -66,6 +66,7 @@ private:
     int trainingSetSize = 10;
     int trainingCount = 0;
     int numSounds; 
+    bool hasOnset = false;
 
     T sampleRate;
 
@@ -80,9 +81,9 @@ private:
     std::atomic_int currentTrainingSound;
 
     //JWM - Inidicates if the model has been trained with full training set and classifier is ready, declared atomic as may be set by a GUI thread / user control
-    std::atomic_bool classifierReady {false};
+    std::atomic_bool classifierReady;
 
-    std::atomic_bool training {true};
+    std::atomic_bool training;
 
     //Vector to hold mag spectrum
     std::vector<T> magSpectrum;

@@ -105,10 +105,13 @@ void AudioClassifier<T>::processAudioBuffer (T* buffer)
 {
     const int bufferSize = getCurrentBufferSize();
 
+    //Reset hasOnset for next process buffer.
+    hasOnset = false;
+
     gistFeatures->processAudioFrame(buffer, bufferSize);
     magSpectrum = gistFeatures->getMagnitudeSpectrum();
     
-    auto hasOnset = osDetector->checkForOnset(magSpectrum);
+    hasOnset = osDetector->checkForOnset(magSpectrum);
 
     if (hasOnset)
     {
@@ -136,11 +139,12 @@ void AudioClassifier<T>::processAudioBuffer (T* buffer)
                 trainingCount = 0;
             }
         }
-    }
-    else
-    {
-        //JWM - Not classifying, add instance to classifyData for classify() call
-        classifyData.col(0) = currentInstanceVector;
+        else
+        {
+            //JWM - Not in training mode, add instance to classifyData for classify() call
+            classifyData.col(0) = currentInstanceVector;
+        }
+
     }
 
 }
@@ -198,14 +202,17 @@ template<typename T>
 unsigned AudioClassifier<T>::classify()
 {
     unsigned sound = 0;
+
     auto ready = classifierReady.load();
       
     if (!ready)
-        return -1;
+        return 0;
    
-    nbc->Classify(classifyData, resultsData);
-
-    sound = static_cast<unsigned>(resultsData(0));
+    if (hasOnset)
+    {
+        nbc->Classify(classifyData, resultsData);
+        sound = static_cast<unsigned>(resultsData(0));
+    }
 
     return sound;
 }

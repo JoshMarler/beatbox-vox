@@ -142,15 +142,16 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     const int totalNumOutputChannels = getTotalNumOutputChannels();
     const float sampleRate = getSampleRate();
     const int numSamples = buffer.getNumSamples();
+    unsigned sound = 0;
 
     clasifier->processAudioBuffer(buffer.getWritePointer(0));
 
-    unsigned sound = clasifier->classify();
+    sound = clasifier->classify();
     
-    switch (sound)
+
+    if (sound == soundLabel::KickDrum)
     {
-        case static_cast<unsigned>(soundLabel::KickDrum) :
-            triggerKickDrum(midiMessages, numSamples);
+        triggerKickDrum(midiMessages, numSamples);
     }
 
     //Render note on sine synth with the ODS triggered MIDI.

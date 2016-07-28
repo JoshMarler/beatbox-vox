@@ -65,7 +65,7 @@ public:
 
     void triggerKickDrum(MidiBuffer& midiMessages, const int numSamples);
 
-    enum class soundLabel: unsigned
+    enum soundLabel
     {
         KickDrum = 1, 
         SnareDrum, 
