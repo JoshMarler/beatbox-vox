@@ -16,10 +16,10 @@ template<typename T>
 OnsetDetector<T>::OnsetDetector(int initBufferSize)
     : onsetDetectionFunction(std::make_unique<OnsetDetectionFunction<T>>(initBufferSize))
 {
-    usingLocalMaximum = true;
+    usingLocalMaximum = false;
     meanCoeff = 1.5;
     numPreviousValues = 10;
-    threshold = 0.1;
+    threshold = 0.5;
 
     previousValues.resize(numPreviousValues);
     std::fill(previousValues.begin(), previousValues.end(), 0.0);   

@@ -76,6 +76,10 @@
             <FILE id="yEDtds" name="AudioClassifyOptions.h" compile="0" resource="0"
                   file="Source/AudioClassify/src/AudioClassifyOptions/AudioClassifyOptions.h"/>
           </GROUP>
+          <GROUP id="{2F0EBA12-2C40-CCA4-DDFA-A397A627C965}" name="NaiveBayes">
+            <FILE id="s7N0Ox" name="NaiveBayes.cpp" compile="1" resource="0" file="Source/AudioClassify/src/NaiveBayes/NaiveBayes.cpp"/>
+            <FILE id="xVTWLX" name="NaiveBayes.h" compile="0" resource="0" file="Source/AudioClassify/src/NaiveBayes/NaiveBayes.h"/>
+          </GROUP>
           <GROUP id="{3E7D8448-E5A1-7B6D-144D-BB78A02F7A19}" name="OnsetDetection">
             <FILE id="QZGmsU" name="OnsetDetector.cpp" compile="1" resource="0"
                   file="Source/AudioClassify/src/OnsetDetection/OnsetDetector.cpp"/>
@@ -96,15 +100,15 @@
   </MAINGROUP>
   <EXPORTFORMATS>
     <LINUX_MAKE targetFolder="Builds/LinuxMakefile" vstFolder="" cppLanguageStandard="-std=c++14"
-                extraCompilerFlags="" extraDefs="USE_KISS_FFT=1&#10;" externalLibraries="boost_program_options&#10;boost_math_c99&#10;boost_serialization&#10;armadillo&#10;mlpack"
+                extraCompilerFlags="" extraDefs="USE_KISS_FFT=1&#10;" externalLibraries="armadillo&#10;"
                 extraLinkerFlags="">
       <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/&#10;/usr/lib/&#10;/usr/local/lib/"
+        <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/&#10;/usr/lib/&#10;"
                        isDebug="1" optimisation="1" targetName="BeatboxVox" binaryPath="~/AudioPlugins/vst"
-                       headerPath="/usr/local/include&#10;/usr/include/armadillo_bits"/>
-        <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/&#10;/usr/lib/&#10;/usr/local/lib/"
-                       isDebug="0" optimisation="3" targetName="BeatboxVox" binaryPath="~/AudioPlugins/vst"
-                       headerPath="/usr/local/include&#10;/usr/include/armadillo_bits"/>
+                       headerPath="/usr/include/armadillo_bits"/>
+        <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/&#10;" isDebug="0"
+                       optimisation="3" targetName="BeatboxVox" binaryPath="~/AudioPlugins/vst"
+                       headerPath="/usr/local/include&#10;"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../JUCE/modules"/>

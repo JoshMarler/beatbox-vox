@@ -1,30 +1,30 @@
 /*
-  ==============================================================================
+   ==============================================================================
 
-    AudioClassifier.cpp
-    Created: 9 Jul 2016 3:49:01pm
-    Author:  joshua
+   AudioClassifier.cpp
+Created: 9 Jul 2016 3:49:01pm
+Author:  joshua
 
-  ==============================================================================
+==============================================================================
 */
 
 #include "AudioClassifier.h"
 
 //==============================================================================
-template<typename T>
+    template<typename T>
 AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int initNumSounds) 
     : gistFeatures(std::make_unique<Gist<T>>(initBufferSize, initSampleRate)),
       osDetector(std::make_unique<OnsetDetector<T>>(initBufferSize)),
-      currentTrainingSound(1),
-      trainingData(18, trainingSetSize, fill::zeros),
-      classifyData(18, 1),
-      resultsData(1),
+      currentTrainingSound(0),
+      trainingData(18, (trainingSetSize * initNumSounds), arma::fill::zeros),
       trainingLabels(trainingSetSize),
-      currentInstanceVector(18, fill::zeros),
-      nbc(std::make_unique<NaiveBayesClassifier<>>(18, initNumSounds))
+      currentInstanceVector(18, arma::fill::zeros),
+      nbc(std::make_unique<NaiveBayes<T>>(initNumSounds, 18))
 {
     setCurrentSampleRate(initSampleRate);
     setCurrentBufferSize(initBufferSize);
+
+    classifierReady.store(false);
 
     numSounds = initNumSounds;
 }
@@ -117,7 +117,7 @@ void AudioClassifier<T>::processAudioBuffer (T* buffer)
     {
         processCurrentInstance();
 
-        if (training.load())
+        if (currentTrainingSound.load() != -1)
         {
             //JWM - may change this logic later re handling classifier is ready etc.
             classifierReady.store(false);
@@ -130,19 +130,15 @@ void AudioClassifier<T>::processAudioBuffer (T* buffer)
             }
             else
             {
-                //mlpack::Timer::Start("timer");
-                nbc->Train(trainingData, trainingLabels, false); 
-                //mlpack::Timer::Stop("timer");
-                //auto timeVal = mlpack::Timer::Get("timer");
-                training.store(false);
-                classifierReady.store(true);
+                soundsReady.find(currentTrainingSound.load());
+
+                //Reset training status for next sound
                 trainingCount = 0;
+                currentTrainingSound.store(-1);
+                
+
+                nbc->Train(trainingData, trainingLabels); 
             }
-        }
-        else
-        {
-            //JWM - Not in training mode, add instance to classifyData for classify() call
-            classifyData.col(0) = currentInstanceVector;
         }
 
     }
@@ -201,20 +197,40 @@ void AudioClassifier<T>::processCurrentInstance()
 template<typename T>
 unsigned AudioClassifier<T>::classify()
 {
-    unsigned sound = 0;
+    unsigned sound = -1;
 
     auto ready = classifierReady.load();
       
     if (!ready)
-        return 0;
+        return -1;
    
     if (hasOnset)
     {
-        nbc->Classify(classifyData, resultsData);
-        sound = static_cast<unsigned>(resultsData(0));
+        sound = nbc->Classify(currentInstanceVector);
     }
 
     return sound;
+}
+
+//==============================================================================
+
+template<typename T>
+bool AudioClassifier<T>::checkTrainingSetReady()
+{
+    size_t readyCount = 0;
+    for(size_t i = 0; i < numSounds; i++)
+    {
+       auto it = soundsReady.find(i); 
+       if (it->second == true)
+           readyCount++;
+    }
+
+
+    if(readyCount == numSounds)
+        return true;
+    else
+        return false;
+    
 }
 
 //==============================================================================

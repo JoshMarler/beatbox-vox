@@ -37,21 +37,19 @@ flags = [
     '-std=c++14',
     #'-stdlib=libstdc++',
     '-x', 'c++',
-    '-I','./ClangCompleter',
+    '-I', './ClangCompleter',
     '-I', '/home/joshua/JUCE/modules',
     '-I', '../beatbox-vox/JuceLibraryCode',
     '-I', '/home/joshuamarler/SDKs/VST3',
     '-I', '/usr/include/freetype2',
-    '-I', '../beatbox-vox/Source/',
-    #'-I', '/usr/local/include/',
-    '-I', '/usr/include/armadillo_bits/',
+    '-I', '/usr/local/include',
+    '-I', '/usr/include/armadillo_bits',
     '-isystem', '/usr/bin/../lib/gcc/x86_64-linux-gnu/5.3.1/../../../../include/c++/5.3.1/',
     '-isystem', '/usr/bin/../lib/gcc/x86_64-linux-gnu/5.3.1/../../../../include/x86_64-linux-gnu/c++/5.3.1/',
     '-isystem', '/usr/bin/../lib/gcc/x86_64-linux-gnu/5.3.1/../../../../include/c++/5.3.1/backward/',
-    '-isystem', '/usr/local/include', 
     '-isystem', '/usr/lib/llvm-3.8/bin/../lib/clang/3.8.0/include', 
     '-isystem', '/usr/include/x86_64-linux-gnu/', 
-    '-isystem', '/usr/include'   
+    '-isystem', '/usr/include',   
 ]
 
 

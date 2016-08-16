@@ -10,8 +10,8 @@
 #ifndef PLUGINPROCESSOR_H_INCLUDED
 #define PLUGINPROCESSOR_H_INCLUDED
 
-#include "../JuceLibraryCode/JuceHeader.h"
 #include <atomic>
+#include "../JuceLibraryCode/JuceHeader.h"
 #include "AudioClassify/src/AudioClassify.h"
 #include "SinewaveSynth.h"
 
@@ -67,7 +67,7 @@ public:
 
     enum soundLabel
     {
-        KickDrum = 1, 
+        KickDrum = 0, 
         SnareDrum, 
         HiHat
     };

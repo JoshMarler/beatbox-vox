@@ -13,16 +13,11 @@
 
 #include <map>
 #include <atomic>
-#include "mlpack/core.hpp"
-#include "mlpack/methods/naive_bayes/naive_bayes_classifier.hpp"
+#include <armadillo>
 #include "../../Gist/src/Gist.h"
 #include "../AudioClassifyOptions/AudioClassifyOptions.h"
 #include "../OnsetDetection/OnsetDetector.h"
-
-//JWM - need to deal with namespace conflict against juce::Timer
-//using namespace mlpack;
-using namespace mlpack::naive_bayes;
-using namespace arma;
+#include "../NaiveBayes/NaiveBayes.h"
 
 template<typename T>
 class AudioClassifier
@@ -85,6 +80,9 @@ private:
 
     std::atomic_bool training;
 
+    //Map to indicate model status - sound -> ready bool status if training samples collected
+    std::map<int, bool> soundsReady;
+
     //Vector to hold mag spectrum
     std::vector<T> magSpectrum;
 
@@ -92,21 +90,17 @@ private:
     
     std::unique_ptr<OnsetDetector<T>> osDetector;
         
-    mat trainingData;
+    arma::Mat<T> trainingData;
 
-    //JWM - not ideal but mlpack does not provide method for classifying single instance column
-    //May have to reconsider use of mlpack and attempt to roll out own classifier algorithms.
-    //Alternativley submit pull request to mlpack with a classify(arma::Col data) function.
-    mat classifyData;
-    Row<size_t> resultsData;
-
-    Row<size_t> trainingLabels;
-    colvec currentInstanceVector;
+    arma::Row<size_t> trainingLabels;
     
-    std::unique_ptr<NaiveBayesClassifier<>> nbc;
+    arma::Col<T> currentInstanceVector;
+    
+    std::unique_ptr<NaiveBayes<T>> nbc;
 //==============================================================================
 
     void setClassifierReady (bool ready);
+    bool checkTrainingSetReady();
    
     void configTrainingSetMatrix();
 
