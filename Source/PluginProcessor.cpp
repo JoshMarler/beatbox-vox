@@ -24,6 +24,7 @@ BeatboxVoxAudioProcessor::BeatboxVoxAudioProcessor()
 
 BeatboxVoxAudioProcessor::~BeatboxVoxAudioProcessor()
 {
+   float debug = 0; 
 }
 
 //==============================================================================
@@ -142,12 +143,12 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     const int totalNumOutputChannels = getTotalNumOutputChannels();
     const float sampleRate = getSampleRate();
     const int numSamples = buffer.getNumSamples();
-    unsigned sound = 0;
+    int sound = -1;
 
 
-    clasifier->processAudioBuffer(buffer.getWritePointer(0));
+    /** clasifier->processAudioBuffer(buffer.getWritePointer(0)); */
 
-    sound = clasifier->classify();
+    /** sound = clasifier->classify(); */
     
 
     if (sound == soundLabel::KickDrum)
@@ -155,16 +156,6 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
         triggerKickDrum(midiMessages, numSamples);
     }
     
-
-    /** const int noteDuration = static_cast<int> (std::ceil(sampleRate * 1.25f));  */
-    /** if ((startTime + numSamples) >= noteDuration)  */
-    /** {  */
-    /**     const int offset = jmax(0, jmin((int) (noteDuration - startTime), numSamples - 1));  */
-    /**      midiMessages.addEvent(MidiMessage::noteOff(1, 60), offset);  */
-    /** }  */
-    
-    /** startTime = (startTime + numSamples) % noteDuration;  */
-
 
     //Render note on sine synth with the ODS triggered MIDI.
     sineSynth->renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
@@ -182,15 +173,15 @@ void BeatboxVoxAudioProcessor::triggerKickDrum(MidiBuffer& midiMessages, const i
     float sampleRate = getSampleRate();
     midiMessages.addEvent(MidiMessage::noteOn(1, 100, (uint8) 100), 0);
     
-    /** const int noteDuration = static_cast<int> (std::ceil(sampleRate * 1.25f)); */
+    const int noteDuration = static_cast<int> (std::ceil(sampleRate * 1.25f));
 
-    /** if ((startTime + numSamples) >= noteDuration) */
-    /** { */
-    /**     const int offset = jmax(0, jmin((int) (noteDuration - startTime), numSamples - 1)); */
-    /**     midiMessages.addEvent(MidiMessage::noteOff(1, 100), offset); */
-    /** } */
+    if ((startTime + numSamples) >= noteDuration)
+    {
+        const int offset = jmax(0, jmin((int) (noteDuration - startTime), numSamples - 1));
+        midiMessages.addEvent(MidiMessage::noteOff(1, 100), offset);
+    }
     
-    /** startTime = (startTime + numSamples) % noteDuration; */
+    startTime = (startTime + numSamples) % noteDuration;
 }
 
 //==============================================================================

@@ -36,7 +36,7 @@ private:
         return static_cast<BeatboxVoxAudioProcessor&> (processor);
     }
     //JWM - Test label for displaying a Gist feature. 
-    Label spectralCentroidLabel;
+    std::unique_ptr<Label> spectralCentroidLabel;
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BeatboxVoxAudioProcessorEditor)
 };

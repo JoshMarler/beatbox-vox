@@ -48,9 +48,7 @@ public:
     void processCurrentInstance();
 
 
-    //JWM - This funciton will return 0 for unclassified sounds 
-    //NOTE - Need to decide how to handle response of this function when classifier not
-    //ready at compile time i.e. assertion, exception or return -1
+    //This function will return -1 for unclassified sounds 
     unsigned classify();
 
 private:
@@ -72,10 +70,10 @@ private:
     std::atomic_bool usingSpecKurtosis {true};
     std::atomic_bool usingMfcc {true};
 
-    //JWM - This value indicates the current sound being trained declared atomic as may be set by a GUI thread / user control 
+    //This value indicates the current sound being trained declared atomic as may be set by a GUI thread / user control 
     std::atomic_int currentTrainingSound;
 
-    //JWM - Inidicates if the model has been trained with full training set and classifier is ready, declared atomic as may be set by a GUI thread / user control
+    //Inidicates if the model has been trained with full training set and classifier is ready, declared atomic as may be set by a GUI thread / user control
     std::atomic_bool classifierReady;
 
     std::atomic_bool training;
@@ -96,7 +94,7 @@ private:
     
     arma::Col<T> currentInstanceVector;
     
-    std::unique_ptr<NaiveBayes<T>> nbc;
+//    std::unique_ptr<NaiveBayes<T>> nbc;
 //==============================================================================
 
     void setClassifierReady (bool ready);

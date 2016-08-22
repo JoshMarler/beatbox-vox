@@ -28,7 +28,7 @@ public:
 	 *
 	 * @param instance The instance to be classified (passed as single column/vector)
 	*/
-	size_t Classify(const arma::Col<T> instance);
+	size_t Classify(const arma::Col<T>& instance);
 
 private:
 

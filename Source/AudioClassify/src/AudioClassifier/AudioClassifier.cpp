@@ -15,11 +15,11 @@ Author:  joshua
 AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int initNumSounds) 
     : gistFeatures(std::make_unique<Gist<T>>(initBufferSize, initSampleRate)),
       osDetector(std::make_unique<OnsetDetector<T>>(initBufferSize)),
-      currentTrainingSound(0),
+      currentTrainingSound(-1), //Initially set to -1 as valid sounds from 0 - numSounds. Initial training sound set by called later.
       trainingData(18, (trainingSetSize * initNumSounds), arma::fill::zeros),
-      trainingLabels(trainingSetSize),
-      currentInstanceVector(18, arma::fill::zeros),
-      nbc(std::make_unique<NaiveBayes<T>>(initNumSounds, 18))
+      trainingLabels((trainingSetSize * initNumSounds)),
+      currentInstanceVector(18, arma::fill::zeros)
+//      nbc(std::make_unique<NaiveBayes<T>>(initNumSounds, 18))
 {
     setCurrentSampleRate(initSampleRate);
     setCurrentBufferSize(initBufferSize);
@@ -27,6 +27,13 @@ AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int in
     classifierReady.store(false);
 
     numSounds = initNumSounds;
+
+    /** //Set initial sound ready states to false in training set.  */
+    /** for (size_t i = 0; i < numSounds; ++i) */
+    /** { */
+    /**    auto it = soundsReady.find(i); */
+    /**    it->second = false; */
+    /** } */
 }
 
 template<typename T>
@@ -130,19 +137,23 @@ void AudioClassifier<T>::processAudioBuffer (T* buffer)
             }
             else
             {
-                soundsReady.find(currentTrainingSound.load());
+                //Set sound ready state to true for current training sound.
+                auto it = soundsReady.find(currentTrainingSound.load());
+                it->second = true;
 
                 //Reset training status for next sound
                 trainingCount = 0;
                 currentTrainingSound.store(-1);
                 
-
-                nbc->Train(trainingData, trainingLabels); 
+                //If all sound samples collected for training set train model.
+                if (checkTrainingSetReady())
+                {
+                    //nbc->Train(trainingData, trainingLabels); 
+                    classifierReady.store(true);    
+                }
             }
         }
-
     }
-
 }
 
 //==============================================================================
@@ -206,7 +217,7 @@ unsigned AudioClassifier<T>::classify()
    
     if (hasOnset)
     {
-        sound = nbc->Classify(currentInstanceVector);
+        //sound = nbc->Classify(currentInstanceVector);
     }
 
     return sound;
@@ -218,6 +229,7 @@ template<typename T>
 bool AudioClassifier<T>::checkTrainingSetReady()
 {
     size_t readyCount = 0;
+
     for(size_t i = 0; i < numSounds; i++)
     {
        auto it = soundsReady.find(i); 
@@ -225,12 +237,10 @@ bool AudioClassifier<T>::checkTrainingSetReady()
            readyCount++;
     }
 
-
     if(readyCount == numSounds)
         return true;
     else
         return false;
-    
 }
 
 //==============================================================================

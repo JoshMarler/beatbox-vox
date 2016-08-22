@@ -16,7 +16,7 @@ template<typename T>
 OnsetDetector<T>::OnsetDetector(int initBufferSize)
     : onsetDetectionFunction(std::make_unique<OnsetDetectionFunction<T>>(initBufferSize))
 {
-    usingLocalMaximum = false;
+    usingLocalMaximum = true;
     meanCoeff = 1.5;
     numPreviousValues = 10;
     threshold = 0.5;
