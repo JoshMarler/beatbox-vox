@@ -11,9 +11,12 @@
 #ifndef AUDIOCLASSIFIER_H_INCLUDED
 #define AUDIOCLASSIFIER_H_INCLUDED
 
+//For windows compatibility
+#define ARMA_64BIT_WORD
+
 #include <map>
 #include <atomic>
-#include <armadillo>
+#include <armadillo.h>
 #include "../../Gist/src/Gist.h"
 #include "../AudioClassifyOptions/AudioClassifyOptions.h"
 #include "../OnsetDetection/OnsetDetector.h"
@@ -55,10 +58,10 @@ private:
 
 //==============================================================================
 
-    int bufferSize;
+    int bufferSize = 0;
     int trainingSetSize = 10;
     int trainingCount = 0;
-    int numSounds; 
+    int numSounds = 0; 
     bool hasOnset = false;
 
     T sampleRate;
@@ -97,7 +100,7 @@ private:
 //    std::unique_ptr<NaiveBayes<T>> nbc;
 //==============================================================================
 
-    void setClassifierReady (bool ready);
+//    void setClassifierReady (bool ready);
     bool checkTrainingSetReady();
    
     void configTrainingSetMatrix();

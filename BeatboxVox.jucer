@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="n4yAfc" name="BeatboxVox" projectType="audioplug" version="1.0.0"
               bundleIdentifier="com.yourcompany.BeatboxVox" includeBinaryInAppConfig="1"
-              buildVST="1" buildVST3="1" buildAU="0" buildAUv3="0" buildRTAS="0"
+              buildVST="1" buildVST3="0" buildAU="0" buildAUv3="0" buildRTAS="0"
               buildAAX="0" pluginName="BeatboxVox" pluginDesc="BeatboxVox"
               pluginManufacturer="RudeAudio" pluginManufacturerCode="RUDE"
               pluginCode="Bvox" pluginChannelConfigs="1, 1" pluginIsSynth="0"
@@ -16,24 +16,24 @@
         <GROUP id="{065BD7BB-F058-2311-E001-EAFA072A95CE}" name="Gist">
           <GROUP id="{81EFDFEB-09B4-FD95-429D-E9296B301509}" name="libs">
             <GROUP id="{C5B91573-EAF8-C135-B86E-570CB262EF64}" name="kiss_fft130">
-              <FILE id="mLmD7Z" name="_kiss_fft_guts.h" compile="0" resource="0"
+              <FILE id="mLmD7Z" name="_kiss_fft_guts.h" compile="1" resource="0"
                     file="Source/AudioClassify/Gist/libs/kiss_fft130/_kiss_fft_guts.h"/>
-              <FILE id="gkwfnI" name="COPYING" compile="0" resource="1" file="Source/AudioClassify/Gist/libs/kiss_fft130/COPYING"/>
+              <FILE id="gkwfnI" name="COPYING" compile="1" resource="1" file="Source/AudioClassify/Gist/libs/kiss_fft130/COPYING"/>
               <FILE id="gEhIDP" name="kiss_fft.c" compile="1" resource="0" file="Source/AudioClassify/Gist/libs/kiss_fft130/kiss_fft.c"/>
-              <FILE id="b902nA" name="kiss_fft.h" compile="0" resource="0" file="Source/AudioClassify/Gist/libs/kiss_fft130/kiss_fft.h"/>
-              <FILE id="I3fB1M" name="kissfft.hh" compile="0" resource="0" file="Source/AudioClassify/Gist/libs/kiss_fft130/kissfft.hh"/>
-              <FILE id="VqpR9C" name="README" compile="0" resource="1" file="Source/AudioClassify/Gist/libs/kiss_fft130/README"/>
+              <FILE id="b902nA" name="kiss_fft.h" compile="1" resource="0" file="Source/AudioClassify/Gist/libs/kiss_fft130/kiss_fft.h"/>
+              <FILE id="I3fB1M" name="kissfft.hh" compile="1" resource="0" file="Source/AudioClassify/Gist/libs/kiss_fft130/kissfft.hh"/>
+              <FILE id="VqpR9C" name="README" compile="1" resource="1" file="Source/AudioClassify/Gist/libs/kiss_fft130/README"/>
             </GROUP>
           </GROUP>
           <GROUP id="{6EAEC084-8BFF-BE67-91D1-BB99443BB256}" name="src">
             <GROUP id="{96B37773-416D-A11D-FEFD-CA65CF1E1CDB}" name="core">
               <FILE id="G9iWVr" name="CoreFrequencyDomainFeatures.cpp" compile="1"
                     resource="0" file="Source/AudioClassify/Gist/src/core/CoreFrequencyDomainFeatures.cpp"/>
-              <FILE id="qT81qu" name="CoreFrequencyDomainFeatures.h" compile="0"
+              <FILE id="qT81qu" name="CoreFrequencyDomainFeatures.h" compile="1"
                     resource="0" file="Source/AudioClassify/Gist/src/core/CoreFrequencyDomainFeatures.h"/>
               <FILE id="cPNdLG" name="CoreTimeDomainFeatures.cpp" compile="1" resource="0"
                     file="Source/AudioClassify/Gist/src/core/CoreTimeDomainFeatures.cpp"/>
-              <FILE id="VoJimc" name="CoreTimeDomainFeatures.h" compile="0" resource="0"
+              <FILE id="VoJimc" name="CoreTimeDomainFeatures.h" compile="1" resource="0"
                     file="Source/AudioClassify/Gist/src/core/CoreTimeDomainFeatures.h"/>
             </GROUP>
             <GROUP id="{54E70310-ED03-ECB0-4F77-7D845BD8124D}" name="fft">
@@ -43,49 +43,49 @@
             </GROUP>
             <GROUP id="{E425E518-A4DE-B650-9DBF-7756332C0CFC}" name="mfcc">
               <FILE id="YsfcVj" name="MFCC.cpp" compile="1" resource="0" file="Source/AudioClassify/Gist/src/mfcc/MFCC.cpp"/>
-              <FILE id="CKpeSS" name="MFCC.h" compile="0" resource="0" file="Source/AudioClassify/Gist/src/mfcc/MFCC.h"/>
+              <FILE id="CKpeSS" name="MFCC.h" compile="1" resource="0" file="Source/AudioClassify/Gist/src/mfcc/MFCC.h"/>
             </GROUP>
             <GROUP id="{5238CB41-CC4F-C2CD-1094-66B49B6E57A0}" name="onset-detection-functions">
               <FILE id="kHgXxl" name="OnsetDetectionFunction.cpp" compile="1" resource="0"
                     file="Source/AudioClassify/Gist/src/onset-detection-functions/OnsetDetectionFunction.cpp"/>
-              <FILE id="MJc3D8" name="OnsetDetectionFunction.h" compile="0" resource="0"
+              <FILE id="MJc3D8" name="OnsetDetectionFunction.h" compile="1" resource="0"
                     file="Source/AudioClassify/Gist/src/onset-detection-functions/OnsetDetectionFunction.h"/>
             </GROUP>
             <GROUP id="{C9985B4A-46E5-F4C4-FA47-17BD6DA018BF}" name="pitch">
               <FILE id="DPLgSc" name="Yin.cpp" compile="1" resource="0" file="Source/AudioClassify/Gist/src/pitch/Yin.cpp"/>
-              <FILE id="DrMDo5" name="Yin.h" compile="0" resource="0" file="Source/AudioClassify/Gist/src/pitch/Yin.h"/>
+              <FILE id="DrMDo5" name="Yin.h" compile="1" resource="0" file="Source/AudioClassify/Gist/src/pitch/Yin.h"/>
             </GROUP>
             <FILE id="kMLS1a" name="Gist.cpp" compile="1" resource="0" file="Source/AudioClassify/Gist/src/Gist.cpp"/>
-            <FILE id="lFsyX4" name="Gist.h" compile="0" resource="0" file="Source/AudioClassify/Gist/src/Gist.h"/>
+            <FILE id="lFsyX4" name="Gist.h" compile="1" resource="0" file="Source/AudioClassify/Gist/src/Gist.h"/>
           </GROUP>
-          <FILE id="Sx4KmG" name="LICENSE.txt" compile="0" resource="1" file="Source/AudioClassify/Gist/LICENSE.txt"/>
-          <FILE id="ceBiaz" name="README.md" compile="0" resource="1" file="Source/AudioClassify/Gist/README.md"/>
+          <FILE id="Sx4KmG" name="LICENSE.txt" compile="1" resource="1" file="Source/AudioClassify/Gist/LICENSE.txt"/>
+          <FILE id="ceBiaz" name="README.md" compile="1" resource="1" file="Source/AudioClassify/Gist/README.md"/>
         </GROUP>
         <GROUP id="{1C6039E4-61BF-701A-8B4E-2B5CAF80A717}" name="MathHelpers">
           <FILE id="PKxqKz" name="MathHelpers.cpp" compile="1" resource="0" file="Source/AudioClassify/MathHelpers/MathHelpers.cpp"/>
-          <FILE id="FMel43" name="MathHelpers.h" compile="0" resource="0" file="Source/AudioClassify/MathHelpers/MathHelpers.h"/>
+          <FILE id="FMel43" name="MathHelpers.h" compile="1" resource="0" file="Source/AudioClassify/MathHelpers/MathHelpers.h"/>
         </GROUP>
         <GROUP id="{85E02C39-0B9F-AA28-9223-C9BC61429A23}" name="src">
           <GROUP id="{A893CC75-7EAE-E4DB-A630-85180E44A872}" name="AudioClassifier">
             <FILE id="FhndgL" name="AudioClassifier.cpp" compile="1" resource="0"
                   file="Source/AudioClassify/src/AudioClassifier/AudioClassifier.cpp"/>
-            <FILE id="VDaWCH" name="AudioClassifier.h" compile="0" resource="0"
+            <FILE id="VDaWCH" name="AudioClassifier.h" compile="1" resource="0"
                   file="Source/AudioClassify/src/AudioClassifier/AudioClassifier.h"/>
           </GROUP>
           <GROUP id="{308BF56F-A3EC-C862-9513-11AD94328803}" name="AudioClassifyOptions">
-            <FILE id="yEDtds" name="AudioClassifyOptions.h" compile="0" resource="0"
+            <FILE id="yEDtds" name="AudioClassifyOptions.h" compile="1" resource="0"
                   file="Source/AudioClassify/src/AudioClassifyOptions/AudioClassifyOptions.h"/>
           </GROUP>
           <GROUP id="{2F0EBA12-2C40-CCA4-DDFA-A397A627C965}" name="NaiveBayes">
             <FILE id="s7N0Ox" name="NaiveBayes.cpp" compile="1" resource="0" file="Source/AudioClassify/src/NaiveBayes/NaiveBayes.cpp"/>
-            <FILE id="xVTWLX" name="NaiveBayes.h" compile="0" resource="0" file="Source/AudioClassify/src/NaiveBayes/NaiveBayes.h"/>
+            <FILE id="xVTWLX" name="NaiveBayes.h" compile="1" resource="0" file="Source/AudioClassify/src/NaiveBayes/NaiveBayes.h"/>
           </GROUP>
           <GROUP id="{3E7D8448-E5A1-7B6D-144D-BB78A02F7A19}" name="OnsetDetection">
             <FILE id="QZGmsU" name="OnsetDetector.cpp" compile="1" resource="0"
                   file="Source/AudioClassify/src/OnsetDetection/OnsetDetector.cpp"/>
-            <FILE id="gIdZ1Q" name="OnsetDetector.h" compile="0" resource="0" file="Source/AudioClassify/src/OnsetDetection/OnsetDetector.h"/>
+            <FILE id="gIdZ1Q" name="OnsetDetector.h" compile="1" resource="0" file="Source/AudioClassify/src/OnsetDetection/OnsetDetector.h"/>
           </GROUP>
-          <FILE id="JSLr8o" name="AudioClassify.h" compile="0" resource="0" file="Source/AudioClassify/src/AudioClassify.h"/>
+          <FILE id="JSLr8o" name="AudioClassify.h" compile="1" resource="0" file="Source/AudioClassify/src/AudioClassify.h"/>
         </GROUP>
       </GROUP>
       <FILE id="tJbDF9" name="SinewaveSynth.h" compile="0" resource="0" file="Source/SinewaveSynth.h"/>
@@ -154,6 +154,34 @@
         <MODULEPATH id="juce_audio_basics" path="../../juce"/>
       </MODULEPATHS>
     </CODEBLOCKS_LINUX>
+    <VS2015 targetFolder="Builds/VisualStudio2015" vstFolder="" vst3Folder=""
+            externalLibraries="libopenblas.lib&#10;armadillo.lib" extraDefs="USE_KISS_FFT=1&#10;">
+      <CONFIGURATIONS>
+        <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
+                       isDebug="1" optimisation="1" targetName="BeatboxVox" libraryPath="D:\Development\xianyi-OpenBLAS-3f6398a\lib&#10;D:\Development\armadillo-7.300.1\examples\lib_win64&#10;D:\Development\armadillo-7.300.1\build\Debug"
+                       headerPath="D:\Development\armadillo-7.300.1\include" binaryPath="C:\Users\JOSHUA.MARLER\AudioPlugins\vst"/>
+        <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
+                       isDebug="0" optimisation="3" targetName="BeatboxVox" headerPath="D:\Development\armadillo-7.300.1\include"
+                       libraryPath="D:\Development\xianyi-OpenBLAS-3f6398a\lib&#10;D:\Development\armadillo-7.300.1\examples\lib_win64&#10;D:\Development\armadillo-7.300.1\build\Debug"
+                       binaryPath="C:\Users\JOSHUA.MARLER\AudioPlugins\vst"/>
+      </CONFIGURATIONS>
+      <MODULEPATHS>
+        <MODULEPATH id="juce_video" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_opengl" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_gui_extra" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_gui_basics" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_graphics" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_events" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_data_structures" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_cryptography" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_core" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_processors" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_formats" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_devices" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_basics" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+      </MODULEPATHS>
+    </VS2015>
   </EXPORTFORMATS>
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0"/>
@@ -174,5 +202,6 @@
   <JUCEOPTIONS JUCE_QUICKTIME="disabled"/>
   <LIVE_SETTINGS>
     <LINUX/>
+    <WINDOWS/>
   </LIVE_SETTINGS>
 </JUCERPROJECT>

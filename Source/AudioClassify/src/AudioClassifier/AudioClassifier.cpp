@@ -11,7 +11,7 @@ Author:  joshua
 #include "AudioClassifier.h"
 
 //==============================================================================
-    template<typename T>
+template<typename T>
 AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int initNumSounds) 
     : gistFeatures(std::make_unique<Gist<T>>(initBufferSize, initSampleRate)),
       osDetector(std::make_unique<OnsetDetector<T>>(initBufferSize)),
@@ -28,12 +28,12 @@ AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int in
 
     numSounds = initNumSounds;
 
-    /** //Set initial sound ready states to false in training set.  */
-    /** for (size_t i = 0; i < numSounds; ++i) */
-    /** { */
-    /**    auto it = soundsReady.find(i); */
-    /**    it->second = false; */
-    /** } */
+     //Set initial sound ready states to false in training set.  
+   /*  for (size_t i = 0; i < numSounds; ++i) 
+     { 
+        auto it = soundsReady.find(i); 
+        it->second = false; 
+     }*/ 
 }
 
 template<typename T>
@@ -230,14 +230,14 @@ bool AudioClassifier<T>::checkTrainingSetReady()
 {
     size_t readyCount = 0;
 
-    for(size_t i = 0; i < numSounds; i++)
+    /*for(size_t i = 0; i < numSounds; i++)
     {
        auto it = soundsReady.find(i); 
        if (it->second == true)
            readyCount++;
-    }
+    }*/
 
-    if(readyCount == numSounds)
+    if (readyCount == numSounds)
         return true;
     else
         return false;
