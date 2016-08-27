@@ -16,7 +16,7 @@
 BeatboxVoxAudioProcessor::BeatboxVoxAudioProcessor() 
     : sineSynth(std::make_unique<Synthesiser>()),
       spectralCentroid(0.0f),
-      clasifier(std::make_unique<AudioClassifier<float>>(256, 44100, 1))
+      clasifier(std::make_unique<AudioClassifier<float>>(256, 44800, 1))
       
 { 
     initialiseSynth(); 

@@ -14,7 +14,7 @@
 
 template<typename T>
 OnsetDetector<T>::OnsetDetector(int initBufferSize)
-    : onsetDetectionFunction(std::make_unique<OnsetDetectionFunction<T>>(initBufferSize))
+    : onsetDetectionFunction(initBufferSize)
 {
     usingLocalMaximum = true;
     meanCoeff = 1.5;
@@ -78,7 +78,7 @@ bool OnsetDetector<T>::checkForOnset(std::vector<T> magnitudeSpectrum)
     T featureValue = 0;
     bool hasOnset = false;
 
-    featureValue = onsetDetectionFunction->highFrequencyContent(magnitudeSpectrum); 
+    featureValue = onsetDetectionFunction.highFrequencyContent(magnitudeSpectrum); 
     hasOnset = checkForPeak(featureValue);
 
     return hasOnset;
@@ -93,7 +93,6 @@ bool OnsetDetector<T>::checkForPeak(T featureValue)
     {
         if (previousValues[0] > threshold && previousValues[0] > featureValue && previousValues[0] > previousValues[1]) 
             isOnset = true;           
-        
     }
     else
     {
@@ -104,10 +103,10 @@ bool OnsetDetector<T>::checkForPeak(T featureValue)
     threshold = meanCoeff * MathHelpers::getMean(previousValues);
 
     //JWM - NOTE: Would be nice to do this with proper iterators later.
-    for (auto i = numPreviousValues - 1; i > 0; i--)
-    {
-        previousValues[i] = previousValues[i - 1];
-    }
+    for (auto i = numPreviousValues - 1; i > 0; i--) 
+    { 
+        previousValues[i] = previousValues[i - 1]; 
+    } 
 
     previousValues[0] = featureValue;
     

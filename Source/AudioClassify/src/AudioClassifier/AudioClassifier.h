@@ -16,7 +16,7 @@
 
 #include <map>
 #include <atomic>
-#include <armadillo.h>
+#include <armadillo>
 #include "../../Gist/src/Gist.h"
 #include "../AudioClassifyOptions/AudioClassifyOptions.h"
 #include "../OnsetDetection/OnsetDetector.h"
@@ -87,17 +87,15 @@ private:
     //Vector to hold mag spectrum
     std::vector<T> magSpectrum;
 
-    std::unique_ptr<Gist<T>> gistFeatures; 
-    
-    std::unique_ptr<OnsetDetector<T>> osDetector;
-        
     arma::Mat<T> trainingData;
 
     arma::Row<size_t> trainingLabels;
     
     arma::Col<T> currentInstanceVector;
     
-//    std::unique_ptr<NaiveBayes<T>> nbc;
+    Gist<T> gistFeatures;
+    OnsetDetector<T> osDetector;
+    NaiveBayes<T> nbc;
 //==============================================================================
 
 //    void setClassifierReady (bool ready);

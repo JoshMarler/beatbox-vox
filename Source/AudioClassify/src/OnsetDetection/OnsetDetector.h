@@ -46,7 +46,7 @@ class OnsetDetector
 
        std::vector<T> previousValues;
 
-       std::unique_ptr<OnsetDetectionFunction<T>> onsetDetectionFunction;
+       OnsetDetectionFunction<T> onsetDetectionFunction;
 
        std::atomic<AudioClassifyOptions::ODFType> currentODFType {AudioClassifyOptions::ODFType::spectralDifference};
 

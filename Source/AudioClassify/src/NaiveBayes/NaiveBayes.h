@@ -14,7 +14,7 @@
 //For windows compatibility
 #define ARMA_64BIT_WORD
 
-#include <armadillo.h>
+#include <armadillo>
 
 template<typename T>
 class NaiveBayes

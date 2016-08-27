@@ -13,13 +13,13 @@ Author:  joshua
 //==============================================================================
 template<typename T>
 AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int initNumSounds) 
-    : gistFeatures(std::make_unique<Gist<T>>(initBufferSize, initSampleRate)),
-      osDetector(std::make_unique<OnsetDetector<T>>(initBufferSize)),
-      currentTrainingSound(-1), //Initially set to -1 as valid sounds from 0 - numSounds. Initial training sound set by called later.
+    : currentTrainingSound(-1), //Initially set to -1 as valid sounds from 0 - numSounds. Initial training sound set by called later.
       trainingData(18, (trainingSetSize * initNumSounds), arma::fill::zeros),
       trainingLabels((trainingSetSize * initNumSounds)),
-      currentInstanceVector(18, arma::fill::zeros)
-//      nbc(std::make_unique<NaiveBayes<T>>(initNumSounds, 18))
+      currentInstanceVector(18, arma::fill::zeros),
+      gistFeatures(initBufferSize, initSampleRate),
+      osDetector(initBufferSize),
+      nbc(initNumSounds, 18)
 {
     setCurrentSampleRate(initSampleRate);
     setCurrentBufferSize(initBufferSize);
@@ -29,11 +29,10 @@ AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int in
     numSounds = initNumSounds;
 
      //Set initial sound ready states to false in training set.  
-   /*  for (size_t i = 0; i < numSounds; ++i) 
+     for (size_t i = 0; i < numSounds; ++i) 
      { 
-        auto it = soundsReady.find(i); 
-        it->second = false; 
-     }*/ 
+        soundsReady.insert(std::pair<int, bool>(i, false));
+     } 
 }
 
 template<typename T>
@@ -60,7 +59,7 @@ template<typename T>
 void AudioClassifier<T>::setCurrentBufferSize (int newBufferSize)
 {
     bufferSize = newBufferSize;
-    gistFeatures->setAudioFrameSize(newBufferSize);
+    gistFeatures.setAudioFrameSize(newBufferSize);
 
     magSpectrum.resize(newBufferSize / 2);
     std::fill(magSpectrum.begin(), magSpectrum.end(), 0.0f);
@@ -70,7 +69,7 @@ template<typename T>
 void AudioClassifier<T>::setCurrentSampleRate (T newSampleRate)
 {
     sampleRate = newSampleRate;
-    gistFeatures->setSamplingFrequency(static_cast<int>(newSampleRate));
+    gistFeatures.setSamplingFrequency(static_cast<int>(newSampleRate));
 }
 
 //==============================================================================
@@ -115,10 +114,10 @@ void AudioClassifier<T>::processAudioBuffer (T* buffer)
     //Reset hasOnset for next process buffer.
     hasOnset = false;
 
-    gistFeatures->processAudioFrame(buffer, bufferSize);
-    magSpectrum = gistFeatures->getMagnitudeSpectrum();
+    gistFeatures.processAudioFrame(buffer, bufferSize);
+    magSpectrum = gistFeatures.getMagnitudeSpectrum();
     
-    hasOnset = osDetector->checkForOnset(magSpectrum);
+    hasOnset = osDetector.checkForOnset(magSpectrum);
 
     if (hasOnset)
     {
@@ -148,7 +147,7 @@ void AudioClassifier<T>::processAudioBuffer (T* buffer)
                 //If all sound samples collected for training set train model.
                 if (checkTrainingSetReady())
                 {
-                    //nbc->Train(trainingData, trainingLabels); 
+                    nbc.Train(trainingData, trainingLabels); 
                     classifierReady.store(true);    
                 }
             }
@@ -164,43 +163,43 @@ void AudioClassifier<T>::processCurrentInstance()
 
     if (usingSpecCentroid.load())
     {
-        currentInstanceVector[pos] = gistFeatures->spectralCentroid(); 
+        currentInstanceVector[pos] = gistFeatures.spectralCentroid(); 
         pos++;
     }
 
     if (usingSpecCrest.load())
     {
-        currentInstanceVector[pos] = gistFeatures->spectralCrest();
+        currentInstanceVector[pos] = gistFeatures.spectralCrest();
         pos++;
     }
 
     if (usingSpecFlatness.load())
     {
-        currentInstanceVector[pos] = gistFeatures->spectralFlatness(); 
+        currentInstanceVector[pos] = gistFeatures.spectralFlatness(); 
         pos++;
     }
 
     if (usingSpecRolloff.load())
     {
-        currentInstanceVector[pos] = gistFeatures->spectralRolloff();
+        currentInstanceVector[pos] = gistFeatures.spectralRolloff();
         pos++;
     }
     
     if (usingSpecKurtosis.load())
     {
-        currentInstanceVector[pos] = gistFeatures->spectralKurtosis();
+        currentInstanceVector[pos] = gistFeatures.spectralKurtosis();
         pos++;
     }
 
     if (usingMfcc.load())
     {
-        auto mfccVec = gistFeatures->melFrequencyCepstralCoefficients();
+         auto mfccVec = gistFeatures.melFrequencyCepstralCoefficients(); 
 
-        for (auto val : mfccVec)
-        {
-          currentInstanceVector[pos] = val; 
-          pos++;
-        }
+         for (auto val : mfccVec) 
+         { 
+           currentInstanceVector[pos] = val;  
+           pos++; 
+         } 
     }
 }
 
@@ -217,7 +216,7 @@ unsigned AudioClassifier<T>::classify()
    
     if (hasOnset)
     {
-        //sound = nbc->Classify(currentInstanceVector);
+        sound = nbc.Classify(currentInstanceVector);
     }
 
     return sound;
@@ -230,12 +229,12 @@ bool AudioClassifier<T>::checkTrainingSetReady()
 {
     size_t readyCount = 0;
 
-    /*for(size_t i = 0; i < numSounds; i++)
+    for(size_t i = 0; i < numSounds; i++)
     {
        auto it = soundsReady.find(i); 
        if (it->second == true)
            readyCount++;
-    }*/
+    }
 
     if (readyCount == numSounds)
         return true;
