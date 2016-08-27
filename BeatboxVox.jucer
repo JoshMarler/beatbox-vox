@@ -13,53 +13,386 @@
   <MAINGROUP id="z3DhfV" name="BeatboxVox">
     <GROUP id="{B8A10E5D-D185-1FFC-CC44-E732222EC3EB}" name="Source">
       <GROUP id="{2787DE04-C09F-E428-545B-AFFF83B0B35C}" name="AudioClassify">
-        <GROUP id="{065BD7BB-F058-2311-E001-EAFA072A95CE}" name="Gist">
-          <GROUP id="{81EFDFEB-09B4-FD95-429D-E9296B301509}" name="libs">
-            <GROUP id="{C5B91573-EAF8-C135-B86E-570CB262EF64}" name="kiss_fft130">
-              <FILE id="mLmD7Z" name="_kiss_fft_guts.h" compile="1" resource="0"
+        <GROUP id="{4AD03948-68FE-2AD9-FBAE-E6277A412707}" name="Gist">
+          <GROUP id="{0A41FF2E-52B4-B768-F2DA-DD43F0BFDAAD}" name="documentation">
+            <GROUP id="{ED08F9C7-9259-570D-6D7D-CA953D0E99AB}" name="html">
+              <GROUP id="{53057EB8-95B5-0D70-3C82-D9CB930E47EA}" name="search">
+                <FILE id="ZpksR4" name="all_0.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_0.html"/>
+                <FILE id="oytWP2" name="all_0.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_0.js"/>
+                <FILE id="s07MOU" name="all_1.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_1.html"/>
+                <FILE id="edberF" name="all_1.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_1.js"/>
+                <FILE id="ufecId" name="all_2.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_2.html"/>
+                <FILE id="lryU5Z" name="all_2.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_2.js"/>
+                <FILE id="CZAiys" name="all_3.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_3.html"/>
+                <FILE id="r5D5Xr" name="all_3.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_3.js"/>
+                <FILE id="Zjl7Dg" name="all_4.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_4.html"/>
+                <FILE id="Ez3iUg" name="all_4.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_4.js"/>
+                <FILE id="tDE4fr" name="all_5.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_5.html"/>
+                <FILE id="Mmyio4" name="all_5.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_5.js"/>
+                <FILE id="lsgWtv" name="all_6.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_6.html"/>
+                <FILE id="fT64u9" name="all_6.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_6.js"/>
+                <FILE id="dyXGYi" name="all_6f.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_6f.html"/>
+                <FILE id="m3cFnY" name="all_6f.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_6f.js"/>
+                <FILE id="k5PzeE" name="all_7.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_7.html"/>
+                <FILE id="Bs2S4o" name="all_7.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_7.js"/>
+                <FILE id="diK4Ip" name="all_7a.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_7a.html"/>
+                <FILE id="Ld0uVu" name="all_7a.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_7a.js"/>
+                <FILE id="Ig23fq" name="all_8.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_8.html"/>
+                <FILE id="iMZ5Rb" name="all_8.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_8.js"/>
+                <FILE id="B1urXg" name="all_9.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_9.html"/>
+                <FILE id="g5TN1F" name="all_9.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_9.js"/>
+                <FILE id="ltPdSg" name="all_63.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_63.html"/>
+                <FILE id="kTYp0g" name="all_63.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_63.js"/>
+                <FILE id="uWqeTv" name="all_67.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_67.html"/>
+                <FILE id="lncsFj" name="all_67.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_67.js"/>
+                <FILE id="yYyWQa" name="all_70.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_70.html"/>
+                <FILE id="DzX4OD" name="all_70.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_70.js"/>
+                <FILE id="FjxgCI" name="all_72.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_72.html"/>
+                <FILE id="XmpGLk" name="all_72.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_72.js"/>
+                <FILE id="HYyykl" name="all_73.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_73.html"/>
+                <FILE id="pAKN9Z" name="all_73.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_73.js"/>
+                <FILE id="ttKhra" name="all_79.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_79.html"/>
+                <FILE id="X21UQ0" name="all_79.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_79.js"/>
+                <FILE id="clJ1M4" name="all_a.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_a.html"/>
+                <FILE id="g76xuH" name="all_a.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_a.js"/>
+                <FILE id="PTJlCS" name="all_b.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_b.html"/>
+                <FILE id="kdFZEy" name="all_b.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_b.js"/>
+                <FILE id="HN6dw5" name="all_c.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_c.html"/>
+                <FILE id="T7dwVc" name="all_c.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/all_c.js"/>
+                <FILE id="nf9UIw" name="classes_0.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/classes_0.html"/>
+                <FILE id="g1Ugbf" name="classes_0.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/classes_0.js"/>
+                <FILE id="NKC72e" name="classes_1.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/classes_1.html"/>
+                <FILE id="JJ4lv5" name="classes_1.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/classes_1.js"/>
+                <FILE id="Sa4rQy" name="classes_2.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/classes_2.html"/>
+                <FILE id="glwKi7" name="classes_2.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/classes_2.js"/>
+                <FILE id="ru1LL7" name="classes_3.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/classes_3.html"/>
+                <FILE id="gSq930" name="classes_3.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/classes_3.js"/>
+                <FILE id="Z9bqdw" name="classes_4.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/classes_4.html"/>
+                <FILE id="kStEzu" name="classes_4.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/classes_4.js"/>
+                <FILE id="M24xkr" name="classes_5.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/classes_5.html"/>
+                <FILE id="WnUM2U" name="classes_5.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/classes_5.js"/>
+                <FILE id="Fhn0IZ" name="classes_6f.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/classes_6f.html"/>
+                <FILE id="gsxSB0" name="classes_6f.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/classes_6f.js"/>
+                <FILE id="jmC7kg" name="classes_63.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/classes_63.html"/>
+                <FILE id="XMVd8c" name="classes_63.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/classes_63.js"/>
+                <FILE id="pWDKmA" name="classes_79.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/classes_79.html"/>
+                <FILE id="UHqDhY" name="classes_79.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/classes_79.js"/>
+                <FILE id="RX5dLk" name="close.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/close.png"/>
+                <FILE id="nUo1FL" name="files_0.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/files_0.html"/>
+                <FILE id="MBbmeP" name="files_0.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/files_0.js"/>
+                <FILE id="voJd3O" name="files_1.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/files_1.html"/>
+                <FILE id="SXdkJ1" name="files_1.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/files_1.js"/>
+                <FILE id="IMEdfW" name="files_2.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/files_2.html"/>
+                <FILE id="KSfPhK" name="files_2.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/files_2.js"/>
+                <FILE id="eSshZ7" name="files_3.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/files_3.html"/>
+                <FILE id="kmysFl" name="files_3.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/files_3.js"/>
+                <FILE id="rT43df" name="files_4.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/files_4.html"/>
+                <FILE id="aE4awM" name="files_4.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/files_4.js"/>
+                <FILE id="vcdBZA" name="files_5.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/files_5.html"/>
+                <FILE id="fp5Ew0" name="files_5.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/files_5.js"/>
+                <FILE id="LfqOTx" name="files_6f.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/files_6f.html"/>
+                <FILE id="owEyPy" name="files_6f.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/files_6f.js"/>
+                <FILE id="cTUUoW" name="files_63.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/files_63.html"/>
+                <FILE id="MUTa23" name="files_63.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/files_63.js"/>
+                <FILE id="z6ka0D" name="files_67.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/files_67.html"/>
+                <FILE id="e1cR9p" name="files_67.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/files_67.js"/>
+                <FILE id="ifDehT" name="files_79.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/files_79.html"/>
+                <FILE id="Ol5qgi" name="files_79.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/files_79.js"/>
+                <FILE id="TlTgCh" name="functions_0.html" compile="0" resource="1"
+                      file="Source/AudioClassify/Gist/documentation/html/search/functions_0.html"/>
+                <FILE id="gyZ7TV" name="functions_0.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/functions_0.js"/>
+                <FILE id="GpOCn8" name="functions_1.html" compile="0" resource="1"
+                      file="Source/AudioClassify/Gist/documentation/html/search/functions_1.html"/>
+                <FILE id="Sh4Lpc" name="functions_1.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/functions_1.js"/>
+                <FILE id="j5fegP" name="functions_2.html" compile="0" resource="1"
+                      file="Source/AudioClassify/Gist/documentation/html/search/functions_2.html"/>
+                <FILE id="Xx0cTL" name="functions_2.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/functions_2.js"/>
+                <FILE id="kvSZd9" name="functions_3.html" compile="0" resource="1"
+                      file="Source/AudioClassify/Gist/documentation/html/search/functions_3.html"/>
+                <FILE id="yeMKCF" name="functions_3.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/functions_3.js"/>
+                <FILE id="JTfWeB" name="functions_4.html" compile="0" resource="1"
+                      file="Source/AudioClassify/Gist/documentation/html/search/functions_4.html"/>
+                <FILE id="M7RKSw" name="functions_4.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/functions_4.js"/>
+                <FILE id="PGLKRq" name="functions_5.html" compile="0" resource="1"
+                      file="Source/AudioClassify/Gist/documentation/html/search/functions_5.html"/>
+                <FILE id="Iw3tUV" name="functions_5.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/functions_5.js"/>
+                <FILE id="DMFHoj" name="functions_6.html" compile="0" resource="1"
+                      file="Source/AudioClassify/Gist/documentation/html/search/functions_6.html"/>
+                <FILE id="NiGz6J" name="functions_6.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/functions_6.js"/>
+                <FILE id="ZBvlqz" name="functions_6f.html" compile="0" resource="1"
+                      file="Source/AudioClassify/Gist/documentation/html/search/functions_6f.html"/>
+                <FILE id="PfyD5Y" name="functions_6f.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/functions_6f.js"/>
+                <FILE id="TXbKWf" name="functions_7.html" compile="0" resource="1"
+                      file="Source/AudioClassify/Gist/documentation/html/search/functions_7.html"/>
+                <FILE id="G1yxBs" name="functions_7.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/functions_7.js"/>
+                <FILE id="jpt4qE" name="functions_7a.html" compile="0" resource="1"
+                      file="Source/AudioClassify/Gist/documentation/html/search/functions_7a.html"/>
+                <FILE id="JwgPSW" name="functions_7a.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/functions_7a.js"/>
+                <FILE id="pHyp8w" name="functions_8.html" compile="0" resource="1"
+                      file="Source/AudioClassify/Gist/documentation/html/search/functions_8.html"/>
+                <FILE id="iE6xe1" name="functions_8.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/functions_8.js"/>
+                <FILE id="eoF1s0" name="functions_9.html" compile="0" resource="1"
+                      file="Source/AudioClassify/Gist/documentation/html/search/functions_9.html"/>
+                <FILE id="OOXMV4" name="functions_9.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/functions_9.js"/>
+                <FILE id="DawErf" name="functions_63.html" compile="0" resource="1"
+                      file="Source/AudioClassify/Gist/documentation/html/search/functions_63.html"/>
+                <FILE id="Zu8jd4" name="functions_63.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/functions_63.js"/>
+                <FILE id="WitC8o" name="functions_67.html" compile="0" resource="1"
+                      file="Source/AudioClassify/Gist/documentation/html/search/functions_67.html"/>
+                <FILE id="NoaiBt" name="functions_67.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/functions_67.js"/>
+                <FILE id="JkyC1c" name="functions_70.html" compile="0" resource="1"
+                      file="Source/AudioClassify/Gist/documentation/html/search/functions_70.html"/>
+                <FILE id="UfK5B6" name="functions_70.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/functions_70.js"/>
+                <FILE id="v1FT7B" name="functions_72.html" compile="0" resource="1"
+                      file="Source/AudioClassify/Gist/documentation/html/search/functions_72.html"/>
+                <FILE id="SD8aPs" name="functions_72.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/functions_72.js"/>
+                <FILE id="zHbbD6" name="functions_73.html" compile="0" resource="1"
+                      file="Source/AudioClassify/Gist/documentation/html/search/functions_73.html"/>
+                <FILE id="pb3gWz" name="functions_73.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/functions_73.js"/>
+                <FILE id="LlFzYa" name="functions_79.html" compile="0" resource="1"
+                      file="Source/AudioClassify/Gist/documentation/html/search/functions_79.html"/>
+                <FILE id="SsvgWp" name="functions_79.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/functions_79.js"/>
+                <FILE id="lrDd69" name="functions_a.html" compile="0" resource="1"
+                      file="Source/AudioClassify/Gist/documentation/html/search/functions_a.html"/>
+                <FILE id="DjSoZF" name="functions_a.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/functions_a.js"/>
+                <FILE id="RRJi5W" name="functions_b.html" compile="0" resource="1"
+                      file="Source/AudioClassify/Gist/documentation/html/search/functions_b.html"/>
+                <FILE id="DL9Z6g" name="functions_b.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/functions_b.js"/>
+                <FILE id="bsi5n2" name="mag_sel.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/mag_sel.png"/>
+                <FILE id="hAtSVO" name="nomatches.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/nomatches.html"/>
+                <FILE id="HGoZZo" name="pages_0.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/pages_0.html"/>
+                <FILE id="OzGakK" name="pages_0.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/pages_0.js"/>
+                <FILE id="mbBfVI" name="pages_67.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/pages_67.html"/>
+                <FILE id="ik85Bj" name="pages_67.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/pages_67.js"/>
+                <FILE id="wRHJEA" name="search.css" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/search.css"/>
+                <FILE id="kkmsoA" name="search.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/search.js"/>
+                <FILE id="vsGp6B" name="search_l.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/search_l.png"/>
+                <FILE id="tVi0O2" name="search_m.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/search_m.png"/>
+                <FILE id="u3I2k0" name="search_r.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/search_r.png"/>
+                <FILE id="HG5vEd" name="searchdata.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/search/searchdata.js"/>
+              </GROUP>
+              <FILE id="OdnzRa" name="_accelerate_f_f_t_8cpp.html" compile="0" resource="1"
+                    file="Source/AudioClassify/Gist/documentation/html/_accelerate_f_f_t_8cpp.html"/>
+              <FILE id="FjddgF" name="_accelerate_f_f_t_8h.html" compile="0" resource="1"
+                    file="Source/AudioClassify/Gist/documentation/html/_accelerate_f_f_t_8h.html"/>
+              <FILE id="MGvN3p" name="_accelerate_f_f_t_8h_source.html" compile="0"
+                    resource="1" file="Source/AudioClassify/Gist/documentation/html/_accelerate_f_f_t_8h_source.html"/>
+              <FILE id="purfGB" name="_core_frequency_domain_features_8cpp.html"
+                    compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/_core_frequency_domain_features_8cpp.html"/>
+              <FILE id="WseDzo" name="_core_frequency_domain_features_8h.html" compile="0"
+                    resource="1" file="Source/AudioClassify/Gist/documentation/html/_core_frequency_domain_features_8h.html"/>
+              <FILE id="zt8Lzr" name="_core_frequency_domain_features_8h_source.html"
+                    compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/_core_frequency_domain_features_8h_source.html"/>
+              <FILE id="mm7h4L" name="_core_time_domain_features_8cpp.html" compile="0"
+                    resource="1" file="Source/AudioClassify/Gist/documentation/html/_core_time_domain_features_8cpp.html"/>
+              <FILE id="YmAtjd" name="_core_time_domain_features_8h.html" compile="0"
+                    resource="1" file="Source/AudioClassify/Gist/documentation/html/_core_time_domain_features_8h.html"/>
+              <FILE id="nCKYCF" name="_core_time_domain_features_8h_source.html"
+                    compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/_core_time_domain_features_8h_source.html"/>
+              <FILE id="HQTuwM" name="_gist_8cpp.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/_gist_8cpp.html"/>
+              <FILE id="RCMiGZ" name="_gist_8h.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/_gist_8h.html"/>
+              <FILE id="M1YD7E" name="_gist_8h_source.html" compile="0" resource="1"
+                    file="Source/AudioClassify/Gist/documentation/html/_gist_8h_source.html"/>
+              <FILE id="x42C0u" name="_m_f_c_c_8cpp.html" compile="0" resource="1"
+                    file="Source/AudioClassify/Gist/documentation/html/_m_f_c_c_8cpp.html"/>
+              <FILE id="FT6xW0" name="_m_f_c_c_8h.html" compile="0" resource="1"
+                    file="Source/AudioClassify/Gist/documentation/html/_m_f_c_c_8h.html"/>
+              <FILE id="pNR1fp" name="_m_f_c_c_8h_source.html" compile="0" resource="1"
+                    file="Source/AudioClassify/Gist/documentation/html/_m_f_c_c_8h_source.html"/>
+              <FILE id="SW85zG" name="_onset_detection_function_8cpp.html" compile="0"
+                    resource="1" file="Source/AudioClassify/Gist/documentation/html/_onset_detection_function_8cpp.html"/>
+              <FILE id="T0i5Fg" name="_onset_detection_function_8h.html" compile="0"
+                    resource="1" file="Source/AudioClassify/Gist/documentation/html/_onset_detection_function_8h.html"/>
+              <FILE id="a1JTOQ" name="_onset_detection_function_8h_source.html" compile="0"
+                    resource="1" file="Source/AudioClassify/Gist/documentation/html/_onset_detection_function_8h_source.html"/>
+              <FILE id="azZin5" name="_yin_8cpp.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/_yin_8cpp.html"/>
+              <FILE id="MmaXON" name="_yin_8h.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/_yin_8h.html"/>
+              <FILE id="Jly1os" name="_yin_8h_source.html" compile="0" resource="1"
+                    file="Source/AudioClassify/Gist/documentation/html/_yin_8h_source.html"/>
+              <FILE id="Y8nDcN" name="annotated.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/annotated.html"/>
+              <FILE id="D62Oyv" name="arrowdown.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/arrowdown.png"/>
+              <FILE id="UP51nO" name="arrowright.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/arrowright.png"/>
+              <FILE id="yIn53d" name="bc_s.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/bc_s.png"/>
+              <FILE id="lwBGDu" name="bdwn.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/bdwn.png"/>
+              <FILE id="PoagIB" name="class_accelerate_f_f_t-members.html" compile="0"
+                    resource="1" file="Source/AudioClassify/Gist/documentation/html/class_accelerate_f_f_t-members.html"/>
+              <FILE id="jqewGS" name="class_accelerate_f_f_t.html" compile="0" resource="1"
+                    file="Source/AudioClassify/Gist/documentation/html/class_accelerate_f_f_t.html"/>
+              <FILE id="yL6i4L" name="class_core_frequency_domain_features-members.html"
+                    compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/class_core_frequency_domain_features-members.html"/>
+              <FILE id="uYdH4h" name="class_core_frequency_domain_features.html"
+                    compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/class_core_frequency_domain_features.html"/>
+              <FILE id="HcHJUY" name="class_core_time_domain_features-members.html"
+                    compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/class_core_time_domain_features-members.html"/>
+              <FILE id="Qwjlg0" name="class_core_time_domain_features.html" compile="0"
+                    resource="1" file="Source/AudioClassify/Gist/documentation/html/class_core_time_domain_features.html"/>
+              <FILE id="oopIRN" name="class_gist-members.html" compile="0" resource="1"
+                    file="Source/AudioClassify/Gist/documentation/html/class_gist-members.html"/>
+              <FILE id="YPXo2M" name="class_gist.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/class_gist.html"/>
+              <FILE id="TY3DII" name="class_m_f_c_c-members.html" compile="0" resource="1"
+                    file="Source/AudioClassify/Gist/documentation/html/class_m_f_c_c-members.html"/>
+              <FILE id="J5Gzuy" name="class_m_f_c_c.html" compile="0" resource="1"
+                    file="Source/AudioClassify/Gist/documentation/html/class_m_f_c_c.html"/>
+              <FILE id="EsGj1A" name="class_onset_detection_function-members.html"
+                    compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/class_onset_detection_function-members.html"/>
+              <FILE id="SJdbJ6" name="class_onset_detection_function.html" compile="0"
+                    resource="1" file="Source/AudioClassify/Gist/documentation/html/class_onset_detection_function.html"/>
+              <FILE id="Vv7Qyq" name="class_yin-members.html" compile="0" resource="1"
+                    file="Source/AudioClassify/Gist/documentation/html/class_yin-members.html"/>
+              <FILE id="mfX8jF" name="class_yin.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/class_yin.html"/>
+              <FILE id="VSvUX4" name="classes.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/classes.html"/>
+              <FILE id="iCFTHd" name="closed.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/closed.png"/>
+              <FILE id="nmO4x7" name="dir_1fbe5abfc91f031908f9b0fcd26c05f0.html"
+                    compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/dir_1fbe5abfc91f031908f9b0fcd26c05f0.html"/>
+              <FILE id="OkjpqG" name="dir_68267d1309a1af8e8297ef4c3efbcdba.html"
+                    compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/dir_68267d1309a1af8e8297ef4c3efbcdba.html"/>
+              <FILE id="wNyXkS" name="dir_115431e8672b3c127a9229444cc9e107.html"
+                    compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/dir_115431e8672b3c127a9229444cc9e107.html"/>
+              <FILE id="Fbh6qj" name="dir_470929ddc4e6c81f88cfe96f3f82f42a.html"
+                    compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/dir_470929ddc4e6c81f88cfe96f3f82f42a.html"/>
+              <FILE id="wHH1ay" name="dir_aebb8dcc11953d78e620bbef0b9e2183.html"
+                    compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/dir_aebb8dcc11953d78e620bbef0b9e2183.html"/>
+              <FILE id="ATaL1L" name="dir_efab871e5a3bbeebd99132f592e59696.html"
+                    compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/dir_efab871e5a3bbeebd99132f592e59696.html"/>
+              <FILE id="TPT291" name="doc.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/doc.png"/>
+              <FILE id="Wp5h3b" name="doxygen.css" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/doxygen.css"/>
+              <FILE id="yd8s1j" name="doxygen.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/doxygen.png"/>
+              <FILE id="lt1zt6" name="dynsections.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/dynsections.js"/>
+              <FILE id="OKet7D" name="files.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/files.html"/>
+              <FILE id="zDkxUr" name="folderclosed.png" compile="0" resource="1"
+                    file="Source/AudioClassify/Gist/documentation/html/folderclosed.png"/>
+              <FILE id="Hyttla" name="folderopen.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/folderopen.png"/>
+              <FILE id="R4Ak1p" name="ftv2blank.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/ftv2blank.png"/>
+              <FILE id="Q7lzPG" name="ftv2cl.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/ftv2cl.png"/>
+              <FILE id="ZDcOkc" name="ftv2doc.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/ftv2doc.png"/>
+              <FILE id="HejTVt" name="ftv2folderclosed.png" compile="0" resource="1"
+                    file="Source/AudioClassify/Gist/documentation/html/ftv2folderclosed.png"/>
+              <FILE id="qV7pDM" name="ftv2folderopen.png" compile="0" resource="1"
+                    file="Source/AudioClassify/Gist/documentation/html/ftv2folderopen.png"/>
+              <FILE id="toKYoV" name="ftv2lastnode.png" compile="0" resource="1"
+                    file="Source/AudioClassify/Gist/documentation/html/ftv2lastnode.png"/>
+              <FILE id="iPKCjw" name="ftv2link.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/ftv2link.png"/>
+              <FILE id="qNJlKE" name="ftv2mlastnode.png" compile="0" resource="1"
+                    file="Source/AudioClassify/Gist/documentation/html/ftv2mlastnode.png"/>
+              <FILE id="WegtHt" name="ftv2mnode.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/ftv2mnode.png"/>
+              <FILE id="BPV3f7" name="ftv2mo.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/ftv2mo.png"/>
+              <FILE id="dxnfMv" name="ftv2node.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/ftv2node.png"/>
+              <FILE id="K9509o" name="ftv2ns.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/ftv2ns.png"/>
+              <FILE id="FCLj8y" name="ftv2plastnode.png" compile="0" resource="1"
+                    file="Source/AudioClassify/Gist/documentation/html/ftv2plastnode.png"/>
+              <FILE id="UtyKXb" name="ftv2pnode.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/ftv2pnode.png"/>
+              <FILE id="rjAhGF" name="ftv2splitbar.png" compile="0" resource="1"
+                    file="Source/AudioClassify/Gist/documentation/html/ftv2splitbar.png"/>
+              <FILE id="jLXVYe" name="ftv2vertline.png" compile="0" resource="1"
+                    file="Source/AudioClassify/Gist/documentation/html/ftv2vertline.png"/>
+              <FILE id="SNqJBv" name="functions.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/functions.html"/>
+              <FILE id="kw7x4H" name="functions_func.html" compile="0" resource="1"
+                    file="Source/AudioClassify/Gist/documentation/html/functions_func.html"/>
+              <FILE id="lPmOIz" name="gist_8h.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/gist_8h.html"/>
+              <FILE id="vQaiNX" name="gist_8h_source.html" compile="0" resource="1"
+                    file="Source/AudioClassify/Gist/documentation/html/gist_8h_source.html"/>
+              <FILE id="QZ7ire" name="index.html" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/index.html"/>
+              <FILE id="TDGHIi" name="jquery.js" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/jquery.js"/>
+              <FILE id="ttaVXs" name="nav_f.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/nav_f.png"/>
+              <FILE id="sEwiy4" name="nav_g.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/nav_g.png"/>
+              <FILE id="Af4dq8" name="nav_h.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/nav_h.png"/>
+              <FILE id="aKFjrR" name="open.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/open.png"/>
+              <FILE id="o73l6G" name="splitbar.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/splitbar.png"/>
+              <FILE id="wpULyh" name="sync_off.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/sync_off.png"/>
+              <FILE id="BXsFSi" name="sync_on.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/sync_on.png"/>
+              <FILE id="kj2kpA" name="tab_a.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/tab_a.png"/>
+              <FILE id="sE4jR6" name="tab_b.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/tab_b.png"/>
+              <FILE id="ZSNenC" name="tab_h.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/tab_h.png"/>
+              <FILE id="DPwBkw" name="tab_s.png" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/tab_s.png"/>
+              <FILE id="bRKJ3W" name="tabs.css" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/html/tabs.css"/>
+            </GROUP>
+            <FILE id="RFj6eK" name="gist.Doxyfile" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/gist.Doxyfile"/>
+            <FILE id="NA2Jwu" name="mainpage.dox" compile="0" resource="1" file="Source/AudioClassify/Gist/documentation/mainpage.dox"/>
+          </GROUP>
+          <GROUP id="{D3F806BA-73B5-38AF-1B3C-C1DBA852B456}" name="libs">
+            <GROUP id="{9B439428-0140-46BF-BC05-E02EA5ECDC9A}" name="kiss_fft130">
+              <FILE id="crLLti" name="_kiss_fft_guts.h" compile="0" resource="0"
                     file="Source/AudioClassify/Gist/libs/kiss_fft130/_kiss_fft_guts.h"/>
-              <FILE id="gkwfnI" name="COPYING" compile="1" resource="1" file="Source/AudioClassify/Gist/libs/kiss_fft130/COPYING"/>
-              <FILE id="gEhIDP" name="kiss_fft.c" compile="1" resource="0" file="Source/AudioClassify/Gist/libs/kiss_fft130/kiss_fft.c"/>
-              <FILE id="b902nA" name="kiss_fft.h" compile="1" resource="0" file="Source/AudioClassify/Gist/libs/kiss_fft130/kiss_fft.h"/>
-              <FILE id="I3fB1M" name="kissfft.hh" compile="1" resource="0" file="Source/AudioClassify/Gist/libs/kiss_fft130/kissfft.hh"/>
-              <FILE id="VqpR9C" name="README" compile="1" resource="1" file="Source/AudioClassify/Gist/libs/kiss_fft130/README"/>
+              <FILE id="Hj2Q1j" name="COPYING" compile="0" resource="1" file="Source/AudioClassify/Gist/libs/kiss_fft130/COPYING"/>
+              <FILE id="b6eqmf" name="kiss_fft.c" compile="1" resource="0" file="Source/AudioClassify/Gist/libs/kiss_fft130/kiss_fft.c"/>
+              <FILE id="jMReEE" name="kiss_fft.h" compile="0" resource="0" file="Source/AudioClassify/Gist/libs/kiss_fft130/kiss_fft.h"/>
+              <FILE id="B6yHBR" name="kissfft.hh" compile="0" resource="0" file="Source/AudioClassify/Gist/libs/kiss_fft130/kissfft.hh"/>
+              <FILE id="tlMHfZ" name="README" compile="0" resource="1" file="Source/AudioClassify/Gist/libs/kiss_fft130/README"/>
             </GROUP>
           </GROUP>
-          <GROUP id="{6EAEC084-8BFF-BE67-91D1-BB99443BB256}" name="src">
-            <GROUP id="{96B37773-416D-A11D-FEFD-CA65CF1E1CDB}" name="core">
-              <FILE id="G9iWVr" name="CoreFrequencyDomainFeatures.cpp" compile="1"
+          <GROUP id="{A832C9F1-E1A6-8576-96FF-DC544E59A314}" name="python-module">
+            <FILE id="nySEjf" name="example.py" compile="0" resource="1" file="Source/AudioClassify/Gist/python-module/example.py"/>
+            <FILE id="tAGDll" name="GistPythonModule.cpp" compile="0" resource="0"
+                  file="Source/AudioClassify/Gist/python-module/GistPythonModule.cpp"/>
+            <FILE id="gbJUbw" name="INSTALL.md" compile="0" resource="1" file="Source/AudioClassify/Gist/python-module/INSTALL.md"/>
+            <FILE id="ER3uqn" name="setup.py" compile="0" resource="1" file="Source/AudioClassify/Gist/python-module/setup.py"/>
+          </GROUP>
+          <GROUP id="{0ACE5363-FB3C-C5E9-CF01-056C23B7B1A1}" name="src">
+            <GROUP id="{AB53BC88-9D88-45C1-B96E-B6E9E15F349F}" name="core">
+              <FILE id="eQN66L" name="CoreFrequencyDomainFeatures.cpp" compile="1"
                     resource="0" file="Source/AudioClassify/Gist/src/core/CoreFrequencyDomainFeatures.cpp"/>
-              <FILE id="qT81qu" name="CoreFrequencyDomainFeatures.h" compile="1"
+              <FILE id="WApcY1" name="CoreFrequencyDomainFeatures.h" compile="0"
                     resource="0" file="Source/AudioClassify/Gist/src/core/CoreFrequencyDomainFeatures.h"/>
-              <FILE id="cPNdLG" name="CoreTimeDomainFeatures.cpp" compile="1" resource="0"
+              <FILE id="ItmrXT" name="CoreTimeDomainFeatures.cpp" compile="1" resource="0"
                     file="Source/AudioClassify/Gist/src/core/CoreTimeDomainFeatures.cpp"/>
-              <FILE id="VoJimc" name="CoreTimeDomainFeatures.h" compile="1" resource="0"
+              <FILE id="CYOGAa" name="CoreTimeDomainFeatures.h" compile="0" resource="0"
                     file="Source/AudioClassify/Gist/src/core/CoreTimeDomainFeatures.h"/>
             </GROUP>
-            <GROUP id="{54E70310-ED03-ECB0-4F77-7D845BD8124D}" name="fft">
-              <FILE id="yKXrFm" name="AccelerateFFT.cpp" compile="0" resource="0"
+            <GROUP id="{6A34F251-4DD3-A165-F676-C1FF94593907}" name="fft">
+              <FILE id="Hhs4LJ" name="AccelerateFFT.cpp" compile="0" resource="0"
                     file="Source/AudioClassify/Gist/src/fft/AccelerateFFT.cpp"/>
-              <FILE id="CaYbki" name="AccelerateFFT.h" compile="0" resource="0" file="Source/AudioClassify/Gist/src/fft/AccelerateFFT.h"/>
+              <FILE id="dkBwSm" name="AccelerateFFT.h" compile="0" resource="0" file="Source/AudioClassify/Gist/src/fft/AccelerateFFT.h"/>
             </GROUP>
-            <GROUP id="{E425E518-A4DE-B650-9DBF-7756332C0CFC}" name="mfcc">
-              <FILE id="YsfcVj" name="MFCC.cpp" compile="1" resource="0" file="Source/AudioClassify/Gist/src/mfcc/MFCC.cpp"/>
-              <FILE id="CKpeSS" name="MFCC.h" compile="1" resource="0" file="Source/AudioClassify/Gist/src/mfcc/MFCC.h"/>
+            <GROUP id="{3475DC46-D7EC-B3A4-174F-CBF7B613E4EB}" name="mfcc">
+              <FILE id="AaIysp" name="MFCC.cpp" compile="1" resource="0" file="Source/AudioClassify/Gist/src/mfcc/MFCC.cpp"/>
+              <FILE id="fMTlct" name="MFCC.h" compile="0" resource="0" file="Source/AudioClassify/Gist/src/mfcc/MFCC.h"/>
             </GROUP>
-            <GROUP id="{5238CB41-CC4F-C2CD-1094-66B49B6E57A0}" name="onset-detection-functions">
-              <FILE id="kHgXxl" name="OnsetDetectionFunction.cpp" compile="1" resource="0"
+            <GROUP id="{4AF899F2-CEA0-CBFC-4C57-867887FB82EF}" name="onset-detection-functions">
+              <FILE id="BPsWDc" name="OnsetDetectionFunction.cpp" compile="1" resource="0"
                     file="Source/AudioClassify/Gist/src/onset-detection-functions/OnsetDetectionFunction.cpp"/>
-              <FILE id="MJc3D8" name="OnsetDetectionFunction.h" compile="1" resource="0"
+              <FILE id="WCafAj" name="OnsetDetectionFunction.h" compile="0" resource="0"
                     file="Source/AudioClassify/Gist/src/onset-detection-functions/OnsetDetectionFunction.h"/>
             </GROUP>
-            <GROUP id="{C9985B4A-46E5-F4C4-FA47-17BD6DA018BF}" name="pitch">
-              <FILE id="DPLgSc" name="Yin.cpp" compile="1" resource="0" file="Source/AudioClassify/Gist/src/pitch/Yin.cpp"/>
-              <FILE id="DrMDo5" name="Yin.h" compile="1" resource="0" file="Source/AudioClassify/Gist/src/pitch/Yin.h"/>
+            <GROUP id="{E4BB0906-3D08-2A93-B06D-99434E0D9E01}" name="pitch">
+              <FILE id="KQFjJT" name="Yin.cpp" compile="1" resource="0" file="Source/AudioClassify/Gist/src/pitch/Yin.cpp"/>
+              <FILE id="kPSuxC" name="Yin.h" compile="0" resource="0" file="Source/AudioClassify/Gist/src/pitch/Yin.h"/>
             </GROUP>
-            <FILE id="kMLS1a" name="Gist.cpp" compile="1" resource="0" file="Source/AudioClassify/Gist/src/Gist.cpp"/>
-            <FILE id="lFsyX4" name="Gist.h" compile="1" resource="0" file="Source/AudioClassify/Gist/src/Gist.h"/>
+            <FILE id="l4ThGH" name="Gist.cpp" compile="1" resource="0" file="Source/AudioClassify/Gist/src/Gist.cpp"/>
+            <FILE id="uJfpai" name="Gist.h" compile="0" resource="0" file="Source/AudioClassify/Gist/src/Gist.h"/>
           </GROUP>
-          <FILE id="Sx4KmG" name="LICENSE.txt" compile="1" resource="1" file="Source/AudioClassify/Gist/LICENSE.txt"/>
-          <FILE id="ceBiaz" name="README.md" compile="1" resource="1" file="Source/AudioClassify/Gist/README.md"/>
+          <GROUP id="{7F7E23BA-BF89-6999-B43E-4A2B178AD72E}" name="test">
+            <GROUP id="{2094D803-A43D-26D4-B32C-F4EF4D345E61}" name="GistTest">
+              <GROUP id="{4B496634-940E-6385-CAC8-1956AE0A1DB8}" name="test-signals">
+                <FILE id="QCQVGf" name="Test_Signals.cpp" compile="0" resource="0"
+                      file="Source/AudioClassify/Gist/test/GistTest/test-signals/Test_Signals.cpp"/>
+                <FILE id="lUPjAk" name="Test_Signals.h" compile="0" resource="0" file="Source/AudioClassify/Gist/test/GistTest/test-signals/Test_Signals.h"/>
+              </GROUP>
+              <FILE id="PTPtsR" name="GistTest.1" compile="0" resource="1" file="Source/AudioClassify/Gist/test/GistTest/GistTest.1"/>
+              <FILE id="EXpfER" name="main.cpp" compile="0" resource="0" file="Source/AudioClassify/Gist/test/GistTest/main.cpp"/>
+              <FILE id="UKEJLT" name="Test_CoreFrequencyDomainFeatures.cpp" compile="0"
+                    resource="0" file="Source/AudioClassify/Gist/test/GistTest/Test_CoreFrequencyDomainFeatures.cpp"/>
+              <FILE id="io95Bl" name="Test_CoreTimeDomainFeatures.cpp" compile="0"
+                    resource="0" file="Source/AudioClassify/Gist/test/GistTest/Test_CoreTimeDomainFeatures.cpp"/>
+              <FILE id="SKIDmZ" name="Test_Gist.cpp" compile="0" resource="0" file="Source/AudioClassify/Gist/test/GistTest/Test_Gist.cpp"/>
+              <FILE id="LadwvH" name="Test_MFCC.cpp" compile="0" resource="0" file="Source/AudioClassify/Gist/test/GistTest/Test_MFCC.cpp"/>
+              <FILE id="dNPiTF" name="Test_OnsetDetectionFunction.cpp" compile="0"
+                    resource="0" file="Source/AudioClassify/Gist/test/GistTest/Test_OnsetDetectionFunction.cpp"/>
+              <FILE id="fWweju" name="Test_Pitch.cpp" compile="0" resource="0" file="Source/AudioClassify/Gist/test/GistTest/Test_Pitch.cpp"/>
+            </GROUP>
+            <GROUP id="{50BD9A24-6E39-BAFD-73DE-BF4C1B535B8F}" name="GistTest.xcodeproj">
+              <GROUP id="{C744FB35-7C17-EBB4-C2C8-E0BD75D2130D}" name="project.xcworkspace">
+                <GROUP id="{988CBF81-17B5-6234-C785-203094085E19}" name="xcshareddata">
+                  <FILE id="OmJmNi" name="GistTest.xccheckout" compile="0" resource="1"
+                        file="Source/AudioClassify/Gist/test/GistTest.xcodeproj/project.xcworkspace/xcshareddata/GistTest.xccheckout"/>
+                </GROUP>
+                <FILE id="Nhg9fi" name="contents.xcworkspacedata" compile="0" resource="1"
+                      file="Source/AudioClassify/Gist/test/GistTest.xcodeproj/project.xcworkspace/contents.xcworkspacedata"/>
+              </GROUP>
+              <FILE id="TXPkKZ" name="project.pbxproj" compile="0" resource="1" file="Source/AudioClassify/Gist/test/GistTest.xcodeproj/project.pbxproj"/>
+            </GROUP>
+          </GROUP>
+          <FILE id="rKziXo" name="LICENSE.txt" compile="0" resource="1" file="Source/AudioClassify/Gist/LICENSE.txt"/>
+          <FILE id="N58EPj" name="README.md" compile="0" resource="1" file="Source/AudioClassify/Gist/README.md"/>
         </GROUP>
         <GROUP id="{1C6039E4-61BF-701A-8B4E-2B5CAF80A717}" name="MathHelpers">
           <FILE id="PKxqKz" name="MathHelpers.cpp" compile="1" resource="0" file="Source/AudioClassify/MathHelpers/MathHelpers.cpp"/>
