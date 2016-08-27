@@ -12,7 +12,12 @@
 #define NAIVEBAYES_H_INCLUDED
 
 //For windows compatibility
+#if JUCE_WINDOWS
+
 #define ARMA_64BIT_WORD
+
+#endif
+
 
 #include <armadillo>
 

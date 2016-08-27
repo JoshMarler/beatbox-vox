@@ -11,8 +11,12 @@
 #ifndef AUDIOCLASSIFIER_H_INCLUDED
 #define AUDIOCLASSIFIER_H_INCLUDED
 
-//For windows compatibility
+//For windows compatibility with armadillo 64bit
+#if JUCE_WINDOWS
+
 #define ARMA_64BIT_WORD
+
+#endif
 
 #include <map>
 #include <atomic>
