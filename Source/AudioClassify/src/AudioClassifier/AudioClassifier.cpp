@@ -107,7 +107,7 @@ bool AudioClassifier<T>::getClassifierReady()
 
 //==============================================================================
 template<typename T> 
-void AudioClassifier<T>::processAudioBuffer (T* buffer)
+void AudioClassifier<T>::processAudioBuffer (const T* buffer)
 {
     const int bufferSize = getCurrentBufferSize();
 

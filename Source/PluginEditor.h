@@ -20,6 +20,7 @@
 */
 class BeatboxVoxAudioProcessorEditor  : public AudioProcessorEditor, 
                                         private Timer
+
 {
 public:
     BeatboxVoxAudioProcessorEditor (BeatboxVoxAudioProcessor&);
@@ -35,8 +36,14 @@ private:
     {
         return static_cast<BeatboxVoxAudioProcessor&> (processor);
     }
+
     //JWM - Test label for displaying a Gist feature. 
     std::unique_ptr<Label> spectralCentroidLabel;
+
+    //JWM - Test button to swich on classifier training for sound
+    std::unique_ptr<Button> classifierOnButton;
+
+    
 
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BeatboxVoxAudioProcessorEditor)
 };

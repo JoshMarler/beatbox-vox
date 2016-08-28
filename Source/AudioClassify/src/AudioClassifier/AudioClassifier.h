@@ -50,7 +50,7 @@ public:
 
     bool getClassifierReady();
 
-    void processAudioBuffer (T* buffer);
+    void processAudioBuffer (const T* buffer);
 
     void processCurrentInstance();
 

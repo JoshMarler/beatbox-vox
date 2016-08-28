@@ -13,7 +13,6 @@
 #include <atomic>
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "AudioClassify/src/AudioClassify.h"
-#include "SinewaveSynth.h"
 
 
 //==============================================================================
@@ -63,7 +62,8 @@ public:
     //Initialise the test synth object
     void initialiseSynth();
 
-    void triggerKickDrum(MidiBuffer& midiMessages, const int numSamples);
+    void triggerKickDrum(MidiBuffer& midiMessages);
+    void triggerSnareDrum(MidiBuffer& midiMessages);
 
     enum soundLabel
     {
@@ -72,19 +72,21 @@ public:
         HiHat
     };
 
+    //Returns reference to plugins AudioClassifier for GUI to set classification settings.
+    //JWM - NOTE will need to change to accept templated precision. 
+    const AudioClassifier<float>& getClassifier() const;
+
 private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BeatboxVoxAudioProcessor);
 
 
     int startTime = 0;
-    
-    //Sinewave synth for flam/OSD Testing
-    std::unique_ptr<Synthesiser> sineSynth;
 
     std::atomic<float> spectralCentroid;
 
-    std::unique_ptr<AudioClassifier<float>> clasifier;
+    Synthesiser drumSynth;
+    AudioClassifier<float> classifier;
 };
 
 

@@ -5,13 +5,17 @@
               buildVST="1" buildVST3="0" buildAU="0" buildAUv3="0" buildRTAS="0"
               buildAAX="0" pluginName="BeatboxVox" pluginDesc="BeatboxVox"
               pluginManufacturer="RudeAudio" pluginManufacturerCode="RUDE"
-              pluginCode="Bvox" pluginChannelConfigs="1, 1" pluginIsSynth="0"
+              pluginCode="Bvox" pluginChannelConfigs="1, 2" pluginIsSynth="0"
               pluginWantsMidiIn="0" pluginProducesMidiOut="0" pluginIsMidiEffectPlugin="0"
               pluginEditorRequiresKeys="0" pluginAUExportPrefix="BeatboxVoxAU"
               pluginRTASCategory="" aaxIdentifier="com.yourcompany.BeatboxVox"
               pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="4.2.3">
   <MAINGROUP id="z3DhfV" name="BeatboxVox">
     <GROUP id="{B8A10E5D-D185-1FFC-CC44-E732222EC3EB}" name="Source">
+      <GROUP id="{3F849092-9582-55CE-53ED-F19745D4D8B1}" name="Resources">
+        <FILE id="AzFjzW" name="bassdrum.wav" compile="0" resource="1" file="Source/Resources/bassdrum.wav"/>
+        <FILE id="WGvALc" name="snaredrum.wav" compile="0" resource="1" file="Source/Resources/snaredrum.wav"/>
+      </GROUP>
       <GROUP id="{2787DE04-C09F-E428-545B-AFFF83B0B35C}" name="AudioClassify">
         <GROUP id="{4AD03948-68FE-2AD9-FBAE-E6277A412707}" name="Gist">
           <GROUP id="{0A41FF2E-52B4-B768-F2DA-DD43F0BFDAAD}" name="documentation">
@@ -342,6 +346,10 @@
               <FILE id="Hhs4LJ" name="AccelerateFFT.cpp" compile="0" resource="0"
                     file="Source/AudioClassify/Gist/src/fft/AccelerateFFT.cpp"/>
               <FILE id="dkBwSm" name="AccelerateFFT.h" compile="0" resource="0" file="Source/AudioClassify/Gist/src/fft/AccelerateFFT.h"/>
+              <FILE id="vU8c9V" name="WindowFunctions.cpp" compile="1" resource="0"
+                    file="Source/AudioClassify/Gist/src/fft/WindowFunctions.cpp"/>
+              <FILE id="yCWpkm" name="WindowFunctions.h" compile="0" resource="0"
+                    file="Source/AudioClassify/Gist/src/fft/WindowFunctions.h"/>
             </GROUP>
             <GROUP id="{3475DC46-D7EC-B3A4-174F-CBF7B613E4EB}" name="mfcc">
               <FILE id="AaIysp" name="MFCC.cpp" compile="1" resource="0" file="Source/AudioClassify/Gist/src/mfcc/MFCC.cpp"/>
@@ -421,7 +429,6 @@
           <FILE id="JSLr8o" name="AudioClassify.h" compile="1" resource="0" file="Source/AudioClassify/src/AudioClassify.h"/>
         </GROUP>
       </GROUP>
-      <FILE id="tJbDF9" name="SinewaveSynth.h" compile="0" resource="0" file="Source/SinewaveSynth.h"/>
       <FILE id="gujfVz" name="PluginProcessor.cpp" compile="1" resource="0"
             file="Source/PluginProcessor.cpp"/>
       <FILE id="OdJYlG" name="PluginProcessor.h" compile="0" resource="0"

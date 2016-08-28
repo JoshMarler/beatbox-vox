@@ -14,9 +14,8 @@
 
 //==============================================================================
 BeatboxVoxAudioProcessor::BeatboxVoxAudioProcessor() 
-    : sineSynth(std::make_unique<Synthesiser>()),
-      spectralCentroid(0.0f),
-      clasifier(std::make_unique<AudioClassifier<float>>(256, 44800, 1))
+    : spectralCentroid(0.0f),
+      classifier(256, 44800, 2)
       
 { 
     initialiseSynth(); 
@@ -24,7 +23,6 @@ BeatboxVoxAudioProcessor::BeatboxVoxAudioProcessor()
 
 BeatboxVoxAudioProcessor::~BeatboxVoxAudioProcessor()
 {
-   float debug = 0; 
 }
 
 //==============================================================================
@@ -82,13 +80,33 @@ void BeatboxVoxAudioProcessor::changeProgramName (int index, const String& newNa
 
 void BeatboxVoxAudioProcessor::initialiseSynth ()
 {
-    const int numVoices = 1;    
+    /** JWM - Quick and dirty sample drum synth for prototype
+     *  In future versions will ideally allow user to select sample to use and
+     *  also manage sample rate changes effect on loaded samples. 
+    */
 
-    for (auto i = numVoices; --i >= 0;)
-            sineSynth->addVoice(new SineWaveVoice());
+    WavAudioFormat wavFormat;
+    BigInteger kickNoteRange;
+    BigInteger snareNoteRange;
 
-    sineSynth->addSound(new SineWaveSound());
+    drumSynth.clearSounds();
 
+    std::unique_ptr<AudioFormatReader> readerKickDrum(wavFormat.createReaderFor(new MemoryInputStream(BinaryData::bassdrum_wav,
+                                                                                                      BinaryData::bassdrum_wavSize,
+                                                                                                      false),
+                                                                                                      true));
+
+    std::unique_ptr<AudioFormatReader> readerSnareDrum(wavFormat.createReaderFor(new MemoryInputStream(BinaryData::snaredrum_wav,
+                                                                                                       BinaryData::snaredrum_wavSize,
+                                                                                                       false),
+                                                                                                       true));
+    kickNoteRange.setBit(36);
+    snareNoteRange.setBit(60);
+    
+    drumSynth.addSound(new SamplerSound("Kick Sound", *readerKickDrum, kickNoteRange, 36, 0.0, 0.1, 5.0));
+    drumSynth.addSound(new SamplerSound("Snare Sound", *readerSnareDrum, snareNoteRange, 60, 0.0, 0.1, 5.0));
+
+    drumSynth.addVoice(new SamplerVoice);
 }
 
 //==============================================================================
@@ -97,10 +115,10 @@ void BeatboxVoxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
     
-    sineSynth->setCurrentPlaybackSampleRate(sampleRate);
+    drumSynth.setCurrentPlaybackSampleRate(sampleRate);
 
-    clasifier->setCurrentBufferSize(samplesPerBlock);
-    clasifier->setCurrentSampleRate(sampleRate);
+    classifier.setCurrentBufferSize(samplesPerBlock);
+    classifier.setCurrentSampleRate(sampleRate);
 
 }
 
@@ -143,22 +161,27 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     const int totalNumOutputChannels = getTotalNumOutputChannels();
     const float sampleRate = getSampleRate();
     const int numSamples = buffer.getNumSamples();
+    
+    //Holds classifier result for this block. 
     int sound = -1;
 
 
-    /** clasifier->processAudioBuffer(buffer.getWritePointer(0)); */
+    classifier.processAudioBuffer(buffer.getReadPointer(0)); 
 
-    /** sound = clasifier->classify(); */
+    sound = classifier.classify();
     
-
-    if (sound == soundLabel::KickDrum)
+    switch(sound)
     {
-        triggerKickDrum(midiMessages, numSamples);
+        case soundLabel::KickDrum :
+            triggerKickDrum(midiMessages);
+            break;
+        case soundLabel::SnareDrum :
+            triggerSnareDrum(midiMessages);
+            break;
     }
-    
 
     //Render note on sine synth with the ODS triggered MIDI.
-    sineSynth->renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+    drumSynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
     
 
     for (int i = getTotalNumInputChannels(); i < getTotalNumOutputChannels(); ++i)
@@ -168,20 +191,15 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
 }
 
 //==============================================================================
-void BeatboxVoxAudioProcessor::triggerKickDrum(MidiBuffer& midiMessages, const int numSamples)
+void BeatboxVoxAudioProcessor::triggerKickDrum(MidiBuffer& midiMessages)
 {
-    float sampleRate = getSampleRate();
     midiMessages.addEvent(MidiMessage::noteOn(1, 100, (uint8) 100), 0);
-    
-    const int noteDuration = static_cast<int> (std::ceil(sampleRate * 1.25f));
+}
 
-    if ((startTime + numSamples) >= noteDuration)
-    {
-        const int offset = jmax(0, jmin((int) (noteDuration - startTime), numSamples - 1));
-        midiMessages.addEvent(MidiMessage::noteOff(1, 100), offset);
-    }
-    
-    startTime = (startTime + numSamples) % noteDuration;
+//==============================================================================
+void BeatboxVoxAudioProcessor::triggerSnareDrum(MidiBuffer& midiMessages)
+{
+    midiMessages.addEvent(MidiMessage::noteOn(1, 100, (uint8) 100), 0);
 }
 
 //==============================================================================
@@ -189,6 +207,13 @@ float BeatboxVoxAudioProcessor::getSpectralCentroid() const
 {
     return spectralCentroid.load();
 }
+
+//==============================================================================
+const AudioClassifier<float>& BeatboxVoxAudioProcessor::getClassifier() const
+{
+    return classifier;
+}
+
 
 //==============================================================================
 bool BeatboxVoxAudioProcessor::hasEditor() const
