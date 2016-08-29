@@ -82,7 +82,6 @@ private:
 
 
     int startTime = 0;
-
     std::atomic<float> spectralCentroid;
 
     Synthesiser drumSynth;

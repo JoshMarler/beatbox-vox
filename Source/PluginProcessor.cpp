@@ -100,13 +100,16 @@ void BeatboxVoxAudioProcessor::initialiseSynth ()
                                                                                                        BinaryData::snaredrum_wavSize,
                                                                                                        false),
                                                                                                        true));
-    kickNoteRange.setBit(36);
-    snareNoteRange.setBit(60);
+    kickNoteRange.setBit(12);
+    snareNoteRange.setBit(43);
     
-    drumSynth.addSound(new SamplerSound("Kick Sound", *readerKickDrum, kickNoteRange, 36, 0.0, 0.1, 5.0));
-    drumSynth.addSound(new SamplerSound("Snare Sound", *readerSnareDrum, snareNoteRange, 60, 0.0, 0.1, 5.0));
+    //kickNoteRange.setRange(0, 64, true);
+    //snareNoteRange.setRange(65, 63, true);
+    
+    drumSynth.addSound(new SamplerSound("Kick Sound", *readerKickDrum, kickNoteRange, 12, 0.0, 0.1, 5.0));
+    drumSynth.addSound(new SamplerSound("Snare Sound", *readerSnareDrum, snareNoteRange, 43, 0.0, 0.1, 5.0));
 
-    drumSynth.addVoice(new SamplerVoice);
+    drumSynth.addVoice(new SamplerVoice());
 }
 
 //==============================================================================
@@ -165,6 +168,12 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     //Holds classifier result for this block. 
     int sound = -1;
 
+    //SYNTH SAMPLE TEST
+    /** if (++startTime == 100)   */
+    /** {  */
+    /**     triggerSnareDrum(midiMessages);  */
+    /**     startTime = 0;   */
+    /** }  */
 
     classifier.processAudioBuffer(buffer.getReadPointer(0)); 
 
@@ -180,26 +189,27 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
             break;
     }
 
-    //Render note on sine synth with the ODS triggered MIDI.
-    drumSynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
-    
-
-    for (int i = getTotalNumInputChannels(); i < getTotalNumOutputChannels(); ++i)
+    //Now classification complete clear the input buffer/signal - we only want synth output.
+    for (int i = 0; i < getTotalNumInputChannels(); ++i)
     {
         buffer.clear(i, 0, buffer.getNumSamples());
     }
+
+    //Render note on sine synth with the ODS triggered MIDI.
+    drumSynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+
 }
 
 //==============================================================================
 void BeatboxVoxAudioProcessor::triggerKickDrum(MidiBuffer& midiMessages)
 {
-    midiMessages.addEvent(MidiMessage::noteOn(1, 100, (uint8) 100), 0);
+    midiMessages.addEvent(MidiMessage::noteOn(1, 12, (uint8) 100), 0);
 }
 
 //==============================================================================
 void BeatboxVoxAudioProcessor::triggerSnareDrum(MidiBuffer& midiMessages)
 {
-    midiMessages.addEvent(MidiMessage::noteOn(1, 100, (uint8) 100), 0);
+    midiMessages.addEvent(MidiMessage::noteOn(1, 43, (uint8) 100), 0);
 }
 
 //==============================================================================
