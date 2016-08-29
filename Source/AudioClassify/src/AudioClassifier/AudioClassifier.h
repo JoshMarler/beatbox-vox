@@ -45,8 +45,9 @@ public:
     void setTrainingSound(int trainingSound);
     int getCurrentTrainingSound();
 
+    const size_t getNumSounds() const;
+    
     void setTrainingSetSize(int newTrainingSetSize);
-
 
     bool getClassifierReady();
 

@@ -219,7 +219,7 @@ float BeatboxVoxAudioProcessor::getSpectralCentroid() const
 }
 
 //==============================================================================
-const AudioClassifier<float>& BeatboxVoxAudioProcessor::getClassifier() const
+AudioClassifier<float>& BeatboxVoxAudioProcessor::getClassifier() 
 {
     return classifier;
 }

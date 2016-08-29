@@ -74,6 +74,13 @@ void AudioClassifier<T>::setCurrentSampleRate (T newSampleRate)
 
 //==============================================================================
 template<typename T>
+const size_t AudioClassifier<T>::getNumSounds() const
+{
+    return numSounds;
+}
+
+//==============================================================================
+template<typename T>
 int AudioClassifier<T>::getCurrentTrainingSound()
 {
     return currentTrainingSound.load();

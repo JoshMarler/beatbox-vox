@@ -19,6 +19,7 @@
 /**
 */
 class BeatboxVoxAudioProcessorEditor  : public AudioProcessorEditor, 
+                                        private ButtonListener,
                                         private Timer
 
 {
@@ -31,20 +32,19 @@ public:
     void resized() override;
     void timerCallback() override;
 
+    void buttonClicked(Button* button) override;
+
 private:
     BeatboxVoxAudioProcessor& getProcessor() const
     {
         return static_cast<BeatboxVoxAudioProcessor&> (processor);
     }
 
-    //JWM - Test label for displaying a Gist feature. 
-    std::unique_ptr<Label> spectralCentroidLabel;
-
     //JWM - Test button to swich on classifier training for sound
-    std::unique_ptr<Button> classifierOnButton;
+    std::unique_ptr<TextButton> trainClassifierButton;
 
+    OwnedArray<Button> soundButtons;
     
-
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BeatboxVoxAudioProcessorEditor)
 };
 
