@@ -45,6 +45,14 @@ public:
     void setTrainingSound(int trainingSound);
     int getCurrentTrainingSound();
 
+    void recordTrainingSample(int trainingSound);
+
+    //JWM - May change this after prototype so that the model is trained incrementally for each sound
+    //to avoid calling trainModel with unfinished training data set. Alternativley may have this function
+    //return bool for successful or not in training. 
+    void trainModel();
+
+
     const size_t getNumSounds() const;
     
     void setTrainingSetSize(int newTrainingSetSize);
@@ -54,7 +62,6 @@ public:
     void processAudioBuffer (const T* buffer);
 
     void processCurrentInstance();
-
 
     //This function will return -1 for unclassified sounds 
     unsigned classify();

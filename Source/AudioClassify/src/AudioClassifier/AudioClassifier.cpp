@@ -24,6 +24,7 @@ AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int in
     setCurrentSampleRate(initSampleRate);
     setCurrentBufferSize(initBufferSize);
 
+    training.store(false);
     classifierReady.store(false);
 
     numSounds = initNumSounds;
@@ -86,14 +87,28 @@ int AudioClassifier<T>::getCurrentTrainingSound()
     return currentTrainingSound.load();
 }
 
-//==============================================================================
 
+//==============================================================================
 //JWM - NOTE: revist later - will need assertion if user uses sound value out of range 1 - numSOunds
 template<typename T>
-void AudioClassifier<T>::setTrainingSound (int trainingSound)
+void AudioClassifier<T>::recordTrainingSample(int sound)
 {
-    currentTrainingSound.store(trainingSound);
+    currentTrainingSound.store(sound);
     training.store(true);
+}
+
+//==============================================================================
+template<typename T>
+void AudioClassifier<T>::trainModel()
+{
+    //If all sound samples collected for training set train model.
+    if (checkTrainingSetReady())
+    {
+        nbc.Train(trainingData, trainingLabels); 
+        classifierReady.store(true);    
+    }
+
+    //JWM - NOTE: Potentially return boolean and return false if checkTrainingSetReady() returns false.
 }
 
 //==============================================================================
@@ -117,7 +132,7 @@ template<typename T>
 void AudioClassifier<T>::processAudioBuffer (const T* buffer)
 {
     const int bufferSize = getCurrentBufferSize();
-
+    const int sound = currentTrainingSound.load();
     //Reset hasOnset for next process buffer.
     hasOnset = false;
 
@@ -130,15 +145,16 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer)
     {
         processCurrentInstance();
 
-        if (currentTrainingSound.load() != -1)
+        if (sound != -1 && training.load())
         {
             //JWM - may change this logic later re handling classifier is ready etc.
             classifierReady.store(false);
-
+            
+            //JWM -NOTE BUG: Should be more along the lines of trainingCount < (trainingSetSize * (currentTrainingSound.load() + 1))
             if (trainingCount < trainingSetSize)
             {
                 trainingData.col(trainingCount) = currentInstanceVector;
-                trainingLabels[trainingCount] = currentTrainingSound.load();
+                trainingLabels[trainingCount] = sound;
                 trainingCount++;
             }
             else
@@ -147,16 +163,8 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer)
                 auto it = soundsReady.find(currentTrainingSound.load());
                 it->second = true;
 
-                //Reset training status for next sound
-                trainingCount = 0;
+                training.store(false);
                 currentTrainingSound.store(-1);
-                
-                //If all sound samples collected for training set train model.
-                if (checkTrainingSetReady())
-                {
-                    nbc.Train(trainingData, trainingLabels); 
-                    classifierReady.store(true);    
-                }
             }
         }
     }
@@ -230,7 +238,6 @@ unsigned AudioClassifier<T>::classify()
 }
 
 //==============================================================================
-
 template<typename T>
 bool AudioClassifier<T>::checkTrainingSetReady()
 {

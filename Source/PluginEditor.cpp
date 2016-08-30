@@ -15,9 +15,24 @@
 //==============================================================================
 BeatboxVoxAudioProcessorEditor::BeatboxVoxAudioProcessorEditor (BeatboxVoxAudioProcessor& p)
     : AudioProcessorEditor (p),
+      recordSoundButton(std::make_unique<TextButton> ("Record Training Sound")),
       trainClassifierButton(std::make_unique<TextButton>("Train Model"))
 {
+
+    trainClassifierButton->setClickingTogglesState(true);
+    trainClassifierButton->setColour(TextButton::buttonColourId, Colours::white);
+    trainClassifierButton->setColour(TextButton::buttonOnColourId, Colours::greenyellow);
+    trainClassifierButton->addListener(this);
+    
     addAndMakeVisible(*trainClassifierButton);
+
+    recordSoundButton->setClickingTogglesState(true);
+    recordSoundButton->setColour(TextButton::buttonColourId, Colours::white);
+    recordSoundButton->setColour(TextButton::buttonOnColourId, Colours::greenyellow);
+    recordSoundButton->addListener(this);
+    
+    addAndMakeVisible(*recordSoundButton);
+    
 
     auto numSounds = p.getClassifier().getNumSounds();
 
@@ -58,19 +73,17 @@ void BeatboxVoxAudioProcessorEditor::buttonClicked(Button* button)
 
     if (button == std::addressof(*trainClassifierButton))
     {
-        //Call classifier.Train() ?            
+        if (button->getToggleState())
+            processor.getClassifier().trainModel();    
+    }
+    else if (button == std::addressof(*recordSoundButton))
+    {
+        if (button->getToggleState())
+            processor.getClassifier().recordTrainingSample(currentTrainingSound);
     }
     else if (button->getToggleState())
     {
-        auto sound = soundButtons.indexOf(button);
-
-        switch (sound)
-        {
-            case BeatboxVoxAudioProcessor::soundLabel::KickDrum :
-                break;
-            case BeatboxVoxAudioProcessor::soundLabel::SnareDrum :
-                break;
-        }
+        currentTrainingSound = soundButtons.indexOf(button);
     }
 }
 
@@ -88,11 +101,13 @@ void BeatboxVoxAudioProcessorEditor::resized()
     // subcomponents in your editor..
     Rectangle<int> r (getLocalBounds().reduced(15));
 
-    trainClassifierButton->setBounds(r.removeFromTop(25));
+    recordSoundButton->setBounds(r.removeFromTop(25));
 
     for(size_t i = 0; i < soundButtons.size(); ++i)
     {
         auto button = soundButtons[i]; 
         button->setBounds(r.removeFromTop(75 + (10 * i)));
     }
+
+    trainClassifierButton->setBounds(r.removeFromBottom(15));
 }

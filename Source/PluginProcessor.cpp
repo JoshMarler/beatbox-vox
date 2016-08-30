@@ -103,9 +103,6 @@ void BeatboxVoxAudioProcessor::initialiseSynth ()
     kickNoteRange.setBit(12);
     snareNoteRange.setBit(43);
     
-    //kickNoteRange.setRange(0, 64, true);
-    //snareNoteRange.setRange(65, 63, true);
-    
     drumSynth.addSound(new SamplerSound("Kick Sound", *readerKickDrum, kickNoteRange, 12, 0.0, 0.1, 5.0));
     drumSynth.addSound(new SamplerSound("Snare Sound", *readerSnareDrum, snareNoteRange, 43, 0.0, 0.1, 5.0));
 

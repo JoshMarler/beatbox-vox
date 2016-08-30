@@ -35,13 +35,20 @@ public:
     void buttonClicked(Button* button) override;
 
 private:
+
     BeatboxVoxAudioProcessor& getProcessor() const
     {
         return static_cast<BeatboxVoxAudioProcessor&> (processor);
     }
 
+    //JWM - A little dirty maybe but works for now at prototype stage
+    int currentTrainingSound = -1;
+
+    std::unique_ptr<TextButton> recordSoundButton;
+    
     //JWM - Test button to swich on classifier training for sound
     std::unique_ptr<TextButton> trainClassifierButton;
+
 
     OwnedArray<Button> soundButtons;
     
