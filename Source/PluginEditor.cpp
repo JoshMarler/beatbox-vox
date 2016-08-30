@@ -16,12 +16,13 @@
 BeatboxVoxAudioProcessorEditor::BeatboxVoxAudioProcessorEditor (BeatboxVoxAudioProcessor& p)
     : AudioProcessorEditor (p),
       recordSoundButton(std::make_unique<TextButton> ("Record Training Sound")),
-      trainClassifierButton(std::make_unique<TextButton>("Train Model"))
+      trainClassifierButton(std::make_unique<TextButton> ("Train Model"))
 {
 
     trainClassifierButton->setClickingTogglesState(true);
     trainClassifierButton->setColour(TextButton::buttonColourId, Colours::white);
     trainClassifierButton->setColour(TextButton::buttonOnColourId, Colours::greenyellow);
+    trainClassifierButton->setEnabled(false);
     trainClassifierButton->addListener(this);
     
     addAndMakeVisible(*trainClassifierButton);
@@ -62,7 +63,21 @@ BeatboxVoxAudioProcessorEditor::~BeatboxVoxAudioProcessorEditor()
 //==============================================================================
 void BeatboxVoxAudioProcessorEditor::timerCallback()
 {
+     auto isTraining = getProcessor().getClassifier().isTraining();
+     auto trainingSetReady = getProcessor().getClassifier().checkTrainingSetReady();
+
+     if(trainingSetReady)
+         trainClassifierButton->setEnabled(true);
+         
+     //JWM - A little sketchy way of doing things maybe but works for prototype stage. 
+     if (recordSoundButton->getToggleState())
+     {
+        if(isTraining == false)
+           recordSoundButton->setToggleState(false, NotificationType::dontSendNotification);
+     }
 }
+
+
 
 //==============================================================================
 void BeatboxVoxAudioProcessorEditor::buttonClicked(Button* button)

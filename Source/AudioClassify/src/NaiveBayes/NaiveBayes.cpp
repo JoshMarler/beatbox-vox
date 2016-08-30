@@ -80,7 +80,7 @@ void NaiveBayes<T>::Train(const arma::Mat<T>& trainingData, const arma::Row<size
 template<typename T>
 size_t NaiveBayes<T>::Classify(const arma::Col<T> instance)
 {
-	size_t classVal = -1;
+	int classVal = -1;
 
 	//Calculate standard deviation
     stdDev = arma::sqrt(featureVariances);

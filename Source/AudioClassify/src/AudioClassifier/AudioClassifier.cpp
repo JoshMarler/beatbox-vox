@@ -1,11 +1,11 @@
 /*
    ==============================================================================
 
-   AudioClassifier.cpp
-Created: 9 Jul 2016 3:49:01pm
-Author:  joshua
+    AudioClassifier.cpp
+    Created: 9 Jul 2016 3:49:01pm
+    Author:  joshua
 
-==============================================================================
+    ==============================================================================
 */
 
 #include "AudioClassifier.h"
@@ -13,8 +13,7 @@ Author:  joshua
 //==============================================================================
 template<typename T>
 AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int initNumSounds) 
-    : currentTrainingSound(-1), //Initially set to -1 as valid sounds from 0 - numSounds. Initial training sound set by called later.
-      trainingData(18, (trainingSetSize * initNumSounds), arma::fill::zeros),
+    : trainingData(18, (trainingSetSize * initNumSounds), arma::fill::zeros),
       trainingLabels((trainingSetSize * initNumSounds)),
       currentInstanceVector(18, arma::fill::zeros),
       gistFeatures(initBufferSize, initSampleRate),
@@ -26,14 +25,15 @@ AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int in
 
     training.store(false);
     classifierReady.store(false);
+    currentTrainingSound.store(-1);
 
     numSounds = initNumSounds;
 
-     //Set initial sound ready states to false in training set.  
-     for (size_t i = 0; i < numSounds; ++i) 
-     { 
+    //Set initial sound ready states to false in training set.  
+    for (size_t i = 0; i < numSounds; ++i) 
+    { 
         soundsReady.insert(std::pair<int, bool>(i, false));
-     } 
+    } 
 }
 
 template<typename T>
@@ -126,13 +126,19 @@ bool AudioClassifier<T>::getClassifierReady()
 {
     return classifierReady.load();
 }
+//==============================================================================
+template<typename T>
+bool AudioClassifier<T>::isTraining()
+{
+    return training.load();
+}
 
 //==============================================================================
 template<typename T> 
 void AudioClassifier<T>::processAudioBuffer (const T* buffer)
 {
     const int bufferSize = getCurrentBufferSize();
-    const int sound = currentTrainingSound.load();
+    
     //Reset hasOnset for next process buffer.
     hasOnset = false;
 
@@ -145,16 +151,19 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer)
     {
         processCurrentInstance();
 
-        if (sound != -1 && training.load())
+        if (currentTrainingSound.load() != -1 && training.load())
         {
             //JWM - may change this logic later re handling classifier is ready etc.
             classifierReady.store(false);
+
+            int sound = currentTrainingSound.load();
             
-            //JWM -NOTE BUG: Should be more along the lines of trainingCount < (trainingSetSize * (currentTrainingSound.load() + 1))
             if (trainingCount < trainingSetSize)
             {
-                trainingData.col(trainingCount) = currentInstanceVector;
-                trainingLabels[trainingCount] = sound;
+                size_t index = (trainingCount * (sound + 1));
+
+                trainingData.col(index) = currentInstanceVector;
+                trainingLabels[index] = static_cast<size_t>(sound);
                 trainingCount++;
             }
             else
@@ -165,6 +174,8 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer)
 
                 training.store(false);
                 currentTrainingSound.store(-1);
+                
+                trainingCount = 0;
             }
         }
     }
@@ -222,7 +233,7 @@ void AudioClassifier<T>::processCurrentInstance()
 template<typename T>
 unsigned AudioClassifier<T>::classify()
 {
-    unsigned sound = -1;
+    int sound = -1;
 
     auto ready = classifierReady.load();
       

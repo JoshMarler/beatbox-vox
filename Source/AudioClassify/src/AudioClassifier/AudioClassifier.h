@@ -56,8 +56,12 @@ public:
     const size_t getNumSounds() const;
     
     void setTrainingSetSize(int newTrainingSetSize);
+    
+    bool checkTrainingSetReady();
 
     bool getClassifierReady();
+    
+    bool isTraining();
 
     void processAudioBuffer (const T* buffer);
 
@@ -109,9 +113,6 @@ private:
     OnsetDetector<T> osDetector;
     NaiveBayes<T> nbc;
 //==============================================================================
-
-//    void setClassifierReady (bool ready);
-    bool checkTrainingSetReady();
    
     void configTrainingSetMatrix();
 
