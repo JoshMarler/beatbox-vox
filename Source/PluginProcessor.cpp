@@ -165,13 +165,6 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     //Holds classifier result for this block. 
     int sound = -1;
 
-    //SYNTH SAMPLE TEST
-    /** if (++startTime == 100)   */
-    /** {  */
-    /**     triggerSnareDrum(midiMessages);  */
-    /**     startTime = 0;   */
-    /** }  */
-
     classifier.processAudioBuffer(buffer.getReadPointer(0)); 
 
     sound = classifier.classify();
@@ -186,6 +179,7 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
             break;
     }
 
+    
     //Now classification complete clear the input buffer/signal - we only want synth output.
     for (int i = 0; i < getTotalNumInputChannels(); ++i)
     {

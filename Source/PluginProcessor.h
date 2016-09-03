@@ -80,8 +80,6 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BeatboxVoxAudioProcessor);
 
-
-    int startTime = 0;
     std::atomic<float> spectralCentroid;
 
     Synthesiser drumSynth;

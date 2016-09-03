@@ -47,7 +47,7 @@ public:
 
     void recordTrainingSample(int trainingSound);
 
-    //JWM - May change this after prototype so that the model is trained incrementally for each sound
+    //NOTE - May change this after prototype so that the model is trained incrementally for each sound
     //to avoid calling trainModel with unfinished training data set. Alternativley may have this function
     //return bool for successful or not in training. 
     void trainModel();
@@ -82,6 +82,7 @@ private:
 
     T sampleRate;
 
+    //Values to indicate which features currently being used by model.
     std::atomic_bool usingSpecCentroid {true};
     std::atomic_bool usingSpecCrest {true};
     std::atomic_bool usingSpecFlatness {true};
@@ -89,24 +90,28 @@ private:
     std::atomic_bool usingSpecKurtosis {true};
     std::atomic_bool usingMfcc {true};
 
-    //This value indicates the current sound being trained declared atomic as may be set by a GUI thread / user control 
+
+    //This value indicates the current sound being trained declared atomic as may be set by a GUI thread / user control.
     std::atomic_int currentTrainingSound;
 
-    //Inidicates if the model has been trained with full training set and classifier is ready, declared atomic as may be set by a GUI thread / user control
+    //Inidicates if the model has been trained with full training set and classifier is ready, declared atomic as may be set by a GUI thread / user control.
     std::atomic_bool classifierReady;
 
     std::atomic_bool training;
 
-    //Map to indicate model status - sound -> ready bool status if training samples collected
-    std::map<int, bool> soundsReady;
-
-    //Vector to hold mag spectrum
+    //Holds states for each sound in model to confirm whether sound's training set has been recorded.
+    std::vector<bool> soundsReady;
+    
+    //Vector to hold mag spectrum.
     std::vector<T> magSpectrum;
 
+    //Holds the training data set.
     arma::Mat<T> trainingData;
 
+    //Holds the trainingData matrix's corresponding label values for labelled training data.
     arma::Row<size_t> trainingLabels;
     
+    //Holds the the feature values/vector for the current instance/block.
     arma::Col<T> currentInstanceVector;
     
     Gist<T> gistFeatures;

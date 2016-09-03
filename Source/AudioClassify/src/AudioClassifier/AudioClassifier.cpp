@@ -30,10 +30,7 @@ AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int in
     numSounds = initNumSounds;
 
     //Set initial sound ready states to false in training set.  
-    for (size_t i = 0; i < numSounds; ++i) 
-    { 
-        soundsReady.insert(std::pair<int, bool>(i, false));
-    } 
+    soundsReady.resize(numSounds, false);
 }
 
 template<typename T>
@@ -64,6 +61,12 @@ void AudioClassifier<T>::setCurrentBufferSize (int newBufferSize)
 
     magSpectrum.resize(newBufferSize / 2);
     std::fill(magSpectrum.begin(), magSpectrum.end(), 0.0f);
+
+    /**
+     * Note: After prototype stage this funciton should probably handle clearing the model
+     * and setting classifier ready to false as well as emptying the trainingDataSet and trainingLables matrices.
+     * The NaiveBayes class may require a clear method which clears out the various probability and feature mean vectors etc.
+     */
 }
 
 template<typename T>
@@ -89,6 +92,7 @@ int AudioClassifier<T>::getCurrentTrainingSound()
 
 
 //==============================================================================
+
 //JWM - NOTE: revist later - will need assertion if user uses sound value out of range 1 - numSOunds
 template<typename T>
 void AudioClassifier<T>::recordTrainingSample(int sound)
@@ -156,7 +160,6 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer)
 
         if (currentTrainingSound.load() != -1 && training.load())
         {
-            //JWM - may change this logic later re handling classifier is ready etc.
             classifierReady.store(false);
 
             int sound = currentTrainingSound.load();
@@ -165,15 +168,13 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer)
             {
                 trainingData.col(trainingCount) = currentInstanceVector;
 
-                size_t soundSize_t = static_cast<size_t>(sound);
-                trainingLabels[trainingCount] = soundSize_t;
+                trainingLabels[trainingCount] = static_cast<size_t>(sound);
                 trainingCount++;
             }
             else
             {
                 //Set sound ready state to true for current training sound.
-                auto it = soundsReady.find(sound);
-                it->second = true;
+                soundsReady[sound] = true;
 
                 training.store(false);
                 currentTrainingSound.store(-1);
@@ -255,11 +256,10 @@ bool AudioClassifier<T>::checkTrainingSetReady()
 {
     size_t readyCount = 0;
 
-    for (size_t i = 0; i < numSounds; i++)
+    for (auto v : soundsReady)
     {
-       auto it = soundsReady.find(i); 
-       if (it->second == true)
-           readyCount++;
+        if (v == true)
+            readyCount++;
     }
 
     if (readyCount == numSounds)
@@ -302,7 +302,7 @@ size_t AudioClassifier<T>::calcFeatureVecSize()
 
     if (usingMfcc.load())
     {
-        //JWM - eventually change this to use numMfcc's or something
+        //JWM - eventually change this to use numMfcc based on user selected AudioClassifyOptions. 
         size += 13;
     }
 
