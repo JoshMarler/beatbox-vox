@@ -94,6 +94,9 @@ template<typename T>
 void AudioClassifier<T>::recordTrainingSample(int sound)
 {
     currentTrainingSound.store(sound);
+
+    trainingCount = (sound * trainingSetSize);
+
     training.store(true);
 }
 
@@ -157,25 +160,23 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer)
             classifierReady.store(false);
 
             int sound = currentTrainingSound.load();
-            
-            if (trainingCount < trainingSetSize)
-            {
-                size_t index = (trainingCount * (sound + 1));
 
-                trainingData.col(index) = currentInstanceVector;
-                trainingLabels[index] = static_cast<size_t>(sound);
+            if (trainingCount < (trainingSetSize * (sound + 1)))
+            {
+                trainingData.col(trainingCount) = currentInstanceVector;
+
+                size_t soundSize_t = static_cast<size_t>(sound);
+                trainingLabels[trainingCount] = soundSize_t;
                 trainingCount++;
             }
             else
             {
                 //Set sound ready state to true for current training sound.
-                auto it = soundsReady.find(currentTrainingSound.load());
+                auto it = soundsReady.find(sound);
                 it->second = true;
 
                 training.store(false);
                 currentTrainingSound.store(-1);
-                
-                trainingCount = 0;
             }
         }
     }
@@ -231,7 +232,7 @@ void AudioClassifier<T>::processCurrentInstance()
 
 //==============================================================================
 template<typename T>
-unsigned AudioClassifier<T>::classify()
+int AudioClassifier<T>::classify()
 {
     int sound = -1;
 
@@ -254,7 +255,7 @@ bool AudioClassifier<T>::checkTrainingSetReady()
 {
     size_t readyCount = 0;
 
-    for(size_t i = 0; i < numSounds; i++)
+    for (size_t i = 0; i < numSounds; i++)
     {
        auto it = soundsReady.find(i); 
        if (it->second == true)

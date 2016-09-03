@@ -42,7 +42,7 @@ BeatboxVoxAudioProcessorEditor::BeatboxVoxAudioProcessorEditor (BeatboxVoxAudioP
         soundButtons.add(new ToggleButton("Sound " + String(i + 1) + " Button"));
 
         auto button = soundButtons[i];
-        button->setRadioGroupId(1);
+        button->setRadioGroupId(1234);
         button->addListener(this);
 
         addAndMakeVisible(button);
@@ -65,14 +65,21 @@ void BeatboxVoxAudioProcessorEditor::timerCallback()
 {
      auto isTraining = getProcessor().getClassifier().isTraining();
      auto trainingSetReady = getProcessor().getClassifier().checkTrainingSetReady();
+     auto classifierReady = getProcessor().getClassifier().getClassifierReady();
 
-     if(trainingSetReady)
+     if (trainingSetReady)
          trainClassifierButton->setEnabled(true);
+
+     if (trainClassifierButton->getToggleState())
+     {
+        if (classifierReady)
+            trainClassifierButton->setToggleState(false, NotificationType::dontSendNotification);
+     }
          
      //JWM - A little sketchy way of doing things maybe but works for prototype stage. 
      if (recordSoundButton->getToggleState())
      {
-        if(isTraining == false)
+        if (isTraining == false)
            recordSoundButton->setToggleState(false, NotificationType::dontSendNotification);
      }
 }
@@ -86,7 +93,14 @@ void BeatboxVoxAudioProcessorEditor::buttonClicked(Button* button)
     //Probably going to change all this to set parameters with callback functions or using value tree params etc.
     BeatboxVoxAudioProcessor& processor = getProcessor();
 
-    if (button == std::addressof(*trainClassifierButton))
+    if (button->getRadioGroupId() == 1234)
+    {
+        if (button->getToggleState())
+        {
+            currentTrainingSound = soundButtons.indexOf(button);
+        }
+    }
+    else if (button == std::addressof(*trainClassifierButton))
     {
         if (button->getToggleState())
             processor.getClassifier().trainModel();    
@@ -95,10 +109,6 @@ void BeatboxVoxAudioProcessorEditor::buttonClicked(Button* button)
     {
         if (button->getToggleState())
             processor.getClassifier().recordTrainingSample(currentTrainingSound);
-    }
-    else if (button->getToggleState())
-    {
-        currentTrainingSound = soundButtons.indexOf(button);
     }
 }
 
@@ -118,7 +128,7 @@ void BeatboxVoxAudioProcessorEditor::resized()
 
     recordSoundButton->setBounds(r.removeFromTop(25));
 
-    for(size_t i = 0; i < soundButtons.size(); ++i)
+    for (size_t i = 0; i < soundButtons.size(); ++i)
     {
         auto button = soundButtons[i]; 
         button->setBounds(r.removeFromTop(75 + (10 * i)));

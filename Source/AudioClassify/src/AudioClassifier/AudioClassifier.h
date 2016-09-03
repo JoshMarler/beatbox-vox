@@ -68,7 +68,7 @@ public:
     void processCurrentInstance();
 
     //This function will return -1 for unclassified sounds 
-    unsigned classify();
+    int classify();
 
 private:
 
