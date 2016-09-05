@@ -15,7 +15,9 @@
 //==============================================================================
 BeatboxVoxAudioProcessor::BeatboxVoxAudioProcessor() 
     : spectralCentroid(0.0f),
-      classifier(256, 44800, 2)
+      classifier(256, downSamplingRate, 2),
+      interpolator(),
+      downSampledBuffer()
       
 { 
     initialiseSynth(); 
@@ -114,18 +116,24 @@ void BeatboxVoxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
-    
+    downSampledBuffer.setSize(1, samplesPerBlock);
+    downSampledBuffer.clear();
+
     drumSynth.setCurrentPlaybackSampleRate(sampleRate);
 
     classifier.setCurrentBufferSize(samplesPerBlock);
-    classifier.setCurrentSampleRate(sampleRate);
+    //classifier.setCurrentSampleRate(sampleRate);
 
+    interpolator.reset();
 }
 
 void BeatboxVoxAudioProcessor::releaseResources()
 {
     // When playback stops, you can use this as an opportunity to free up any
     // spare memory, etc.
+    
+    interpolator.reset();
+    downSampledBuffer.clear();
 }
 
 //==============================================================================
@@ -165,7 +173,14 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     //Holds classifier result for this block. 
     int sound = -1;
 
-    classifier.processAudioBuffer(buffer.getReadPointer(0)); 
+    /**
+     * NOTE: Need to confirm that buffer size will not change between prepareToPlay and processBlock/handle 
+     * this for downSampleBuffer.
+     */
+    interpolator.process((downSamplingRate / sampleRate), buffer.getReadPointer(0), downSampledBuffer.getWritePointer(0, 0), numSamples);
+
+    //classifier.processAudioBuffer(buffer.getReadPointer(0)); 
+    classifier.processAudioBuffer(downSampledBuffer.getReadPointer(0));
 
     sound = classifier.classify();
     
