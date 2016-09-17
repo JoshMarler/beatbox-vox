@@ -13,6 +13,7 @@
 
 #include <atomic>
 #include <memory>
+
 #include "../AudioClassifyOptions/AudioClassifyOptions.h"
 #include "../../MathHelpers/MathHelpers.h"
 #include "../../Gist/src/onset-detection-functions/OnsetDetectionFunction.h"
@@ -33,7 +34,7 @@ class OnsetDetector
         
         void setCurrentODFType(AudioClassifyOptions::ODFType newODFType);
         
-        bool checkForOnset(std::vector<T> magnitudeSpectrum);
+        bool checkForOnset(const T* magnitudeSpectrum, const std::size_t magSpectrumSize);
 
     private:
 
@@ -44,7 +45,7 @@ class OnsetDetector
        T threshold;
        T meanCoeff;
 
-       std::vector<T> previousValues;
+       std::unique_ptr<T[]> previousValues;
 
        OnsetDetectionFunction<T> onsetDetectionFunction;
 

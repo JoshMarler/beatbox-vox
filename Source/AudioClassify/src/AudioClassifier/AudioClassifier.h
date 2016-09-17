@@ -18,9 +18,11 @@
 
 #endif
 
-#include <map>
+#include <memory>
 #include <atomic>
+
 #include <armadillo>
+
 #include "../../Gist/src/Gist.h"
 #include "../AudioClassifyOptions/AudioClassifyOptions.h"
 #include "../OnsetDetection/OnsetDetector.h"
@@ -102,9 +104,12 @@ private:
     //Holds states for each sound in model to confirm whether sound's training set has been recorded.
     std::vector<bool> soundsReady;
     
-    //Vector to hold mag spectrum.
-    std::vector<T> magSpectrum;
+    //Array/Buffer to hold mag spectrum.
+    std::unique_ptr<T[]> magSpectrum;
 
+    //Array/Buffer to hold the mel frequency cepstral coefficients.
+    std::unique_ptr<T[]> mfccs;
+    
     //Holds the training data set.
     arma::Mat<T> trainingData;
 

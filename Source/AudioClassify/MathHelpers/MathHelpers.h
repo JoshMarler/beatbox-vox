@@ -12,14 +12,14 @@
 #define MATHHELPERS_H_INCLUDED
 
 #include <algorithm>
-#include <vector>
+
 namespace MathHelpers
 {
-    template<typename FloatType>
-    FloatType getMean(std::vector<FloatType> vec)
+    template<typename T>
+    T getMean(const T* vec, const std::size_t vecSize)
     {
-        auto sum = std::accumulate(vec.cbegin(), vec.cend(), 0.0);
-        return sum / vec.size();       
+        auto sum = std::accumulate(vec, (vec + vecSize), 0.0);
+        return sum / vecSize;       
     }
 }
 

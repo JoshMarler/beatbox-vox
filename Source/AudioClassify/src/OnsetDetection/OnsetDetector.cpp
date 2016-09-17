@@ -21,8 +21,9 @@ OnsetDetector<T>::OnsetDetector(int initBufferSize)
     numPreviousValues = 10;
     threshold = 0.5;
 
-    previousValues.resize(numPreviousValues);
-    std::fill(previousValues.begin(), previousValues.end(), 0.0);   
+    previousValues.reset(new T[numPreviousValues]);
+
+    std::fill(previousValues.get(), (previousValues.get() + numPreviousValues), static_cast<T>(0.0));   
 
     setCurrentBufferSize(initBufferSize);
 }
@@ -73,12 +74,12 @@ void OnsetDetector<T>::setCurrentODFType(AudioClassifyOptions::ODFType newODFTyp
 //=============================================================================
 
 template<typename T>
-bool OnsetDetector<T>::checkForOnset(std::vector<T> magnitudeSpectrum)
+bool OnsetDetector<T>::checkForOnset(const T* magnitudeSpectrum, const std::size_t magSpectrumSize)
 {
     T featureValue = 0;
     bool hasOnset = false;
 
-    featureValue = onsetDetectionFunction.highFrequencyContent(magnitudeSpectrum); 
+    featureValue = onsetDetectionFunction.highFrequencyContent(magnitudeSpectrum, magSpectrumSize); 
     hasOnset = checkForPeak(featureValue);
 
     return hasOnset;
@@ -100,7 +101,7 @@ bool OnsetDetector<T>::checkForPeak(T featureValue)
             isOnset = true;
     }
 
-    threshold = meanCoeff * MathHelpers::getMean(previousValues);
+    threshold = meanCoeff * MathHelpers::getMean(previousValues.get(), numPreviousValues);
 
     //JWM - NOTE: Would be nice to do this with proper iterators later.
     for (auto i = numPreviousValues - 1; i > 0; i--) 

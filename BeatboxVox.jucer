@@ -444,10 +444,10 @@
                 extraLinkerFlags="">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/&#10;/usr/lib/&#10;"
-                       isDebug="1" optimisation="1" targetName="BeatboxVox" binaryPath="~/AudioPlugins/vst"
+                       isDebug="1" optimisation="1" targetName="BeatboxVox" binaryPath="~/.vst"
                        headerPath="/usr/include/armadillo_bits"/>
         <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/&#10;" isDebug="0"
-                       optimisation="3" targetName="BeatboxVox" binaryPath="~/AudioPlugins/vst"
+                       optimisation="3" targetName="BeatboxVox" binaryPath="~/.vst"
                        headerPath="/usr/local/include&#10;"/>
       </CONFIGURATIONS>
       <MODULEPATHS>

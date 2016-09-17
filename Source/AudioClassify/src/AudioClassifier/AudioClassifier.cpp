@@ -29,6 +29,9 @@ AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int in
 
     numSounds = initNumSounds;
 
+    int numCoefficients = gistFeatures.getMFCCNumCoefficients();
+    mfccs.reset(new T[numCoefficients]);
+
     //Set initial sound ready states to false in training set.  
     soundsReady.resize(numSounds, false);
 }
@@ -59,8 +62,9 @@ void AudioClassifier<T>::setCurrentBufferSize (int newBufferSize)
     bufferSize = newBufferSize;
     gistFeatures.setAudioFrameSize(newBufferSize);
 
-    magSpectrum.resize(newBufferSize / 2);
-    std::fill(magSpectrum.begin(), magSpectrum.end(), 0.0f);
+    magSpectrum.reset(new T[newBufferSize / 2]);    
+
+    std::fill(magSpectrum.get(), (magSpectrum.get() + (newBufferSize / 2)), 0.0f);
 
     /**
      * Note: After prototype stage this funciton should probably handle clearing the model
@@ -150,9 +154,9 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer)
     hasOnset = false;
 
     gistFeatures.processAudioFrame(buffer, bufferSize);
-    magSpectrum = gistFeatures.getMagnitudeSpectrum();
+    gistFeatures.getMagnitudeSpectrum(magSpectrum.get());
     
-    hasOnset = osDetector.checkForOnset(magSpectrum);
+    hasOnset = osDetector.checkForOnset(magSpectrum.get(), bufferSize / 2);
 
     if (hasOnset)
     {
@@ -221,11 +225,12 @@ void AudioClassifier<T>::processCurrentInstance()
 
     if (usingMfcc.load())
     {
-         auto mfccVec = gistFeatures.melFrequencyCepstralCoefficients(); 
-
-         for (auto val : mfccVec) 
+         gistFeatures.melFrequencyCepstralCoefficients(mfccs.get()); 
+            
+         int numCoefficients = gistFeatures.getMFCCNumCoefficients();
+         for (std::size_t i = 0; i < numCoefficients; i++) 
          { 
-           currentInstanceVector[pos] = val;  
+           currentInstanceVector[pos] = mfccs[i];  
            pos++; 
          } 
     }
