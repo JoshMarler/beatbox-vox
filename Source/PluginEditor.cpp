@@ -29,7 +29,7 @@ BeatboxVoxAudioProcessorEditor::BeatboxVoxAudioProcessorEditor (BeatboxVoxAudioP
     // editor's size to whatever you need it to be.
     setSize (700, 600);
     
-    //JWM - set timer for gui update callback
+    //Set timer for gui update callback
     startTimer(10);
 }
 

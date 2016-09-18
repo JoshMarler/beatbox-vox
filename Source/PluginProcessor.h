@@ -13,6 +13,8 @@
 #include <atomic>
 
 #include "../JuceLibraryCode/JuceHeader.h"
+
+#include "Parameters/CustomAudioParameter.h"
 #include "AudioClassify/src/AudioClassify.h"
 
 
@@ -57,10 +59,14 @@ public:
     void getStateInformation (MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
-    //JWM - Test function to get spectral centroid value in GUI
-    float getSpectralCentroid() const;
-
-    //Initialise the test synth object
+    
+    //Setup the audio processor parameters
+    void setupParameters();
+    
+    //Get parameter from ID
+    AudioProcessorParameter& getParameterFromID(StringRef id);
+    
+    //Initialise the synth object
     void initialiseSynth();
 
     void triggerKickDrum(MidiBuffer& midiMessages);
@@ -72,6 +78,10 @@ public:
         SnareDrum, 
         HiHat
     };
+
+    //Parameter ID strings
+    static String paramOSDMeanCoeff;
+    static String paramOSDNoiseRatio;
 
     //Returns reference to plugins AudioClassifier for GUI to set classification settings.
     //JWM - NOTE will need to change to accept templated precision. 
@@ -90,6 +100,11 @@ private:
     CatmullRomInterpolator interpolator;
 
     AudioSampleBuffer downSampledBuffer;
+    
+    //Parameters
+    CustomAudioParameter* osdMeanCoefficient;
+    CustomAudioParameter* osdNoiseRatio; 
+
 };
 
 

@@ -14,6 +14,12 @@ OnsetDetectorComponent::OnsetDetectorComponent(BeatboxVoxAudioProcessor& p)
     : processor(p)
 {
 
+    meanCoeffSlider = std::make_unique<CustomSlider> (processor.getParameterFromID(BeatboxVoxAudioProcessor::paramOSDMeanCoeff));
+    noiseRatioSlider = std::make_unique<CustomSlider> (processor.getParameterFromID(BeatboxVoxAudioProcessor::paramOSDNoiseRatio));
+
+    addAndMakeVisible(*meanCoeffSlider);
+    addAndMakeVisible(*noiseRatioSlider);
+
 }
 
 //==============================================================================
@@ -31,6 +37,6 @@ void OnsetDetectorComponent::paint(Graphics& g)
 //==============================================================================
 void OnsetDetectorComponent::resized()
 {
-
+    Rectangle<int> r (getLocalBounds());
 }
 

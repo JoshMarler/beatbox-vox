@@ -16,7 +16,6 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 
 #include "CustomLookAndFeel.h"
-#include "CustomSlider.h"
 
 #include "../PluginProcessor.h"
 

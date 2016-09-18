@@ -94,6 +94,19 @@ int AudioClassifier<T>::getCurrentTrainingSound()
     return currentTrainingSound.load();
 }
 
+//==============================================================================
+template<typename T>
+void AudioClassifier<T>::setOnsetDetectorMeanCoeff(T newMeanCoeff)
+{
+    osDetector.setMeanCoefficient(newMeanCoeff);
+}
+
+//==============================================================================
+template<typename T>
+void AudioClassifier<T>::setOnsetDetectorNoiseRatio(T newNoiseRatio)
+{
+    osDetector.setNoiseRatio(newNoiseRatio);
+}
 
 //==============================================================================
 

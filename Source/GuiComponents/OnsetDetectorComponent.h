@@ -17,7 +17,6 @@
 
 #include "CustomSlider.h"
 #include "CustomLookAndFeel.h"
-
 #include "../PluginProcessor.h"
 
 class OnsetDetectorComponent : public Component
@@ -34,6 +33,10 @@ private:
 
     BeatboxVoxAudioProcessor& processor;
 
+    //Parameter sliders
+    std::unique_ptr<CustomSlider> meanCoeffSlider;
+    std::unique_ptr<CustomSlider> noiseRatioSlider;
+    
 };
 
 

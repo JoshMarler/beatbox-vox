@@ -11,6 +11,8 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
+String BeatboxVoxAudioProcessor::paramOSDMeanCoeff ("meancoeff");
+String BeatboxVoxAudioProcessor::paramOSDNoiseRatio ("noiseratio");
 
 //==============================================================================
 BeatboxVoxAudioProcessor::BeatboxVoxAudioProcessor() 
@@ -20,6 +22,7 @@ BeatboxVoxAudioProcessor::BeatboxVoxAudioProcessor()
       downSampledBuffer()
       
 { 
+    setupParameters();
     initialiseSynth(); 
 }
 
@@ -80,6 +83,40 @@ void BeatboxVoxAudioProcessor::changeProgramName (int index, const String& newNa
 {
 }
 
+//==============================================================================
+void BeatboxVoxAudioProcessor::setupParameters()
+{
+    auto onsetDetectMeanCallback = [this] (float newMeanCoeff) { this->classifier.setOnsetDetectorMeanCoeff(newMeanCoeff); };
+    osdMeanCoefficient = new CustomAudioParameter(paramOSDMeanCoeff, "OnsetDetectorMeanCoeff", onsetDetectMeanCallback, false);
+
+    auto onsetDetectNoiseCallback = [this] (float newNoiseRatio) { this->classifier.setOnsetDetectorNoiseRatio(newNoiseRatio); };
+    osdNoiseRatio = new CustomAudioParameter(paramOSDNoiseRatio, "OnsetDetectorNoiseRatio", onsetDetectNoiseCallback, false);
+
+    addParameter(osdMeanCoefficient);
+    addParameter(osdNoiseRatio);
+}
+
+//==============================================================================
+AudioProcessorParameter& BeatboxVoxAudioProcessor::getParameterFromID(StringRef id)
+{
+    AudioProcessorParameter* param = nullptr;
+
+    const std::size_t numParams = getNumParameters();
+
+    for (std::size_t i = 0; i < numParams; i++)
+    {
+       if (AudioProcessorParameterWithID* p = dynamic_cast<AudioProcessorParameterWithID*>(getParameters().getUnchecked(i)))
+       {
+            if (id == p->paramID)      
+                param = p;
+       }
+
+    }
+
+    return *param;
+}
+
+//==============================================================================
 void BeatboxVoxAudioProcessor::initialiseSynth ()
 {
     /** JWM - Quick and dirty sample drum synth for prototype
@@ -216,12 +253,6 @@ void BeatboxVoxAudioProcessor::triggerKickDrum(MidiBuffer& midiMessages)
 void BeatboxVoxAudioProcessor::triggerSnareDrum(MidiBuffer& midiMessages)
 {
     midiMessages.addEvent(MidiMessage::noteOn(1, 43, (uint8) 100), 0);
-}
-
-//==============================================================================
-float BeatboxVoxAudioProcessor::getSpectralCentroid() const
-{
-    return spectralCentroid.load();
 }
 
 //==============================================================================

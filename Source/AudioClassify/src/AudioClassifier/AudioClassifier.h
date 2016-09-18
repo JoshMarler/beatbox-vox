@@ -44,8 +44,11 @@ public:
     void setCurrentBufferSize (int newBufferSize);
     void setCurrentSampleRate (T newSampleRate);
     
-    void setTrainingSound(int trainingSound);
     int getCurrentTrainingSound();
+    
+    //Onset detector functions
+    void setOnsetDetectorMeanCoeff(T newMeanCoeff);
+    void setOnsetDetectorNoiseRatio(T newNoiseRatio);
 
     void recordTrainingSample(int trainingSound);
 
