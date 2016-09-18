@@ -12,6 +12,24 @@
               pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="4.2.3">
   <MAINGROUP id="z3DhfV" name="BeatboxVox">
     <GROUP id="{B8A10E5D-D185-1FFC-CC44-E732222EC3EB}" name="Source">
+      <GROUP id="{9C2B9F3E-88F4-4456-7A0E-5B312DD877F3}" name="GuiComponents">
+        <FILE id="kwvSID" name="AudioClassifierComponent.cpp" compile="1" resource="0"
+              file="Source/GuiComponents/AudioClassifierComponent.cpp"/>
+        <FILE id="KVMNZ6" name="AudioClassifierComponent.h" compile="0" resource="0"
+              file="Source/GuiComponents/AudioClassifierComponent.h"/>
+        <FILE id="j338eL" name="CustomLookAndFeel.cpp" compile="1" resource="0"
+              file="Source/GuiComponents/CustomLookAndFeel.cpp"/>
+        <FILE id="DZabwO" name="CustomLookAndFeel.h" compile="0" resource="0"
+              file="Source/GuiComponents/CustomLookAndFeel.h"/>
+        <FILE id="L83Jbq" name="CustomSlider.cpp" compile="1" resource="0"
+              file="Source/GuiComponents/CustomSlider.cpp"/>
+        <FILE id="vlpZX8" name="CustomSlider.h" compile="0" resource="0" file="Source/GuiComponents/CustomSlider.h"/>
+        <FILE id="ER95zv" name="GuiComponents.h" compile="0" resource="0" file="Source/GuiComponents/GuiComponents.h"/>
+        <FILE id="aabJKX" name="OnsetDetectorComponent.cpp" compile="1" resource="0"
+              file="Source/GuiComponents/OnsetDetectorComponent.cpp"/>
+        <FILE id="AAofgR" name="OnsetDetectorComponent.h" compile="0" resource="0"
+              file="Source/GuiComponents/OnsetDetectorComponent.h"/>
+      </GROUP>
       <GROUP id="{3F849092-9582-55CE-53ED-F19745D4D8B1}" name="Resources">
         <FILE id="AzFjzW" name="bassdrum.wav" compile="0" resource="1" file="Source/Resources/bassdrum.wav"/>
         <FILE id="WGvALc" name="snaredrum.wav" compile="0" resource="1" file="Source/Resources/snaredrum.wav"/>
@@ -446,9 +464,9 @@
         <CONFIGURATION name="Debug" libraryPath="/usr/X11R6/lib/&#10;/usr/lib/&#10;"
                        isDebug="1" optimisation="1" targetName="BeatboxVox" binaryPath="~/.vst"
                        headerPath="/usr/include/armadillo_bits"/>
-        <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/&#10;" isDebug="0"
-                       optimisation="3" targetName="BeatboxVox" binaryPath="~/.vst"
-                       headerPath="/usr/local/include&#10;"/>
+        <CONFIGURATION name="Release" libraryPath="/usr/X11R6/lib/&#10;/usr/lib/&#10;"
+                       isDebug="0" optimisation="3" targetName="BeatboxVox" binaryPath="~/.vst"
+                       headerPath="/usr/include/armadillo_bits"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_core" path="../../JUCE/modules"/>
@@ -467,33 +485,6 @@
         <MODULEPATH id="juce_audio_plugin_client" path="../../JUCE/modules"/>
       </MODULEPATHS>
     </LINUX_MAKE>
-    <CODEBLOCKS_LINUX targetFolder="Builds/CodeBlocksLinux" extraDefs="USE_KISS_FFT=1&#10;"
-                      externalLibraries="boost_program_options&#10;boost_math_c99&#10;boost_serialization&#10;armadillo&#10;mlpack">
-      <CONFIGURATIONS>
-        <CONFIGURATION name="Debug" isDebug="1" optimisation="1" targetName="BeatboxVox"
-                       headerPath="/usr/local/include" libraryPath="/usr/X11R6/lib/&#10;/usr/lib/&#10;/usr/local/lib/"
-                       binaryPath="~/audioplugins/vst"/>
-        <CONFIGURATION name="Release" isDebug="0" optimisation="3" targetName="BeatboxVox"
-                       headerPath="/usr/local/include" libraryPath="/usr/X11R6/lib/&#10;/usr/lib/&#10;/usr/local/lib/"
-                       binaryPath="~/audioplugins/vst"/>
-      </CONFIGURATIONS>
-      <MODULEPATHS>
-        <MODULEPATH id="juce_video" path="../../juce"/>
-        <MODULEPATH id="juce_opengl" path="../../juce"/>
-        <MODULEPATH id="juce_gui_extra" path="../../juce"/>
-        <MODULEPATH id="juce_gui_basics" path="../../juce"/>
-        <MODULEPATH id="juce_graphics" path="../../juce"/>
-        <MODULEPATH id="juce_events" path="../../juce"/>
-        <MODULEPATH id="juce_data_structures" path="../../juce"/>
-        <MODULEPATH id="juce_cryptography" path="../../juce"/>
-        <MODULEPATH id="juce_core" path="../../juce"/>
-        <MODULEPATH id="juce_audio_processors" path="../../juce"/>
-        <MODULEPATH id="juce_audio_plugin_client" path="../../juce"/>
-        <MODULEPATH id="juce_audio_formats" path="../../juce"/>
-        <MODULEPATH id="juce_audio_devices" path="../../juce"/>
-        <MODULEPATH id="juce_audio_basics" path="../../juce"/>
-      </MODULEPATHS>
-    </CODEBLOCKS_LINUX>
     <VS2015 targetFolder="Builds/VisualStudio2015" vstFolder="" vst3Folder=""
             externalLibraries="libopenblas.lib&#10;armadillo.lib" extraDefs="USE_KISS_FFT=1&#10;">
       <CONFIGURATIONS>

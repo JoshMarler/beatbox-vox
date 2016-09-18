@@ -17,10 +17,13 @@ OnsetDetector<T>::OnsetDetector(int initBufferSize)
     : onsetDetectionFunction(initBufferSize)
 {
     usingLocalMaximum = true;
-    meanCoeff = 1.5;
     numPreviousValues = 10;
     threshold = 0.5;
+    largestPeak = 0.0;
 
+    meanCoeff.store(1.5);
+    noiseRatio.store(0.05);
+    
     previousValues.reset(new T[numPreviousValues]);
 
     std::fill(previousValues.get(), (previousValues.get() + numPreviousValues), static_cast<T>(0.0));   
@@ -66,6 +69,31 @@ void OnsetDetector<T>::setUsingLocalMaximum(bool newUsingLocalMaximum)
 
 //=============================================================================
 template<typename T>
+void OnsetDetector<T>::setNoiseRatio(T newNoiseRatio)
+{
+    noiseRatio.store(newNoiseRatio);
+}
+
+template<typename T>
+T OnsetDetector<T>::getNoiseRatio() const
+{
+    return noiseRatio.load();
+}
+//=============================================================================
+template<typename T>
+void OnsetDetector<T>::setMeanCoefficient(T newCoeff)
+{
+    meanCoeff.store(newCoeff);
+}
+
+template<typename T>
+T OnsetDetector<T>::getMeanCoefficient() const
+{
+    return meanCoeff.load();
+}
+//=============================================================================
+
+template<typename T>
 void OnsetDetector<T>::setCurrentODFType(AudioClassifyOptions::ODFType newODFType)
 {
     currentODFType.store(newODFType);   
@@ -101,7 +129,8 @@ bool OnsetDetector<T>::checkForPeak(T featureValue)
             isOnset = true;
     }
 
-    threshold = meanCoeff * MathHelpers::getMean(previousValues.get(), numPreviousValues);
+    threshold = (meanCoeff.load() * MathHelpers::getMean(previousValues.get(), numPreviousValues)) +
+                (noiseRatio.load() * largestPeak);
 
     //JWM - NOTE: Would be nice to do this with proper iterators later.
     for (auto i = numPreviousValues - 1; i > 0; i--) 
@@ -110,6 +139,9 @@ bool OnsetDetector<T>::checkForPeak(T featureValue)
     } 
 
     previousValues[0] = featureValue;
+
+    if (isOnset && (previousValues[1] > largestPeak))
+        largestPeak = previousValues[1];
     
 
     return isOnset;

@@ -11,6 +11,7 @@
 #define PLUGINPROCESSOR_H_INCLUDED
 
 #include <atomic>
+
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "AudioClassify/src/AudioClassify.h"
 
@@ -81,6 +82,7 @@ private:
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BeatboxVoxAudioProcessor);
 
     std::atomic<float> spectralCentroid;
+
     float downSamplingRate = 11025.0f;
 
     Synthesiser drumSynth;

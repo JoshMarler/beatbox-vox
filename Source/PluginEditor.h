@@ -12,8 +12,9 @@
 #define PLUGINEDITOR_H_INCLUDED
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "PluginProcessor.h"
 
+#include "GuiComponents/GuiComponents.h"
+#include "PluginProcessor.h"
 
 //==============================================================================
 /**
@@ -41,16 +42,11 @@ private:
         return static_cast<BeatboxVoxAudioProcessor&> (processor);
     }
 
-    //JWM - A little dirty maybe but works for now at prototype stage
-    int currentTrainingSound = -1;
+    TabbedComponent tabs;
 
-    std::unique_ptr<TextButton> recordSoundButton;
-    
-    //JWM - Test button to swich on classifier training for sound
-    std::unique_ptr<TextButton> trainClassifierButton;
+    AudioClassifierComponent classifierComponent;
+    OnsetDetectorComponent onsetDetectComponent;
 
-
-    OwnedArray<Button> soundButtons;
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BeatboxVoxAudioProcessorEditor)
 };

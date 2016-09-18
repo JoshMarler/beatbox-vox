@@ -31,6 +31,12 @@ class OnsetDetector
 
         void setUsingLocalMaximum(bool newUsingLocalMaximum);
         bool getUsingLocalMaximum();
+
+        void setNoiseRatio(T newNoiseRatio);
+        T getNoiseRatio() const;
+
+        void setMeanCoefficient(T newCoeff);
+        T getMeanCoefficient() const;
         
         void setCurrentODFType(AudioClassifyOptions::ODFType newODFType);
         
@@ -40,10 +46,17 @@ class OnsetDetector
 
        int bufferSize; 
        int numPreviousValues;
+       int framesSinceOnset;
+       
+
        bool usingLocalMaximum;      
        
        T threshold;
-       T meanCoeff;
+       T largestPeak;
+
+       //Modifiable parameters declared as std::atomic as likely to be set by a GUI thread. 
+       std::atomic<T> meanCoeff;
+       std::atomic<T> noiseRatio;
 
        std::unique_ptr<T[]> previousValues;
 
