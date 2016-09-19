@@ -109,6 +109,13 @@ void AudioClassifier<T>::setOnsetDetectorNoiseRatio(T newNoiseRatio)
 }
 
 //==============================================================================
+template<typename T>
+void AudioClassifier<T>::setOSDMsBetweenOnsets(int ms)
+{
+    osDetector.setMinMsBetweenOnsets(ms);
+}
+
+//==============================================================================
 
 //JWM - NOTE: revist later - will need assertion if user uses sound value out of range 0 - numSOunds
 template<typename T>
@@ -168,7 +175,7 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer, const int numSampl
 
     if (bufferSize != numSamples)
     {
-        //setCurrentBufferSize() needs to be called before continuing processing
+        //setCurrentBufferSize() needs to be called before continuing processing - training set/model will be invalid strictly speaking.
         return;
     }
 

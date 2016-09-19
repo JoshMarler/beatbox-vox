@@ -13,6 +13,7 @@
 
 #include <atomic>
 #include <memory>
+#include <chrono>
 
 #include "../AudioClassifyOptions/AudioClassifyOptions.h"
 #include "../../MathHelpers/MathHelpers.h"
@@ -38,6 +39,9 @@ class OnsetDetector
         void setMeanCoefficient(T newCoeff);
         T getMeanCoefficient() const;
         
+        //JWM - Note: Should probably make ms an unsigned value to avoid negatives.
+        void setMinMsBetweenOnsets(int ms);
+
         void setCurrentODFType(AudioClassifyOptions::ODFType newODFType);
         
         bool checkForOnset(const T* magnitudeSpectrum, const std::size_t magSpectrumSize);
@@ -48,6 +52,11 @@ class OnsetDetector
        int numPreviousValues;
        int framesSinceOnset;
        
+       //The minimum number of milliseconds between valid onsets
+       std::atomic_int msBetweenOnsets;
+       std::chrono::high_resolution_clock::time_point lastOnsetTime;
+       bool firstOnsetDetected;
+
 
        bool usingLocalMaximum;      
        

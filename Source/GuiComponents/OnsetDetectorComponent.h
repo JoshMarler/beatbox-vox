@@ -39,13 +39,15 @@ private:
     Label meanCoeffLabel;
     Label noiseRatioLabel;
     Label useOSDTestSoundLabel;
+    Label msBetweenOnsetsLabel;
 
     ToggleButton useOSDTestSoundButton;
 
     //Parameter sliders
     std::unique_ptr<CustomSlider> meanCoeffSlider;
     std::unique_ptr<CustomSlider> noiseRatioSlider;
-    
+    std::unique_ptr<CustomSlider> msBetweenOnsetsSlider;
+
 };
 
 

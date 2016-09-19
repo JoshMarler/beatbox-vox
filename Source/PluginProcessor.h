@@ -93,6 +93,7 @@ public:
     //Parameter ID strings
     static String paramOSDMeanCoeff;
     static String paramOSDNoiseRatio;
+    static String paramOSDMsBetweenOnsets;
 
     //Returns reference to plugins AudioClassifier for GUI to set classification settings.
     //JWM - NOTE will need to change to accept templated precision. 
@@ -120,6 +121,7 @@ private:
     //Parameters
     CustomAudioParameter* osdMeanCoefficient;
     CustomAudioParameter* osdNoiseRatio; 
+    CustomAudioParameter* osdMsBetweenOnsets;
 
 };
 

@@ -13,6 +13,7 @@
 
 String BeatboxVoxAudioProcessor::paramOSDMeanCoeff ("osd_meancoeff");
 String BeatboxVoxAudioProcessor::paramOSDNoiseRatio ("osd_noiseratio");
+String BeatboxVoxAudioProcessor::paramOSDMsBetweenOnsets ("osd_msbetween");
 
 //==============================================================================
 BeatboxVoxAudioProcessor::BeatboxVoxAudioProcessor() 
@@ -93,8 +94,12 @@ void BeatboxVoxAudioProcessor::setupParameters()
     auto onsetDetectNoiseCallback = [this] (float newNoiseRatio) { this->classifier.setOnsetDetectorNoiseRatio(newNoiseRatio); };
     osdNoiseRatio = new CustomAudioParameter(paramOSDNoiseRatio, onsetDetectNoiseCallback, false);
 
+    auto onsetDetectMsBetweenCallback = [this] (float newMsBetweenOnsets) { this->classifier.setOSDMsBetweenOnsets(newMsBetweenOnsets); };
+    osdMsBetweenOnsets = new CustomAudioParameter(paramOSDMsBetweenOnsets, onsetDetectMsBetweenCallback, false); 
+
     addParameter(osdMeanCoefficient);
     addParameter(osdNoiseRatio);
+    addParameter(osdMsBetweenOnsets);
 }
 
 //==============================================================================

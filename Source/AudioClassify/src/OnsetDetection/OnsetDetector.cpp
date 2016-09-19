@@ -20,6 +20,10 @@ OnsetDetector<T>::OnsetDetector(int initBufferSize)
     numPreviousValues = 10;
     threshold = 0.5;
     largestPeak = 0.0;
+    msBetweenOnsets.store(20);
+
+    //Set to false initially - this will be set to true and left after the first onset is detected.
+    firstOnsetDetected = false;    
 
     meanCoeff.store(1.5);
     noiseRatio.store(0.05);
@@ -94,6 +98,14 @@ T OnsetDetector<T>::getMeanCoefficient() const
 }
 //=============================================================================
 template<typename T>
+void OnsetDetector<T>::setMinMsBetweenOnsets(int ms)
+{
+    msBetweenOnsets.store(ms);
+}
+
+//=============================================================================
+
+template<typename T>
 void OnsetDetector<T>::setCurrentODFType(AudioClassifyOptions::ODFType newODFType)
 {
     currentODFType.store(newODFType);   
@@ -106,6 +118,9 @@ bool OnsetDetector<T>::checkForOnset(const T* magnitudeSpectrum, const std::size
     T featureValue = 0;
     bool hasOnset = false;
 
+    //JWM - NOTE: Need to check but adaptive whitening of the magnitudeSpectrum would need to occur
+    //here before the hfc function call.
+
     featureValue = onsetDetectionFunction.highFrequencyContent(magnitudeSpectrum, magSpectrumSize); 
     hasOnset = checkForPeak(featureValue);
 
@@ -116,11 +131,39 @@ template<typename T>
 bool OnsetDetector<T>::checkForPeak(T featureValue) 
 {
     auto isOnset = false;
-    
+    std::chrono::duration<float> dur;
+    std::chrono::milliseconds msElapsed;
+
     if (getUsingLocalMaximum()) 
     {
         if (previousValues[0] > threshold && previousValues[0] > featureValue && previousValues[0] > previousValues[1]) 
-            isOnset = true;           
+        {
+            /** For the first time an onset is detected set firstOnsetDetected = true 
+             *  so that the initial lastOnsetTime is valid.
+             *
+             *  NOTE: The time based logic below for elapsed ms between onsets should probably be 
+             *  refactored out into a seperate private function for this class as it is likely to be called
+             *  in at least two seperate places / conditional blocks. 
+             */
+            if (!firstOnsetDetected)
+            {
+                isOnset = true;
+                lastOnsetTime = std::chrono::high_resolution_clock::now();
+                firstOnsetDetected = true;
+            }
+            else 
+            {
+                dur = std::chrono::high_resolution_clock::now() - lastOnsetTime;
+                msElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(dur);
+
+                if (msElapsed.count() > msBetweenOnsets.load())
+                {
+                    isOnset = true;
+                    lastOnsetTime = std::chrono::high_resolution_clock::now();
+                }
+            }
+        }
+            
     }
     else
     {
@@ -130,6 +173,7 @@ bool OnsetDetector<T>::checkForPeak(T featureValue)
 
     threshold = (meanCoeff.load() * MathHelpers::getMean(previousValues.get(), numPreviousValues)) +
                 (noiseRatio.load() * largestPeak);
+
 
     for (auto i = numPreviousValues - 1; i > 0; i--) 
     { 
