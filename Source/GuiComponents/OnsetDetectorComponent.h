@@ -19,7 +19,8 @@
 #include "CustomLookAndFeel.h"
 #include "../PluginProcessor.h"
 
-class OnsetDetectorComponent : public Component
+class OnsetDetectorComponent : public Component,
+                               private ButtonListener
 {
 
 public:
@@ -29,9 +30,17 @@ public:
     void paint(Graphics& g) override;
     void resized() override;
 
+    void buttonClicked(Button* button) override;
+
 private:
 
     BeatboxVoxAudioProcessor& processor;
+
+    Label meanCoeffLabel;
+    Label noiseRatioLabel;
+    Label useOSDTestSoundLabel;
+
+    ToggleButton useOSDTestSoundButton;
 
     //Parameter sliders
     std::unique_ptr<CustomSlider> meanCoeffSlider;

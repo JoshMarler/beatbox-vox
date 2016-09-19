@@ -9,7 +9,7 @@
               pluginWantsMidiIn="0" pluginProducesMidiOut="0" pluginIsMidiEffectPlugin="0"
               pluginEditorRequiresKeys="0" pluginAUExportPrefix="BeatboxVoxAU"
               pluginRTASCategory="" aaxIdentifier="com.yourcompany.BeatboxVox"
-              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="4.2.3">
+              pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="4.2.4">
   <MAINGROUP id="z3DhfV" name="BeatboxVox">
     <GROUP id="{B8A10E5D-D185-1FFC-CC44-E732222EC3EB}" name="Source">
       <GROUP id="{67405001-D3DB-C4FE-5FFD-7E2E8B06E464}" name="Parameters">
@@ -38,6 +38,7 @@
       </GROUP>
       <GROUP id="{3F849092-9582-55CE-53ED-F19745D4D8B1}" name="Resources">
         <FILE id="AzFjzW" name="bassdrum.wav" compile="0" resource="1" file="Source/Resources/bassdrum.wav"/>
+        <FILE id="nIcfzF" name="osdTestOne.wav" compile="0" resource="1" file="Source/Resources/osdTestOne.wav"/>
         <FILE id="WGvALc" name="snaredrum.wav" compile="0" resource="1" file="Source/Resources/snaredrum.wav"/>
       </GROUP>
       <GROUP id="{2787DE04-C09F-E428-545B-AFFF83B0B35C}" name="AudioClassify">

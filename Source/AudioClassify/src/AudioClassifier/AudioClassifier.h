@@ -68,9 +68,18 @@ public:
     
     bool isTraining();
 
-    void processAudioBuffer (const T* buffer);
+    void processAudioBuffer (const T* buffer, const int numSamples);
 
     void processCurrentInstance();
+
+    /** Checks whether the current frame has a detected note onset. This can be called to help 
+     * with configuring the AudioClassifier oject's OnsetDetector. This function should be called
+     * right after a call to processAudioBuffer() in the same frame i.e. before the next processAudioBuffer() 
+     * call.
+     * @returns true if an note onset has been detected for the frame/previous frame depending on whether
+     * the onset detector is using local maximums.
+     */
+    bool noteOnsetDetected();
 
     //This function will return -1 for unclassified sounds 
     int classify();

@@ -59,6 +59,14 @@ public:
     void getStateInformation (MemoryBlock& destData) override;
     void setStateInformation (const void* data, int sizeInBytes) override;
 
+    //==============================================================================
+
+    /** Sets a flag to indicate whether a test sound should be triggered for 
+     * each onset detected.This is used as a reference point / listening test when
+     * configuring the onset detection settings. 
+     * @param useTestSound flag to turn the OnsetDetector test sound on/off
+     */
+    void setUsingOSDTestSound(bool useTestSound);
     
     //Setup the audio processor parameters
     void setupParameters();
@@ -71,6 +79,9 @@ public:
 
     void triggerKickDrum(MidiBuffer& midiMessages);
     void triggerSnareDrum(MidiBuffer& midiMessages);
+    
+    void triggerOSDTestSound(MidiBuffer& midiMessages);
+    
 
     enum soundLabel
     {
@@ -91,11 +102,16 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BeatboxVoxAudioProcessor);
 
-    std::atomic<float> spectralCentroid;
-
     float downSamplingRate = 11025.0f;
 
+    const int kickNoteNumber = 12;
+    const int snareNoteNumber = 43;
+    const int osdTestSoundNoteNumber = 57;
+
+    std::atomic_bool usingOSDTestSound;
+
     Synthesiser drumSynth;
+    Synthesiser osdTestSynth;
     AudioClassifier<float> classifier;
     CatmullRomInterpolator interpolator;
 

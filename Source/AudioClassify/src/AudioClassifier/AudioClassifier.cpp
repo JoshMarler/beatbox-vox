@@ -110,7 +110,7 @@ void AudioClassifier<T>::setOnsetDetectorNoiseRatio(T newNoiseRatio)
 
 //==============================================================================
 
-//JWM - NOTE: revist later - will need assertion if user uses sound value out of range 1 - numSOunds
+//JWM - NOTE: revist later - will need assertion if user uses sound value out of range 0 - numSOunds
 template<typename T>
 void AudioClassifier<T>::recordTrainingSample(int sound)
 {
@@ -159,12 +159,18 @@ bool AudioClassifier<T>::isTraining()
 
 //==============================================================================
 template<typename T> 
-void AudioClassifier<T>::processAudioBuffer (const T* buffer)
+void AudioClassifier<T>::processAudioBuffer (const T* buffer, const int numSamples)
 {
-    const int bufferSize = getCurrentBufferSize();
-    
     //Reset hasOnset for next process buffer.
     hasOnset = false;
+
+    const int bufferSize = getCurrentBufferSize();
+
+    if (bufferSize != numSamples)
+    {
+        //setCurrentBufferSize() needs to be called before continuing processing
+        return;
+    }
 
     gistFeatures.processAudioFrame(buffer, bufferSize);
     gistFeatures.getMagnitudeSpectrum(magSpectrum.get());
@@ -247,6 +253,12 @@ void AudioClassifier<T>::processCurrentInstance()
            pos++; 
          } 
     }
+}
+//==============================================================================
+template<typename T>
+bool AudioClassifier<T>::noteOnsetDetected()
+{
+    return hasOnset;
 }
 
 //==============================================================================

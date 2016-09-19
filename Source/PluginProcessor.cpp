@@ -11,17 +11,18 @@
 #include "PluginProcessor.h"
 #include "PluginEditor.h"
 
-String BeatboxVoxAudioProcessor::paramOSDMeanCoeff ("meancoeff");
-String BeatboxVoxAudioProcessor::paramOSDNoiseRatio ("noiseratio");
+String BeatboxVoxAudioProcessor::paramOSDMeanCoeff ("osd_meancoeff");
+String BeatboxVoxAudioProcessor::paramOSDNoiseRatio ("osd_noiseratio");
 
 //==============================================================================
 BeatboxVoxAudioProcessor::BeatboxVoxAudioProcessor() 
-    : spectralCentroid(0.0f),
-      classifier(256, downSamplingRate, 2),
+    : classifier(256, downSamplingRate, 2),
       interpolator(),
       downSampledBuffer()
       
 { 
+    usingOSDTestSound.store(false);
+
     setupParameters();
     initialiseSynth(); 
 }
@@ -87,10 +88,10 @@ void BeatboxVoxAudioProcessor::changeProgramName (int index, const String& newNa
 void BeatboxVoxAudioProcessor::setupParameters()
 {
     auto onsetDetectMeanCallback = [this] (float newMeanCoeff) { this->classifier.setOnsetDetectorMeanCoeff(newMeanCoeff); };
-    osdMeanCoefficient = new CustomAudioParameter(paramOSDMeanCoeff, "OnsetDetectorMeanCoeff", onsetDetectMeanCallback, false);
+    osdMeanCoefficient = new CustomAudioParameter(paramOSDMeanCoeff, onsetDetectMeanCallback, false);
 
     auto onsetDetectNoiseCallback = [this] (float newNoiseRatio) { this->classifier.setOnsetDetectorNoiseRatio(newNoiseRatio); };
-    osdNoiseRatio = new CustomAudioParameter(paramOSDNoiseRatio, "OnsetDetectorNoiseRatio", onsetDetectNoiseCallback, false);
+    osdNoiseRatio = new CustomAudioParameter(paramOSDNoiseRatio, onsetDetectNoiseCallback, false);
 
     addParameter(osdMeanCoefficient);
     addParameter(osdNoiseRatio);
@@ -127,8 +128,10 @@ void BeatboxVoxAudioProcessor::initialiseSynth ()
     WavAudioFormat wavFormat;
     BigInteger kickNoteRange;
     BigInteger snareNoteRange;
+    BigInteger osdTestSoundNoteRange;
 
     drumSynth.clearSounds();
+    osdTestSynth.clearSounds();
 
     std::unique_ptr<AudioFormatReader> readerKickDrum(wavFormat.createReaderFor(new MemoryInputStream(BinaryData::bassdrum_wav,
                                                                                                       BinaryData::bassdrum_wavSize,
@@ -139,13 +142,24 @@ void BeatboxVoxAudioProcessor::initialiseSynth ()
                                                                                                        BinaryData::snaredrum_wavSize,
                                                                                                        false),
                                                                                                        true));
-    kickNoteRange.setBit(12);
-    snareNoteRange.setBit(43);
+
+    std::unique_ptr<AudioFormatReader> readerOSDTestSound(wavFormat.createReaderFor(new MemoryInputStream(BinaryData::osdTestOne_wav, 
+                                                                                                          BinaryData::osdTestOne_wavSize,
+                                                                                                          false), 
+                                                                                                          true));
+
+    kickNoteRange.setBit(kickNoteNumber);
+    snareNoteRange.setBit(snareNoteNumber);
+    osdTestSoundNoteRange.setBit(osdTestSoundNoteNumber);
+
     
-    drumSynth.addSound(new SamplerSound("Kick Sound", *readerKickDrum, kickNoteRange, 12, 0.0, 0.1, 5.0));
-    drumSynth.addSound(new SamplerSound("Snare Sound", *readerSnareDrum, snareNoteRange, 43, 0.0, 0.1, 5.0));
+    drumSynth.addSound(new SamplerSound("Kick Sound", *readerKickDrum, kickNoteRange, kickNoteNumber, 0.0, 0.0, 5.0));
+    drumSynth.addSound(new SamplerSound("Snare Sound", *readerSnareDrum, snareNoteRange, snareNoteNumber, 0.0, 0.0, 5.0));
 
     drumSynth.addVoice(new SamplerVoice());
+
+    osdTestSynth.addSound(new SamplerSound("OSD Test Sound", *readerOSDTestSound, osdTestSoundNoteRange, osdTestSoundNoteNumber, 0.0, 0.0, 5.0));
+    osdTestSynth.addVoice(new SamplerVoice());
 }
 
 //==============================================================================
@@ -157,6 +171,7 @@ void BeatboxVoxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
     downSampledBuffer.clear();
 
     drumSynth.setCurrentPlaybackSampleRate(sampleRate);
+    osdTestSynth.setCurrentPlaybackSampleRate(sampleRate);
 
     classifier.setCurrentBufferSize(samplesPerBlock);
     //classifier.setCurrentSampleRate(sampleRate);
@@ -217,7 +232,20 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     interpolator.process((downSamplingRate / sampleRate), buffer.getReadPointer(0), downSampledBuffer.getWritePointer(0, 0), numSamples);
 
     //classifier.processAudioBuffer(buffer.getReadPointer(0)); 
-    classifier.processAudioBuffer(downSampledBuffer.getReadPointer(0));
+    classifier.processAudioBuffer(downSampledBuffer.getReadPointer(0), numSamples);
+
+    
+    //This is used for configuring the onset detector settings from the GUI
+    if (classifier.noteOnsetDetected())
+    {
+        //NOTE: Potentially add a flag to onset detected in an fifo or something for visual response on onset.
+        
+        if (usingOSDTestSound.load())
+        {
+            triggerOSDTestSound(midiMessages);
+            osdTestSynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());    
+        }
+    }
 
     sound = classifier.classify();
     
@@ -246,13 +274,19 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
 //==============================================================================
 void BeatboxVoxAudioProcessor::triggerKickDrum(MidiBuffer& midiMessages)
 {
-    midiMessages.addEvent(MidiMessage::noteOn(1, 12, (uint8) 100), 0);
+    midiMessages.addEvent(MidiMessage::noteOn(1, kickNoteNumber, (uint8) 100), 0);
 }
 
 //==============================================================================
 void BeatboxVoxAudioProcessor::triggerSnareDrum(MidiBuffer& midiMessages)
 {
-    midiMessages.addEvent(MidiMessage::noteOn(1, 43, (uint8) 100), 0);
+    midiMessages.addEvent(MidiMessage::noteOn(1, snareNoteNumber, (uint8) 100), 0);
+}
+
+//==============================================================================
+void BeatboxVoxAudioProcessor::triggerOSDTestSound(MidiBuffer& midiMessages)
+{
+    midiMessages.addEvent(MidiMessage::noteOn(1, osdTestSoundNoteNumber, (uint8) 100), 0);
 }
 
 //==============================================================================
@@ -288,6 +322,12 @@ void BeatboxVoxAudioProcessor::setStateInformation (const void* data, int sizeIn
 }
 
 //==============================================================================
+void BeatboxVoxAudioProcessor::setUsingOSDTestSound(bool useTestSound)
+{
+    usingOSDTestSound.store(useTestSound);
+}
+//==============================================================================
+
 // This creates new instances of the plugin..
 AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {

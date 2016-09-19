@@ -10,23 +10,25 @@
 
 #include "CustomAudioParameter.h"
 
-CustomAudioParameter::CustomAudioParameter(String initParameterID, String initParameterName) 
-    : AudioProcessorParameterWithID(initParameterID, initParameterName), 
+CustomAudioParameter::CustomAudioParameter(String initParameterID) 
+    : AudioProcessorParameterWithID(initParameterID, initParameterID), 
       normalisedValue(0.0), 
       unnormalisedValue(0.0)
 {
-    name = initParameterName;
+    //Name is initial set as the same as the parameterID - caller can change this later.
+    name = initParameterID;
     range.start = 0.0;
     range.end = 1.0;
 }
 
 
-CustomAudioParameter::CustomAudioParameter(String initParameterID, String initParameterName, std::function<void(float)> initSetValueCallback, bool initUseNormalizedForCallback) 
-    : AudioProcessorParameterWithID(initParameterID, initParameterName),
+CustomAudioParameter::CustomAudioParameter(String initParameterID, std::function<void(float)> initSetValueCallback, bool initUseNormalizedForCallback) 
+    : AudioProcessorParameterWithID(initParameterID, initParameterID),
       normalisedValue(0.0),
       unnormalisedValue(0.0)
 {
-    name = initParameterName;
+    //Name is initial set as the same as the parameterID - caller can change this later.
+    name = initParameterID;
     useNormalizedForCallback = initUseNormalizedForCallback;
     setValueCallback = initSetValueCallback;
     range.start = 0.0;

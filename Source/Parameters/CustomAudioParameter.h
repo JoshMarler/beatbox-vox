@@ -28,10 +28,10 @@ class CustomAudioParameter : public AudioProcessorParameterWithID
 {
 public:
     
-    CustomAudioParameter(String initParameterID, String initParameterName);
+    CustomAudioParameter(String initParameterID);
     
     //initSetValueCallback is a callback function you can specify (using a lambda etc) that will be called every time the parameter value changes.
-    CustomAudioParameter(String initParameterID, String initParameterName, std::function<void(float)> initSetValueCallback, bool initUseNormalizedForCallback = false);
+    CustomAudioParameter(String initParameterID, std::function<void(float)> initSetValueCallback, bool initUseNormalizedForCallback = false);
     
     ~CustomAudioParameter();
     
