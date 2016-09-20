@@ -13,6 +13,10 @@
   <MAINGROUP id="z3DhfV" name="BeatboxVox">
     <GROUP id="{B8A10E5D-D185-1FFC-CC44-E732222EC3EB}" name="Source">
       <GROUP id="{67405001-D3DB-C4FE-5FFD-7E2E8B06E464}" name="Parameters">
+        <FILE id="T87sxV" name="CallbackParameter.cpp" compile="1" resource="0"
+              file="Source/Parameters/CallbackParameter.cpp"/>
+        <FILE id="QGnBK0" name="CallbackParameter.h" compile="0" resource="0"
+              file="Source/Parameters/CallbackParameter.h"/>
         <FILE id="uVkgmT" name="CustomAudioParameter.cpp" compile="1" resource="0"
               file="Source/Parameters/CustomAudioParameter.cpp"/>
         <FILE id="b5FHfJ" name="CustomAudioParameter.h" compile="0" resource="0"
