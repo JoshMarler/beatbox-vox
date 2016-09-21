@@ -15,17 +15,26 @@ OnsetDetectorComponent::OnsetDetectorComponent(BeatboxVoxAudioProcessor& p)
       useOSDTestSoundButton("Use Onset Detection Test Sound")
 {
 
-    meanCoeffSlider = std::make_unique<CustomSlider> (processor.getParameterFromID(BeatboxVoxAudioProcessor::paramOSDMeanCoeff));
-    noiseRatioSlider = std::make_unique<CustomSlider> (processor.getParameterFromID(BeatboxVoxAudioProcessor::paramOSDNoiseRatio));
-    msBetweenOnsetsSlider = std::make_unique<CustomSlider> (processor.getParameterFromID(BeatboxVoxAudioProcessor::paramOSDMsBetweenOnsets));
-
-    noiseRatioSlider->setRange(0.0, 1.0, 0.01);
-    meanCoeffSlider->setRange(0.0, 1.0, 0.01);
-    msBetweenOnsetsSlider->setRange(0.0, 50.0, 5.0);
+    meanCoeffSlider = std::make_unique<Slider> (Slider::LinearHorizontal, Slider::TextBoxRight);
+    noiseRatioSlider = std::make_unique<Slider> (Slider::LinearHorizontal, Slider::TextBoxRight);
+    msBetweenOnsetsSlider = std::make_unique<Slider> (Slider::LinearHorizontal, Slider::TextBoxRight);
 
     addAndMakeVisible(*meanCoeffSlider);
     addAndMakeVisible(*noiseRatioSlider);
     addAndMakeVisible(*msBetweenOnsetsSlider);
+
+
+    meanCoeffAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(processor.getValueTreeState(), 
+                                                                                           BeatboxVoxAudioProcessor::paramOSDMeanCoeff,
+                                                                                           *meanCoeffSlider);
+
+    noiseRatioAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(processor.getValueTreeState(), 
+                                                                                            BeatboxVoxAudioProcessor::paramOSDNoiseRatio, 
+                                                                                            *noiseRatioSlider);
+
+    msBetweenOnsetsAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(processor.getValueTreeState(),
+                                                                                                 BeatboxVoxAudioProcessor::paramOSDMsBetweenOnsets, 
+                                                                                                 *msBetweenOnsetsSlider);
 
 
     meanCoeffLabel.setText("Mean Coefficient", juce::NotificationType::dontSendNotification);

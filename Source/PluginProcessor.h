@@ -14,13 +14,13 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
-#include "Parameters/CustomAudioParameter.h"
 #include "AudioClassify/src/AudioClassify.h"
 
 
 //==============================================================================
 
-class BeatboxVoxAudioProcessor  : public AudioProcessor
+class BeatboxVoxAudioProcessor  : public AudioProcessor,
+                                  public AudioProcessorValueTreeState::Listener
 {
 public:
     //==============================================================================
@@ -60,6 +60,9 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     //==============================================================================
+    
+    AudioProcessorValueTreeState& getValueTreeState();
+
 
     /** Sets a flag to indicate whether a test sound should be triggered for 
      * each onset detected.This is used as a reference point / listening test when
@@ -70,9 +73,7 @@ public:
     
     //Setup the audio processor parameters
     void setupParameters();
-    
-    //Get parameter from ID
-    AudioProcessorParameter& getParameterFromID(StringRef id);
+    void parameterChanged(const String& paramID, float newValue) override;
     
     //Initialise the synth object
     void initialiseSynth();
@@ -118,10 +119,8 @@ private:
 
     AudioSampleBuffer downSampledBuffer;
     
-    //Parameters
-    CustomAudioParameter* osdMeanCoefficient;
-    CustomAudioParameter* osdNoiseRatio; 
-    CustomAudioParameter* osdMsBetweenOnsets;
+    std::unique_ptr<AudioProcessorValueTreeState> processorState;
+    std::unique_ptr<UndoManager> processorUndoManager;
 
 };
 

@@ -86,43 +86,66 @@ void BeatboxVoxAudioProcessor::changeProgramName (int index, const String& newNa
 }
 
 //==============================================================================
+AudioProcessorValueTreeState& BeatboxVoxAudioProcessor::getValueTreeState()
+{
+    return *processorState;
+}
+//==============================================================================
 void BeatboxVoxAudioProcessor::setupParameters()
 {
-    auto onsetDetectMeanCallback = [this] (float newMeanCoeff) { this->classifier.setOnsetDetectorMeanCoeff(newMeanCoeff); };
-    osdMeanCoefficient = new CustomAudioParameter(paramOSDMeanCoeff, onsetDetectMeanCallback, false);
+    //auto onsetDetectMeanCallback = [this] (float newMeanCoeff) { this->classifier.setOnsetDetectorMeanCoeff(newMeanCoeff); };
+    //auto onsetDetectNoiseCallback = [this] (float newNoiseRatio) { this->classifier.setOnsetDetectorNoiseRatio(newNoiseRatio); };
+    //auto onsetDetectMsBetweenCallback = [this] (float newMsBetweenOnsets) { this->classifier.setOSDMsBetweenOnsets(newMsBetweenOnsets); };
+    
+    processorUndoManager = std::make_unique<UndoManager>();
+    processorState = std::make_unique<AudioProcessorValueTreeState>(*this, processorUndoManager.get());
+    
+    processorState->createAndAddParameter(paramOSDNoiseRatio, 
+                                          "OSD Noise Ratio",
+                                          "Onset Detector Noise Ratio", 
+                                          NormalisableRange<float> (0.0, 1.0, 0.01), 
+                                          0.05, 
+                                          nullptr, 
+                                          nullptr);
 
-    auto onsetDetectNoiseCallback = [this] (float newNoiseRatio) { this->classifier.setOnsetDetectorNoiseRatio(newNoiseRatio); };
-    osdNoiseRatio = new CustomAudioParameter(paramOSDNoiseRatio, onsetDetectNoiseCallback, false);
+    processorState->addParameterListener(paramOSDNoiseRatio, this);
 
-    auto onsetDetectMsBetweenCallback = [this] (float newMsBetweenOnsets) { this->classifier.setOSDMsBetweenOnsets(newMsBetweenOnsets); };
-    osdMsBetweenOnsets = new CustomAudioParameter(paramOSDMsBetweenOnsets, onsetDetectMsBetweenCallback, false); 
 
-    addParameter(osdMeanCoefficient);
-    addParameter(osdNoiseRatio);
-    addParameter(osdMsBetweenOnsets);
+
+    processorState->createAndAddParameter(paramOSDMeanCoeff, 
+                                          "OSD Mean Coefficient",
+                                          "Onset Detector Mean Coefficient",
+                                          NormalisableRange<float> (0.0, 1.0, 0.01),
+                                          0.0, 
+                                          nullptr,
+                                          nullptr);
+
+    processorState->addParameterListener(paramOSDMeanCoeff, this);
+
+
+
+    processorState->createAndAddParameter(paramOSDMsBetweenOnsets, 
+                                          "OSD Ms Between Onsets",
+                                          "Onset Detector Ms Between Onsets",
+                                          NormalisableRange<float> (0.0, 50.0, 5.0),
+                                          0.0,
+                                          nullptr,
+                                          nullptr);
+
+    processorState->addParameterListener(paramOSDMsBetweenOnsets, this);
+
+
+    processorState->state = ValueTree("Beatbox Vox");
+
 }
 
 //==============================================================================
-AudioProcessorParameter& BeatboxVoxAudioProcessor::getParameterFromID(StringRef id)
+void BeatboxVoxAudioProcessor::parameterChanged(const String& paramID, float newValue)
 {
-    AudioProcessorParameter* param = nullptr;
 
-    const std::size_t numParams = getNumParameters();
-
-    for (std::size_t i = 0; i < numParams; i++)
-    {
-       if (AudioProcessorParameterWithID* p = dynamic_cast<AudioProcessorParameterWithID*>(getParameters().getUnchecked(i)))
-       {
-            if (id == p->paramID)      
-                param = p;
-       }
-
-    }
-
-    return *param;
 }
-
 //==============================================================================
+
 void BeatboxVoxAudioProcessor::initialiseSynth ()
 {
     /** JWM - Quick and dirty sample drum synth for prototype

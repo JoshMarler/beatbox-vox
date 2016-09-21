@@ -12,16 +12,6 @@
               pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="4.2.4">
   <MAINGROUP id="z3DhfV" name="BeatboxVox">
     <GROUP id="{B8A10E5D-D185-1FFC-CC44-E732222EC3EB}" name="Source">
-      <GROUP id="{67405001-D3DB-C4FE-5FFD-7E2E8B06E464}" name="Parameters">
-        <FILE id="T87sxV" name="CallbackParameter.cpp" compile="1" resource="0"
-              file="Source/Parameters/CallbackParameter.cpp"/>
-        <FILE id="QGnBK0" name="CallbackParameter.h" compile="0" resource="0"
-              file="Source/Parameters/CallbackParameter.h"/>
-        <FILE id="uVkgmT" name="CustomAudioParameter.cpp" compile="1" resource="0"
-              file="Source/Parameters/CustomAudioParameter.cpp"/>
-        <FILE id="b5FHfJ" name="CustomAudioParameter.h" compile="0" resource="0"
-              file="Source/Parameters/CustomAudioParameter.h"/>
-      </GROUP>
       <GROUP id="{9C2B9F3E-88F4-4456-7A0E-5B312DD877F3}" name="GuiComponents">
         <FILE id="kwvSID" name="AudioClassifierComponent.cpp" compile="1" resource="0"
               file="Source/GuiComponents/AudioClassifierComponent.cpp"/>
@@ -31,9 +21,6 @@
               file="Source/GuiComponents/CustomLookAndFeel.cpp"/>
         <FILE id="DZabwO" name="CustomLookAndFeel.h" compile="0" resource="0"
               file="Source/GuiComponents/CustomLookAndFeel.h"/>
-        <FILE id="mh6GJs" name="CustomSlider.cpp" compile="1" resource="0"
-              file="Source/GuiComponents/CustomSlider.cpp"/>
-        <FILE id="DJ6rfp" name="CustomSlider.h" compile="0" resource="0" file="Source/GuiComponents/CustomSlider.h"/>
         <FILE id="ER95zv" name="GuiComponents.h" compile="0" resource="0" file="Source/GuiComponents/GuiComponents.h"/>
         <FILE id="aabJKX" name="OnsetDetectorComponent.cpp" compile="1" resource="0"
               file="Source/GuiComponents/OnsetDetectorComponent.cpp"/>

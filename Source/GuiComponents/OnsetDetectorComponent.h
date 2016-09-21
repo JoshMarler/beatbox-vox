@@ -15,7 +15,6 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
-#include "CustomSlider.h"
 #include "CustomLookAndFeel.h"
 #include "../PluginProcessor.h"
 
@@ -44,9 +43,14 @@ private:
     ToggleButton useOSDTestSoundButton;
 
     //Parameter sliders
-    std::unique_ptr<CustomSlider> meanCoeffSlider;
-    std::unique_ptr<CustomSlider> noiseRatioSlider;
-    std::unique_ptr<CustomSlider> msBetweenOnsetsSlider;
+    std::unique_ptr<Slider> meanCoeffSlider;
+    std::unique_ptr<Slider> noiseRatioSlider;
+    std::unique_ptr<Slider> msBetweenOnsetsSlider;
+
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> meanCoeffAttachment;
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> noiseRatioAttachment;
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> msBetweenOnsetsAttachment;
+
 
 };
 
