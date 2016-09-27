@@ -16,10 +16,12 @@ OnsetDetectorComponent::OnsetDetectorComponent(BeatboxVoxAudioProcessor& p)
 {
 
     meanCoeffSlider = std::make_unique<Slider> (Slider::LinearHorizontal, Slider::TextBoxRight);
+    medianCoeffSlider = std::make_unique<Slider> (Slider::LinearHorizontal, Slider::TextBoxRight);
     noiseRatioSlider = std::make_unique<Slider> (Slider::LinearHorizontal, Slider::TextBoxRight);
     msBetweenOnsetsSlider = std::make_unique<Slider> (Slider::LinearHorizontal, Slider::TextBoxRight);
 
     addAndMakeVisible(*meanCoeffSlider);
+    addAndMakeVisible(*medianCoeffSlider);
     addAndMakeVisible(*noiseRatioSlider);
     addAndMakeVisible(*msBetweenOnsetsSlider);
 
@@ -27,6 +29,10 @@ OnsetDetectorComponent::OnsetDetectorComponent(BeatboxVoxAudioProcessor& p)
     meanCoeffAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(processor.getValueTreeState(), 
                                                                                            BeatboxVoxAudioProcessor::paramOSDMeanCoeff,
                                                                                            *meanCoeffSlider);
+
+    medianCoeffAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(processor.getValueTreeState(), 
+                                                                                           BeatboxVoxAudioProcessor::paramOSDMedianCoeff,
+                                                                                           *medianCoeffSlider);
 
     noiseRatioAttachment = std::make_unique<AudioProcessorValueTreeState::SliderAttachment>(processor.getValueTreeState(), 
                                                                                             BeatboxVoxAudioProcessor::paramOSDNoiseRatio, 
@@ -41,6 +47,10 @@ OnsetDetectorComponent::OnsetDetectorComponent(BeatboxVoxAudioProcessor& p)
     meanCoeffLabel.setFont(Font("Cracked", 14.0f, Font::plain));
     meanCoeffLabel.setColour(Label::textColourId, Colours::greenyellow);
 
+    medianCoeffLabel.setText("Median Coefficient", juce::NotificationType::dontSendNotification);
+    medianCoeffLabel.setFont(Font("Cracked", 14.0f, Font::plain));
+    medianCoeffLabel.setColour(Label::textColourId, Colours::greenyellow);
+
     noiseRatioLabel.setText("Noise Ratio", juce::NotificationType::dontSendNotification);
     noiseRatioLabel.setFont(Font("Cracked", 14.0f, Font::plain));
     noiseRatioLabel.setColour(Label::textColourId, Colours::greenyellow);
@@ -54,8 +64,9 @@ OnsetDetectorComponent::OnsetDetectorComponent(BeatboxVoxAudioProcessor& p)
     useOSDTestSoundLabel.setColour(Label::textColourId, Colours::greenyellow);
 
 
-    addAndMakeVisible(noiseRatioLabel);
     addAndMakeVisible(meanCoeffLabel);
+    addAndMakeVisible(medianCoeffLabel);
+    addAndMakeVisible(noiseRatioLabel);
     addAndMakeVisible(msBetweenOnsetsLabel);
     addAndMakeVisible(useOSDTestSoundLabel);
 
@@ -85,29 +96,34 @@ void OnsetDetectorComponent::resized()
 
 
     //Rectangle/Bounds for meanCoeff controls
-    Rectangle<int> meanCoeffArea(leftSide.removeFromTop(leftSide.getHeight() / 4));
+    Rectangle<int> meanCoeffArea(leftSide.removeFromTop(leftSide.getHeight() / 5));
 
     meanCoeffLabel.setBounds(meanCoeffArea.removeFromTop(meanCoeffArea.getHeight() / 5));
     meanCoeffSlider->setBounds(meanCoeffArea);
     
     
     //Rectangle/Bounds for noiseRatio controls
-    Rectangle<int> noiseRatioArea(leftSide.removeFromTop(leftSide.getHeight() / 3));
+    Rectangle<int> noiseRatioArea(leftSide.removeFromTop(leftSide.getHeight() / 4));
 
     noiseRatioLabel.setBounds(noiseRatioArea.removeFromTop(noiseRatioArea.getHeight() / 5));
     noiseRatioSlider->setBounds(noiseRatioArea);
     
     
     //Rectangle/Bounds for msBetweenOnsets controls 
-    Rectangle<int> msBetweenOnsetsArea(leftSide.removeFromTop(leftSide.getHeight() / 2));
+    Rectangle<int> msBetweenOnsetsArea(leftSide.removeFromTop(leftSide.getHeight() / 3));
 
     msBetweenOnsetsLabel.setBounds(msBetweenOnsetsArea.removeFromTop(msBetweenOnsetsArea.getHeight() / 5));
     msBetweenOnsetsSlider->setBounds(msBetweenOnsetsArea);
 
     
-    //Rectangle/Bounds for useOSDTestSound controls
-    Rectangle<int> useOSDTestSoundArea(leftSide);
+    
+    //Rectangle/Bounds for useOSDTestSound controlsRectangle<int> meanCoeffArea(leftSidmeanCoeffArea);
+    Rectangle<int> medianCoeffArea(leftSide.removeFromTop(leftSide.getHeight() / 2));
 
+    medianCoeffLabel.setBounds(medianCoeffArea.removeFromTop(medianCoeffArea.getHeight() / 5));
+    medianCoeffSlider->setBounds(medianCoeffArea); 
+    
+    //Give remaining leftSide space to useOSDTestSound controls
     useOSDTestSoundLabel.setBounds(leftSide.removeFromTop(leftSide.getHeight() / 5));
     useOSDTestSoundButton.setBounds(leftSide);
 }

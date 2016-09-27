@@ -25,12 +25,22 @@ OnsetDetector<T>::OnsetDetector(int initBufferSize)
     //Set to false initially - this will be set to true and left after the first onset is detected.
     firstOnsetDetected = false;    
 
-    meanCoeff.store(1.5);
+    meanCoeff.store(0.5);
+    medianCoeff.store(0.8);
     noiseRatio.store(0.05);
     
+    /**
+     * NOTE: May modify this later to allow user/caller to modify
+     * numPreviousValues controlling the window size/number of previous odf values
+     * that are used in threshold calculation. However this will require an atomic pointer swap
+     * and some garbage collection as the previousValues arrays are read on the audio thread etc. 
+     */
     previousValues.reset(new T[numPreviousValues]);
+    previousValuesCopy.reset(new T[numPreviousValues]);
 
     std::fill(previousValues.get(), (previousValues.get() + numPreviousValues), static_cast<T>(0.0));   
+    std::fill(previousValuesCopy.get(), (previousValuesCopy.get() + numPreviousValues), static_cast<T>(0.0));   
+
 
     setCurrentBufferSize(initBufferSize);
 }
@@ -96,6 +106,14 @@ T OnsetDetector<T>::getMeanCoefficient() const
 {
     return meanCoeff.load();
 }
+
+//=============================================================================
+template<typename T>
+void OnsetDetector<T>::setMedianCoefficient(T newCoeff)
+{
+    medianCoeff.store(newCoeff);
+}
+
 //=============================================================================
 template<typename T>
 void OnsetDetector<T>::setMinMsBetweenOnsets(int ms)
@@ -136,6 +154,8 @@ bool OnsetDetector<T>::checkForPeak(T featureValue)
 
     if (getUsingLocalMaximum()) 
     {
+        std::copy(previousValues.get(), previousValues.get() + numPreviousValues, previousValuesCopy.get());
+
         if (previousValues[0] > threshold && previousValues[0] > featureValue && previousValues[0] > previousValues[1]) 
         {
             /** For the first time an onset is detected set firstOnsetDetected = true 
@@ -148,18 +168,18 @@ bool OnsetDetector<T>::checkForPeak(T featureValue)
             if (!firstOnsetDetected)
             {
                 isOnset = true;
-                lastOnsetTime = std::chrono::high_resolution_clock::now();
+                lastOnsetTime = std::chrono::steady_clock::now();
                 firstOnsetDetected = true;
             }
             else 
             {
-                dur = std::chrono::high_resolution_clock::now() - lastOnsetTime;
+                dur = std::chrono::steady_clock::now() - lastOnsetTime;
                 msElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(dur);
-
+                
                 if (msElapsed.count() > msBetweenOnsets.load())
                 {
                     isOnset = true;
-                    lastOnsetTime = std::chrono::high_resolution_clock::now();
+                    lastOnsetTime = std::chrono::steady_clock::now();
                 }
             }
         }
@@ -171,9 +191,14 @@ bool OnsetDetector<T>::checkForPeak(T featureValue)
             isOnset = true;
     }
 
-    threshold = (meanCoeff.load() * MathHelpers::getMean(previousValues.get(), numPreviousValues)) +
+    /** threshold = (meanCoeff.load() * MathHelpers::getMean(previousValues.get(), numPreviousValues)) + */
+    /**             (medianCoeff.load() * MathHelpers::getMedian(previousValuesCopy.get(), numPreviousValues)) + */
+    /**             (noiseRatio.load() * largestPeak); */
+
+    threshold = (medianCoeff.load() * MathHelpers::getMedian(previousValuesCopy.get(), numPreviousValues)) +
                 (noiseRatio.load() * largestPeak);
 
+    /** threshold = (meanCoeff.load() * MathHelpers::getMean(previousValues.get(), numPreviousValues)); */
 
     for (auto i = numPreviousValues - 1; i > 0; i--) 
     { 
@@ -184,9 +209,9 @@ bool OnsetDetector<T>::checkForPeak(T featureValue)
 
     if (isOnset && (previousValues[1] > largestPeak))
         largestPeak = previousValues[1];
-    
 
-    return isOnset;
+     return isOnset;
+        
 }
 
 //=============================================================================

@@ -12,6 +12,7 @@
 #include "PluginEditor.h"
 
 String BeatboxVoxAudioProcessor::paramOSDMeanCoeff ("osd_meancoeff");
+String BeatboxVoxAudioProcessor::paramOSDMedianCoeff ("osd_mediancoeff");
 String BeatboxVoxAudioProcessor::paramOSDNoiseRatio ("osd_noiseratio");
 String BeatboxVoxAudioProcessor::paramOSDMsBetweenOnsets ("osd_msbetween");
 
@@ -93,9 +94,6 @@ AudioProcessorValueTreeState& BeatboxVoxAudioProcessor::getValueTreeState()
 //==============================================================================
 void BeatboxVoxAudioProcessor::setupParameters()
 {
-    //auto onsetDetectMeanCallback = [this] (float newMeanCoeff) { this->classifier.setOnsetDetectorMeanCoeff(newMeanCoeff); };
-    //auto onsetDetectNoiseCallback = [this] (float newNoiseRatio) { this->classifier.setOnsetDetectorNoiseRatio(newNoiseRatio); };
-    //auto onsetDetectMsBetweenCallback = [this] (float newMsBetweenOnsets) { this->classifier.setOSDMsBetweenOnsets(newMsBetweenOnsets); };
     
     processorUndoManager = std::make_unique<UndoManager>();
     processorState = std::make_unique<AudioProcessorValueTreeState>(*this, processorUndoManager.get());
@@ -103,7 +101,7 @@ void BeatboxVoxAudioProcessor::setupParameters()
     processorState->createAndAddParameter(paramOSDNoiseRatio, 
                                           "OSD Noise Ratio",
                                           "Onset Detector Noise Ratio", 
-                                          NormalisableRange<float> (0.0, 1.0, 0.01), 
+                                          NormalisableRange<float> (0.01, 1.0, 0.01), 
                                           0.05, 
                                           nullptr, 
                                           nullptr);
@@ -115,13 +113,23 @@ void BeatboxVoxAudioProcessor::setupParameters()
     processorState->createAndAddParameter(paramOSDMeanCoeff, 
                                           "OSD Mean Coefficient",
                                           "Onset Detector Mean Coefficient",
-                                          NormalisableRange<float> (0.0, 1.0, 0.01),
-                                          0.0, 
+                                          NormalisableRange<float> (0.01, 1.0, 0.01),
+                                          1.0, 
                                           nullptr,
                                           nullptr);
 
     processorState->addParameterListener(paramOSDMeanCoeff, this);
 
+
+    processorState->createAndAddParameter(paramOSDMedianCoeff, 
+                                          "OSD Median Coefficient",
+                                          "Onset Detector Median Coefficient",
+                                          NormalisableRange<float> (0.01, 1.0, 0.01),
+                                          1.0, 
+                                          nullptr,
+                                          nullptr);
+
+    processorState->addParameterListener(paramOSDMedianCoeff, this);
 
 
     processorState->createAndAddParameter(paramOSDMsBetweenOnsets, 
@@ -137,12 +145,22 @@ void BeatboxVoxAudioProcessor::setupParameters()
 
     processorState->state = ValueTree("Beatbox Vox");
 
+    auto onsetDetectMeanCallback = [this] (float newMeanCoeff) { this->classifier.setOnsetDetectorMeanCoeff(newMeanCoeff); };
+    auto onsetDetectMedianCallback = [this] (float newMedianCoeff) { this->classifier.setOnsetDetectorMedianCoeff(newMedianCoeff); };
+    auto onsetDetectNoiseCallback = [this] (float newNoiseRatio) { this->classifier.setOnsetDetectorNoiseRatio(newNoiseRatio); };
+    auto onsetDetectMsBetweenCallback = [this] (float newMsBetweenOnsets) { this->classifier.setOSDMsBetweenOnsets(newMsBetweenOnsets); };
+    
+    paramCallbacks.insert(std::make_pair(paramOSDMeanCoeff, onsetDetectMeanCallback));
+    paramCallbacks.insert(std::make_pair(paramOSDMedianCoeff, onsetDetectMedianCallback));
+    paramCallbacks.insert(std::make_pair(paramOSDNoiseRatio, onsetDetectNoiseCallback));
+    paramCallbacks.insert(std::make_pair(paramOSDMsBetweenOnsets, onsetDetectMsBetweenCallback));
 }
 
 //==============================================================================
 void BeatboxVoxAudioProcessor::parameterChanged(const String& paramID, float newValue)
 {
-
+    auto callback = paramCallbacks.find(paramID);
+    callback->second(newValue);
 }
 //==============================================================================
 
@@ -267,7 +285,6 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     if (classifier.noteOnsetDetected())
     {
         //NOTE: Potentially add a flag to onset detected in an fifo or something for visual response on onset.
-        
         if (usingOSDTestSound.load())
         {
             triggerOSDTestSound(midiMessages);

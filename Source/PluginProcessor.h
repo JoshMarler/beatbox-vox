@@ -11,6 +11,7 @@
 #define PLUGINPROCESSOR_H_INCLUDED
 
 #include <atomic>
+#include <map>
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
@@ -93,6 +94,7 @@ public:
 
     //Parameter ID strings
     static String paramOSDMeanCoeff;
+    static String paramOSDMedianCoeff;
     static String paramOSDNoiseRatio;
     static String paramOSDMsBetweenOnsets;
 
@@ -122,6 +124,7 @@ private:
     std::unique_ptr<AudioProcessorValueTreeState> processorState;
     std::unique_ptr<UndoManager> processorUndoManager;
 
+    std::map<String, std::function<void(float)>> paramCallbacks;
 };
 
 

@@ -48,6 +48,7 @@ public:
     
     //Onset detector functions
     void setOnsetDetectorMeanCoeff(T newMeanCoeff);
+    void setOnsetDetectorMedianCoeff(T newMedianCoeff);
     void setOnsetDetectorNoiseRatio(T newNoiseRatio);
     void setOSDMsBetweenOnsets(int ms);
 

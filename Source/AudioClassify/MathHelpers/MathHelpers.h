@@ -18,10 +18,39 @@ namespace MathHelpers
     template<typename T>
     T getMean(const T* vec, const std::size_t vecSize)
     {
-        auto sum = std::accumulate(vec, (vec + vecSize), 0.0);
+        std::size_t end = sizeof(vec[0]) * vecSize;
+
+        auto sum = std::accumulate(vec, (vec + end), 0.0);
         return sum / vecSize;       
     }
+
+    //Note that this function uses std::n_element internally and will modify the T* vec argument.
+    template<typename T>
+    T getMedian(T* vec, const std::size_t vecSize)
+    {
+        std::size_t middle = vecSize / 2;
+        
+        std::nth_element(vec, (vec + middle), (vec + vecSize));
+
+        T medianOdd = vec[middle];
+        T medianEven = 0;
+
+        if (vecSize % 2 == 1)
+        {
+            return medianOdd;
+        }
+        else
+        {
+            //vec is even - find average of centre values
+            std::nth_element(vec, (vec + (middle - 1)), (vec + vecSize)); 
+            
+            medianEven = vec[middle - 1];
+            return (medianEven + medianOdd) * 0.5;
+        }
+
+    }
 }
+
 
 
 #endif  // MATHHELPERS_H_INCLUDED

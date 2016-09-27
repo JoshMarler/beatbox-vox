@@ -419,7 +419,6 @@
           <FILE id="N58EPj" name="README.md" compile="0" resource="1" file="Source/AudioClassify/Gist/README.md"/>
         </GROUP>
         <GROUP id="{1C6039E4-61BF-701A-8B4E-2B5CAF80A717}" name="MathHelpers">
-          <FILE id="PKxqKz" name="MathHelpers.cpp" compile="1" resource="0" file="Source/AudioClassify/MathHelpers/MathHelpers.cpp"/>
           <FILE id="FMel43" name="MathHelpers.h" compile="1" resource="0" file="Source/AudioClassify/MathHelpers/MathHelpers.h"/>
         </GROUP>
         <GROUP id="{85E02C39-0B9F-AA28-9223-C9BC61429A23}" name="src">

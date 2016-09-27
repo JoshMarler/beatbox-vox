@@ -103,6 +103,12 @@ void AudioClassifier<T>::setOnsetDetectorMeanCoeff(T newMeanCoeff)
 
 //==============================================================================
 template<typename T>
+void AudioClassifier<T>::setOnsetDetectorMedianCoeff(T newMedianCoeff)
+{
+    osDetector.setMedianCoefficient(newMedianCoeff);
+}
+//==============================================================================
+template<typename T>
 void AudioClassifier<T>::setOnsetDetectorNoiseRatio(T newNoiseRatio)
 {
     osDetector.setNoiseRatio(newNoiseRatio);

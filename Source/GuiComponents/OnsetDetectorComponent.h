@@ -36,6 +36,7 @@ private:
     BeatboxVoxAudioProcessor& processor;
 
     Label meanCoeffLabel;
+    Label medianCoeffLabel;
     Label noiseRatioLabel;
     Label useOSDTestSoundLabel;
     Label msBetweenOnsetsLabel;
@@ -44,10 +45,12 @@ private:
 
     //Parameter sliders
     std::unique_ptr<Slider> meanCoeffSlider;
+    std::unique_ptr<Slider> medianCoeffSlider;
     std::unique_ptr<Slider> noiseRatioSlider;
     std::unique_ptr<Slider> msBetweenOnsetsSlider;
 
     std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> meanCoeffAttachment;
+    std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> medianCoeffAttachment;
     std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> noiseRatioAttachment;
     std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> msBetweenOnsetsAttachment;
 
