@@ -18,7 +18,7 @@ OnsetDetector<T>::OnsetDetector(int initBufferSize)
 {
     usingLocalMaximum = true;
     numPreviousValues = 10;
-    threshold = 0.5;
+    threshold = 1.0;
     largestPeak = 0.0;
     msBetweenOnsets.store(20);
 
@@ -152,11 +152,13 @@ bool OnsetDetector<T>::checkForPeak(T featureValue)
     std::chrono::duration<float> dur;
     std::chrono::milliseconds msElapsed;
 
-    if (getUsingLocalMaximum()) 
+    //JWM - NOTE: add conditional section here to allow lowpass filtering / normalisation as pre-processing of featureValue
+    
+    if (usingLocalMaximum) 
     {
         std::copy(previousValues.get(), previousValues.get() + numPreviousValues, previousValuesCopy.get());
 
-        if (previousValues[0] > threshold && previousValues[0] > featureValue && previousValues[0] > previousValues[1]) 
+        if ((previousValues[0] > threshold) && (previousValues[0] > featureValue) && (previousValues[0] > previousValues[1]))
         {
             /** For the first time an onset is detected set firstOnsetDetected = true 
              *  so that the initial lastOnsetTime is valid.
@@ -191,14 +193,8 @@ bool OnsetDetector<T>::checkForPeak(T featureValue)
             isOnset = true;
     }
 
-    /** threshold = (meanCoeff.load() * MathHelpers::getMean(previousValues.get(), numPreviousValues)) + */
-    /**             (medianCoeff.load() * MathHelpers::getMedian(previousValuesCopy.get(), numPreviousValues)) + */
-    /**             (noiseRatio.load() * largestPeak); */
-
-    threshold = (medianCoeff.load() * MathHelpers::getMedian(previousValuesCopy.get(), numPreviousValues)) +
-                (noiseRatio.load() * largestPeak);
-
-    /** threshold = (meanCoeff.load() * MathHelpers::getMean(previousValues.get(), numPreviousValues)); */
+    threshold = (meanCoeff.load() * MathHelpers::getMean(previousValues.get(), numPreviousValues)) +
+                (medianCoeff.load() * MathHelpers::getMedian(previousValuesCopy.get(), numPreviousValues));
 
     for (auto i = numPreviousValues - 1; i > 0; i--) 
     { 

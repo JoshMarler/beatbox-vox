@@ -288,10 +288,13 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
         if (usingOSDTestSound.load())
         {
             triggerOSDTestSound(midiMessages);
-            osdTestSynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());    
+            //osdTestSynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());    
         }
     }
 
+    //JWM - Added here as otherwise audio cutoff short
+    osdTestSynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());    
+    
     sound = classifier.classify();
     
     switch(sound)

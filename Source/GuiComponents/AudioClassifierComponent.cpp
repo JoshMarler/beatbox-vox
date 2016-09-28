@@ -41,6 +41,8 @@ AudioClassifierComponent::AudioClassifierComponent(BeatboxVoxAudioProcessor& p)
         auto button = soundButtons[i];
         button->setRadioGroupId(1234);
         button->addListener(this);
+        button->setColour(ToggleButton::ColourIds::textColourId, Colours::greenyellow);
+        button->setColour(ToggleButton::ColourIds::tickColourId, Colours::greenyellow);
 
         addAndMakeVisible(button);
     }
