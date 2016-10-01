@@ -10,6 +10,9 @@
 
 #include "OnsetDetectorComponent.h"
 //==============================================================================
+
+String OnsetDetectorComponent::useOSDTestSoundButtonID ("UseOSDTestSound");
+
 OnsetDetectorComponent::OnsetDetectorComponent(BeatboxVoxAudioProcessor& p)
     : processor(p), 
       useOSDTestSoundButton("Use Onset Detection Test Sound")
@@ -71,6 +74,7 @@ OnsetDetectorComponent::OnsetDetectorComponent(BeatboxVoxAudioProcessor& p)
     addAndMakeVisible(useOSDTestSoundLabel);
 
     useOSDTestSoundButton.addListener(this);
+    useOSDTestSoundButton.setComponentID(useOSDTestSoundButtonID);
     useOSDTestSoundButton.setToggleState(false, juce::NotificationType::dontSendNotification);
     addAndMakeVisible(useOSDTestSoundButton);
     
@@ -131,7 +135,7 @@ void OnsetDetectorComponent::resized()
 //==============================================================================
 void OnsetDetectorComponent::buttonClicked(Button* button)
 {
-    if (button == &useOSDTestSoundButton)
+    if (button->getComponentID() == useOSDTestSoundButtonID)
     {
         processor.setUsingOSDTestSound(button->getToggleState()); 
     }

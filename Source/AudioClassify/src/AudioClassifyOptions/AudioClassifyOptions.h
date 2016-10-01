@@ -34,7 +34,7 @@ struct AudioClassifyOptions
     {
         spectralDifference,
         spectralDifferenceHWR,
-        complexSpectralDifference,
+        //complexSpectralDifference,
         highFrequencyContent
     };
 };

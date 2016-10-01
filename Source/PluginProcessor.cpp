@@ -18,9 +18,7 @@ String BeatboxVoxAudioProcessor::paramOSDMsBetweenOnsets ("osd_msbetween");
 
 //==============================================================================
 BeatboxVoxAudioProcessor::BeatboxVoxAudioProcessor() 
-    : classifier(256, downSamplingRate, 2),
-      interpolator(),
-      downSampledBuffer()
+    : classifier(256, 48000, 2)
       
 { 
     usingOSDTestSound.store(false);
@@ -136,7 +134,7 @@ void BeatboxVoxAudioProcessor::setupParameters()
                                           "OSD Ms Between Onsets",
                                           "Onset Detector Ms Between Onsets",
                                           NormalisableRange<float> (0.0, 50.0, 5.0),
-                                          0.0,
+                                          20.0,
                                           nullptr,
                                           nullptr);
 
@@ -213,25 +211,19 @@ void BeatboxVoxAudioProcessor::prepareToPlay (double sampleRate, int samplesPerB
 {
     // Use this method as the place to do any pre-playback
     // initialisation that you need..
-    downSampledBuffer.setSize(1, samplesPerBlock);
-    downSampledBuffer.clear();
 
     drumSynth.setCurrentPlaybackSampleRate(sampleRate);
     osdTestSynth.setCurrentPlaybackSampleRate(sampleRate);
 
     classifier.setCurrentBufferSize(samplesPerBlock);
-    //classifier.setCurrentSampleRate(sampleRate);
+    classifier.setCurrentSampleRate(sampleRate);
 
-    interpolator.reset();
 }
 
 void BeatboxVoxAudioProcessor::releaseResources()
 {
     // When playback stops, you can use this as an opportunity to free up any
     // spare memory, etc.
-    
-    interpolator.reset();
-    downSampledBuffer.clear();
 }
 
 //==============================================================================
@@ -270,15 +262,9 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     
     //Holds classifier result for this block. 
     int sound = -1;
+    
 
-    /**
-     * NOTE: Need to confirm that buffer size will not change between prepareToPlay and processBlock/handle 
-     * this for downSampleBuffer.
-     */
-    interpolator.process((downSamplingRate / sampleRate), buffer.getReadPointer(0), downSampledBuffer.getWritePointer(0, 0), numSamples);
-
-    //classifier.processAudioBuffer(buffer.getReadPointer(0)); 
-    classifier.processAudioBuffer(downSampledBuffer.getReadPointer(0), numSamples);
+    classifier.processAudioBuffer(buffer.getReadPointer(0), numSamples); 
 
     
     //This is used for configuring the onset detector settings from the GUI
@@ -286,15 +272,10 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     {
         //NOTE: Potentially add a flag to onset detected in an fifo or something for visual response on onset.
         if (usingOSDTestSound.load())
-        {
             triggerOSDTestSound(midiMessages);
-            //osdTestSynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());    
-        }
     }
 
-    //JWM - Added here as otherwise audio cutoff short
-    osdTestSynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());    
-    
+
     sound = classifier.classify();
     
     switch(sound)
@@ -314,8 +295,11 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
         buffer.clear(i, 0, buffer.getNumSamples());
     }
 
+
+    osdTestSynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());    
+    
     //Render note on sine synth with the ODS triggered MIDI.
-    drumSynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
+    //drumSynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
 
 }
 

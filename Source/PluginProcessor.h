@@ -106,7 +106,6 @@ private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BeatboxVoxAudioProcessor);
 
-    float downSamplingRate = 11025.0f;
 
     const int kickNoteNumber = 12;
     const int snareNoteNumber = 43;
@@ -117,10 +116,7 @@ private:
     Synthesiser drumSynth;
     Synthesiser osdTestSynth;
     AudioClassifier<float> classifier;
-    CatmullRomInterpolator interpolator;
 
-    AudioSampleBuffer downSampledBuffer;
-    
     std::unique_ptr<AudioProcessorValueTreeState> processorState;
     std::unique_ptr<UndoManager> processorUndoManager;
 

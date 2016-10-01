@@ -122,7 +122,13 @@ void AudioClassifier<T>::setOSDMsBetweenOnsets(int ms)
 }
 
 //==============================================================================
+template<typename T>
+void AudioClassifier<T>::setOnsetDetectorODFType(AudioClassifyOptions::ODFType newODFType)
+{
+    osDetector.setCurrentODFType(newODFType);
+}
 
+//==============================================================================
 //JWM - NOTE: revist later - will need assertion if user uses sound value out of range 0 - numSOunds
 template<typename T>
 void AudioClassifier<T>::recordTrainingSample(int sound)
@@ -179,11 +185,11 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer, const int numSampl
 
     const int bufferSize = getCurrentBufferSize();
 
-    if (bufferSize != numSamples)
-    {
-        //setCurrentBufferSize() needs to be called before continuing processing - training set/model will be invalid strictly speaking.
-        return;
-    }
+    /** if (bufferSize != numSamples) */
+    /** { */
+    /**     //setCurrentBufferSize() needs to be called before continuing processing - training set/model will be invalid strictly speaking. */
+    /**     return; */
+    /** } */
 
     gistFeatures.processAudioFrame(buffer, bufferSize);
     gistFeatures.getMagnitudeSpectrum(magSpectrum.get());

@@ -44,7 +44,9 @@ class OnsetDetector
         //JWM - Note: Should probably make ms an unsigned value to avoid negatives.
         void setMinMsBetweenOnsets(int ms);
 
+        int getCurrentODFType();
         void setCurrentODFType(AudioClassifyOptions::ODFType newODFType);
+    
         
         bool checkForOnset(const T* magnitudeSpectrum, const std::size_t magSpectrumSize);
 
@@ -86,6 +88,8 @@ class OnsetDetector
        std::atomic<AudioClassifyOptions::ODFType> currentODFType {AudioClassifyOptions::ODFType::spectralDifference};
 
        bool checkForPeak(T featureValue);
+       
+       bool onsetTimeIsValid();
 };
 
 

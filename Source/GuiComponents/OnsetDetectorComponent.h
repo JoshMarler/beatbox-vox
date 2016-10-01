@@ -31,6 +31,8 @@ public:
 
     void buttonClicked(Button* button) override;
 
+    static String useOSDTestSoundButtonID;
+
 private:
 
     BeatboxVoxAudioProcessor& processor;

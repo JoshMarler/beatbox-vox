@@ -17,7 +17,7 @@ OnsetDetector<T>::OnsetDetector(int initBufferSize)
     : onsetDetectionFunction(initBufferSize)
 {
     usingLocalMaximum = true;
-    numPreviousValues = 10;
+    numPreviousValues = 20;
     threshold = 1.0;
     largestPeak = 0.0;
     msBetweenOnsets.store(20);
@@ -25,9 +25,12 @@ OnsetDetector<T>::OnsetDetector(int initBufferSize)
     //Set to false initially - this will be set to true and left after the first onset is detected.
     firstOnsetDetected = false;    
 
-    meanCoeff.store(0.5);
-    medianCoeff.store(0.8);
+    meanCoeff.store(1.0);
+    medianCoeff.store(1.0);
     noiseRatio.store(0.05);
+    
+    //Set initial ODF type to use hfc
+    currentODFType.store(AudioClassifyOptions::ODFType::highFrequencyContent);
     
     /**
      * NOTE: May modify this later to allow user/caller to modify
@@ -38,8 +41,8 @@ OnsetDetector<T>::OnsetDetector(int initBufferSize)
     previousValues.reset(new T[numPreviousValues]);
     previousValuesCopy.reset(new T[numPreviousValues]);
 
-    std::fill(previousValues.get(), (previousValues.get() + numPreviousValues), static_cast<T>(0.0));   
-    std::fill(previousValuesCopy.get(), (previousValuesCopy.get() + numPreviousValues), static_cast<T>(0.0));   
+    std::fill(previousValues.get(), (previousValues.get() + numPreviousValues), 0.0);   
+    std::fill(previousValuesCopy.get(), (previousValuesCopy.get() + numPreviousValues), 0.0);   
 
 
     setCurrentBufferSize(initBufferSize);
@@ -122,6 +125,11 @@ void OnsetDetector<T>::setMinMsBetweenOnsets(int ms)
 }
 
 //=============================================================================
+template<typename T>
+int OnsetDetector<T>::getCurrentODFType()
+{
+    return static_cast<int>(currentODFType.load());
+}
 
 template<typename T>
 void OnsetDetector<T>::setCurrentODFType(AudioClassifyOptions::ODFType newODFType)
@@ -139,7 +147,21 @@ bool OnsetDetector<T>::checkForOnset(const T* magnitudeSpectrum, const std::size
     //JWM - NOTE: Need to check but adaptive whitening of the magnitudeSpectrum would need to occur
     //here before the hfc function call.
 
-    featureValue = onsetDetectionFunction.highFrequencyContent(magnitudeSpectrum, magSpectrumSize); 
+    switch (currentODFType.load())
+    {
+        case AudioClassifyOptions::ODFType::spectralDifferenceHWR :
+            featureValue = onsetDetectionFunction.spectralDifferenceHWR(magnitudeSpectrum, magSpectrumSize);
+            break;
+
+        case AudioClassifyOptions::ODFType::spectralDifference :
+            featureValue = onsetDetectionFunction.spectralDifference(magnitudeSpectrum, magSpectrumSize);
+            break;
+
+        case AudioClassifyOptions::ODFType::highFrequencyContent : 
+            featureValue = onsetDetectionFunction.highFrequencyContent(magnitudeSpectrum, magSpectrumSize);
+    }
+
+
     hasOnset = checkForPeak(featureValue);
 
     return hasOnset;
@@ -149,8 +171,6 @@ template<typename T>
 bool OnsetDetector<T>::checkForPeak(T featureValue) 
 {
     auto isOnset = false;
-    std::chrono::duration<float> dur;
-    std::chrono::milliseconds msElapsed;
 
     //JWM - NOTE: add conditional section here to allow lowpass filtering / normalisation as pre-processing of featureValue
     
@@ -159,39 +179,14 @@ bool OnsetDetector<T>::checkForPeak(T featureValue)
         std::copy(previousValues.get(), previousValues.get() + numPreviousValues, previousValuesCopy.get());
 
         if ((previousValues[0] > threshold) && (previousValues[0] > featureValue) && (previousValues[0] > previousValues[1]))
-        {
-            /** For the first time an onset is detected set firstOnsetDetected = true 
-             *  so that the initial lastOnsetTime is valid.
-             *
-             *  NOTE: The time based logic below for elapsed ms between onsets should probably be 
-             *  refactored out into a seperate private function for this class as it is likely to be called
-             *  in at least two seperate places / conditional blocks. 
-             */
-            if (!firstOnsetDetected)
-            {
-                isOnset = true;
-                lastOnsetTime = std::chrono::steady_clock::now();
-                firstOnsetDetected = true;
-            }
-            else 
-            {
-                dur = std::chrono::steady_clock::now() - lastOnsetTime;
-                msElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(dur);
-                
-                if (msElapsed.count() > msBetweenOnsets.load())
-                {
-                    isOnset = true;
-                    lastOnsetTime = std::chrono::steady_clock::now();
-                }
-            }
-        }
-            
+                isOnset = onsetTimeIsValid();
     }
     else
     {
         if (featureValue > threshold)
-            isOnset = true;
+            isOnset = onsetTimeIsValid();
     }
+
 
     threshold = (meanCoeff.load() * MathHelpers::getMean(previousValues.get(), numPreviousValues)) +
                 (medianCoeff.load() * MathHelpers::getMedian(previousValuesCopy.get(), numPreviousValues));
@@ -211,7 +206,38 @@ bool OnsetDetector<T>::checkForPeak(T featureValue)
 }
 
 //=============================================================================
+template<typename T>
+bool OnsetDetector<T>::onsetTimeIsValid() 
+{
+    bool isValid = false;
 
+    std::chrono::duration<float> dur;
+    std::chrono::milliseconds msElapsed;
+
+    
+    /** For the first time an onset is detected set firstOnsetDetected = true 
+     *  so that the initial lastOnsetTime is valid.
+     */
+    if (!firstOnsetDetected)
+    {
+        isValid = true;
+        lastOnsetTime = std::chrono::steady_clock::now();
+        firstOnsetDetected = true;
+    }
+    else
+    {
+        dur = std::chrono::steady_clock::now() - lastOnsetTime;
+        msElapsed = std::chrono::duration_cast<std::chrono::milliseconds>(dur);
+
+        if (msElapsed.count() > msBetweenOnsets.load())
+        {
+            isValid = true;
+            lastOnsetTime = std::chrono::steady_clock::now();
+        }
+    }
+
+    return isValid;
+}
 
 //=============================================================================
 template class OnsetDetector<float>;

@@ -51,6 +51,7 @@ public:
     void setOnsetDetectorMedianCoeff(T newMedianCoeff);
     void setOnsetDetectorNoiseRatio(T newNoiseRatio);
     void setOSDMsBetweenOnsets(int ms);
+    void setOnsetDetectorODFType(AudioClassifyOptions::ODFType newODFType);
 
     void recordTrainingSample(int trainingSound);
 
