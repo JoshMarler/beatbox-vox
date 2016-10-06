@@ -66,6 +66,7 @@ void AudioClassifier<T>::setCurrentBufferSize (int newBufferSize)
 
     std::fill(magSpectrum.get(), (magSpectrum.get() + (newBufferSize / 2)), 0.0f);
 
+    osDetector.setCurrentBufferSize(newBufferSize);
     /**
      * Note: After prototype stage this funciton should probably handle clearing the model
      * and setting classifier ready to false as well as emptying the trainingDataSet and trainingLables matrices.

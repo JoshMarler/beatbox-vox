@@ -115,12 +115,12 @@ private:
 
     Synthesiser drumSynth;
     Synthesiser osdTestSynth;
-    AudioClassifier<float> classifier;
 
-    std::unique_ptr<AudioProcessorValueTreeState> processorState;
-    std::unique_ptr<UndoManager> processorUndoManager;
-
+    AudioProcessorValueTreeState processorState;
+    //UndoManager processorUndoManager;
     std::map<String, std::function<void(float)>> paramCallbacks;
+
+    AudioClassifier<float> classifier;
 };
 
 

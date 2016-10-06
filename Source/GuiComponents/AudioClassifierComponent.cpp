@@ -47,7 +47,7 @@ AudioClassifierComponent::AudioClassifierComponent(BeatboxVoxAudioProcessor& p)
         addAndMakeVisible(button);
     }
     
-    //JWM - set timer for gui update callback
+    //Set timer for gui update callback
     startTimer(10);
 
 }
@@ -111,8 +111,6 @@ void AudioClassifierComponent::timerCallback()
 //===============================================================================
 void AudioClassifierComponent::buttonClicked(Button* button)
 {
-    //JWM - Dirty button handling for initial prototype. Will make this all nicer in future. 
-    //Probably going to change all this to set parameters with callback functions or using value tree params etc.
 
     if (button->getRadioGroupId() == 1234)
     {
@@ -133,3 +131,5 @@ void AudioClassifierComponent::buttonClicked(Button* button)
     }
 
 }
+
+//===============================================================================

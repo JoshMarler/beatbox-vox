@@ -12,11 +12,19 @@
 //==============================================================================
 
 String OnsetDetectorComponent::useOSDTestSoundButtonID ("UseOSDTestSound");
+String OnsetDetectorComponent::odfComboBoxID ("ODFComboBox");
 
 OnsetDetectorComponent::OnsetDetectorComponent(BeatboxVoxAudioProcessor& p)
     : processor(p), 
-      useOSDTestSoundButton("Use Onset Detection Test Sound")
+      useOSDTestSoundButton("Use Onset Detection Test Sound"),
+      odfTypeSelector("ODF Type Selector")
 {
+
+    odfTypeSelector.setComponentID(odfComboBoxID);
+
+    populateODFTypeSelector();
+    addAndMakeVisible(odfTypeSelector);
+    
 
     meanCoeffSlider = std::make_unique<Slider> (Slider::LinearHorizontal, Slider::TextBoxRight);
     medianCoeffSlider = std::make_unique<Slider> (Slider::LinearHorizontal, Slider::TextBoxRight);
@@ -67,11 +75,16 @@ OnsetDetectorComponent::OnsetDetectorComponent(BeatboxVoxAudioProcessor& p)
     useOSDTestSoundLabel.setColour(Label::textColourId, Colours::greenyellow);
 
 
+    odfTypeLabel.setText("Onset Detection Function", juce::NotificationType::dontSendNotification);
+    odfTypeLabel.setFont(Font("Cracked", 14.0f, Font::plain));
+    odfTypeLabel.setColour(Label::textColourId, Colours::greenyellow);
+
     addAndMakeVisible(meanCoeffLabel);
     addAndMakeVisible(medianCoeffLabel);
     addAndMakeVisible(noiseRatioLabel);
     addAndMakeVisible(msBetweenOnsetsLabel);
     addAndMakeVisible(useOSDTestSoundLabel);
+    addAndMakeVisible(odfTypeLabel);
 
     useOSDTestSoundButton.addListener(this);
     useOSDTestSoundButton.setComponentID(useOSDTestSoundButtonID);
@@ -97,7 +110,13 @@ void OnsetDetectorComponent::resized()
 {
     Rectangle<int> r (getLocalBounds());
     Rectangle<int> leftSide(r.removeFromLeft(getWidth() / 2));
+    Rectangle<int> rightSide(r);
 
+    
+    Rectangle<int> odfTypeArea(rightSide.removeFromTop(rightSide.getHeight() / 5));
+    
+    odfTypeLabel.setBounds(odfTypeArea.removeFromTop(odfTypeArea.getHeight() / 5));
+    odfTypeSelector.setBounds(odfTypeArea.reduced(10, 10));
 
     //Rectangle/Bounds for meanCoeff controls
     Rectangle<int> meanCoeffArea(leftSide.removeFromTop(leftSide.getHeight() / 5));
@@ -121,7 +140,7 @@ void OnsetDetectorComponent::resized()
 
     
     
-    //Rectangle/Bounds for useOSDTestSound controlsRectangle<int> meanCoeffArea(leftSidmeanCoeffArea);
+    //Rectangle/Bounds for useOSDTestSound controls
     Rectangle<int> medianCoeffArea(leftSide.removeFromTop(leftSide.getHeight() / 2));
 
     medianCoeffLabel.setBounds(medianCoeffArea.removeFromTop(medianCoeffArea.getHeight() / 5));
@@ -140,5 +159,28 @@ void OnsetDetectorComponent::buttonClicked(Button* button)
         processor.setUsingOSDTestSound(button->getToggleState()); 
     }
 }
+//==============================================================================
+void OnsetDetectorComponent::comboBoxChanged(ComboBox* comboBoxThatHasChanged)
+{
+    if (comboBoxThatHasChanged->getComponentID() == odfComboBoxID)
+    {
+        auto& classifier = processor.getClassifier();
+
+        auto odfType = odfTypeSelector.getSelectedId() - 1;
+        classifier.setOnsetDetectorODFType(static_cast<AudioClassifyOptions::ODFType>(odfType));
+    }
+}
+
+//==============================================================================
+void OnsetDetectorComponent::populateODFTypeSelector()
+{
+    //odf enumerated values in AudioClassifyOptions begin at 0 so adding 1 to ID's - can't use 0 value for combobox id 
+    odfTypeSelector.addItem("Spectral Difference", static_cast<int>(AudioClassifyOptions::ODFType::spectralDifference) + 1); 
+    odfTypeSelector.addItem("Spectral Difference HWR", static_cast<int>(AudioClassifyOptions::ODFType::spectralDifferenceHWR) + 1);
+    odfTypeSelector.addItem("High Frequency Content", static_cast<int>(AudioClassifyOptions::ODFType::highFrequencyContent) + 1);
+
+    odfTypeSelector.setSelectedId(static_cast<int>(AudioClassifyOptions::ODFType::spectralDifference) + 1);
+}
+
 //==============================================================================
 

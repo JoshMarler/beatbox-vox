@@ -30,7 +30,7 @@ BeatboxVoxAudioProcessorEditor::BeatboxVoxAudioProcessorEditor (BeatboxVoxAudioP
     setSize (700, 600);
     
     //Set timer for gui update callback
-    startTimer(10);
+    //startTimer(10);
 }
 
 BeatboxVoxAudioProcessorEditor::~BeatboxVoxAudioProcessorEditor()
@@ -61,7 +61,7 @@ void BeatboxVoxAudioProcessorEditor::resized()
 {
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
-    Rectangle<int> r (getLocalBounds().reduced(15));
+    Rectangle<int> r (getLocalBounds());
 
     tabs.setBounds(r);
 }

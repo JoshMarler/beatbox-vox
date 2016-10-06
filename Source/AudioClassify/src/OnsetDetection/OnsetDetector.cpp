@@ -14,32 +14,26 @@
 
 template<typename T>
 OnsetDetector<T>::OnsetDetector(int initBufferSize)
-    : onsetDetectionFunction(initBufferSize)
+    : onsetDetectionFunction(initBufferSize),
+      lastOnsetTime(),
+      numPreviousValues(10),
+      previousValues(std::make_unique<T[]>(numPreviousValues)),
+      previousValuesCopy(std::make_unique<T[]>(numPreviousValues))
 {
     usingLocalMaximum = true;
-    numPreviousValues = 20;
     threshold = 1.0;
     largestPeak = 0.0;
-    msBetweenOnsets.store(20);
+    msBetweenOnsets.store(10);
 
     //Set to false initially - this will be set to true and left after the first onset is detected.
     firstOnsetDetected = false;    
 
-    meanCoeff.store(1.0);
-    medianCoeff.store(1.0);
+    meanCoeff.store(0.8);
+    medianCoeff.store(0.8);
     noiseRatio.store(0.05);
     
-    //Set initial ODF type to use hfc
-    currentODFType.store(AudioClassifyOptions::ODFType::highFrequencyContent);
-    
-    /**
-     * NOTE: May modify this later to allow user/caller to modify
-     * numPreviousValues controlling the window size/number of previous odf values
-     * that are used in threshold calculation. However this will require an atomic pointer swap
-     * and some garbage collection as the previousValues arrays are read on the audio thread etc. 
-     */
-    previousValues.reset(new T[numPreviousValues]);
-    previousValuesCopy.reset(new T[numPreviousValues]);
+    //Set initial ODF type
+    currentODFType.store(AudioClassifyOptions::ODFType::spectralDifference);
 
     std::fill(previousValues.get(), (previousValues.get() + numPreviousValues), 0.0);   
     std::fill(previousValuesCopy.get(), (previousValuesCopy.get() + numPreviousValues), 0.0);   
@@ -68,6 +62,7 @@ template<typename T>
 void OnsetDetector<T>::setCurrentBufferSize(int newBufferSize)
 {
     bufferSize = newBufferSize;
+    onsetDetectionFunction.setFrameSize(newBufferSize);
 }
 
 //==============================================================================
@@ -159,6 +154,7 @@ bool OnsetDetector<T>::checkForOnset(const T* magnitudeSpectrum, const std::size
 
         case AudioClassifyOptions::ODFType::highFrequencyContent : 
             featureValue = onsetDetectionFunction.highFrequencyContent(magnitudeSpectrum, magSpectrumSize);
+            break;
     }
 
 
@@ -179,7 +175,7 @@ bool OnsetDetector<T>::checkForPeak(T featureValue)
         std::copy(previousValues.get(), previousValues.get() + numPreviousValues, previousValuesCopy.get());
 
         if ((previousValues[0] > threshold) && (previousValues[0] > featureValue) && (previousValues[0] > previousValues[1]))
-                isOnset = onsetTimeIsValid();
+            isOnset = onsetTimeIsValid();
     }
     else
     {
@@ -201,7 +197,7 @@ bool OnsetDetector<T>::checkForPeak(T featureValue)
     if (isOnset && (previousValues[1] > largestPeak))
         largestPeak = previousValues[1];
 
-     return isOnset;
+    return isOnset;
         
 }
 

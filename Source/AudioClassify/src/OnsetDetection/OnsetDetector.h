@@ -54,14 +54,12 @@ class OnsetDetector
 
        int bufferSize; 
        int numPreviousValues;
-       int framesSinceOnset;
        int medianWindowSize; 
        
        //Members for minimum milliseconds between onsets behaviour.
        std::atomic_int msBetweenOnsets;
        std::chrono::steady_clock::time_point lastOnsetTime;
        bool firstOnsetDetected;
-
 
        bool usingLocalMaximum;      
        
@@ -72,6 +70,8 @@ class OnsetDetector
        std::atomic<T> meanCoeff;
        std::atomic<T> medianCoeff;
        std::atomic<T> noiseRatio;
+
+       std::atomic<AudioClassifyOptions::ODFType> currentODFType {AudioClassifyOptions::ODFType::spectralDifference};
 
        std::unique_ptr<T[]> previousValues;
 
@@ -85,10 +85,8 @@ class OnsetDetector
 
        OnsetDetectionFunction<T> onsetDetectionFunction;
 
-       std::atomic<AudioClassifyOptions::ODFType> currentODFType {AudioClassifyOptions::ODFType::spectralDifference};
 
        bool checkForPeak(T featureValue);
-       
        bool onsetTimeIsValid();
 };
 

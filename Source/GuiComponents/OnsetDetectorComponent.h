@@ -19,19 +19,22 @@
 #include "../PluginProcessor.h"
 
 class OnsetDetectorComponent : public Component,
-                               private ButtonListener
+                               private ButtonListener,
+                               private ComboBoxListener
 {
 
 public:
-    OnsetDetectorComponent(BeatboxVoxAudioProcessor& p);
+    OnsetDetectorComponent(BeatboxVoxAudioProcessor& p);    
     ~OnsetDetectorComponent();
 
     void paint(Graphics& g) override;
     void resized() override;
 
     void buttonClicked(Button* button) override;
+    void comboBoxChanged(ComboBox* comboBoxThatHasChanged) override;
 
     static String useOSDTestSoundButtonID;
+    static String odfComboBoxID;
 
 private:
 
@@ -42,8 +45,10 @@ private:
     Label noiseRatioLabel;
     Label useOSDTestSoundLabel;
     Label msBetweenOnsetsLabel;
+    Label odfTypeLabel;
 
     ToggleButton useOSDTestSoundButton;
+    ComboBox odfTypeSelector;
 
     //Parameter sliders
     std::unique_ptr<Slider> meanCoeffSlider;
@@ -56,6 +61,8 @@ private:
     std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> noiseRatioAttachment;
     std::unique_ptr<AudioProcessorValueTreeState::SliderAttachment> msBetweenOnsetsAttachment;
 
+
+    void populateODFTypeSelector();
 
 };
 

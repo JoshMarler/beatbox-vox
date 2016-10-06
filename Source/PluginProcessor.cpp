@@ -18,7 +18,8 @@ String BeatboxVoxAudioProcessor::paramOSDMsBetweenOnsets ("osd_msbetween");
 
 //==============================================================================
 BeatboxVoxAudioProcessor::BeatboxVoxAudioProcessor() 
-    : classifier(256, 48000, 2)
+    : processorState(*this, nullptr),
+      classifier(256, 48000, 2)
       
 { 
     usingOSDTestSound.store(false);
@@ -87,61 +88,58 @@ void BeatboxVoxAudioProcessor::changeProgramName (int index, const String& newNa
 //==============================================================================
 AudioProcessorValueTreeState& BeatboxVoxAudioProcessor::getValueTreeState()
 {
-    return *processorState;
+    return processorState;
 }
 //==============================================================================
 void BeatboxVoxAudioProcessor::setupParameters()
 {
     
-    processorUndoManager = std::make_unique<UndoManager>();
-    processorState = std::make_unique<AudioProcessorValueTreeState>(*this, processorUndoManager.get());
-    
-    processorState->createAndAddParameter(paramOSDNoiseRatio, 
+    processorState.createAndAddParameter(paramOSDNoiseRatio, 
                                           "OSD Noise Ratio",
-                                          "Onset Detector Noise Ratio", 
+                                          String(),
                                           NormalisableRange<float> (0.01, 1.0, 0.01), 
                                           0.05, 
                                           nullptr, 
                                           nullptr);
 
-    processorState->addParameterListener(paramOSDNoiseRatio, this);
+    processorState.addParameterListener(paramOSDNoiseRatio, this);
 
 
 
-    processorState->createAndAddParameter(paramOSDMeanCoeff, 
+    processorState.createAndAddParameter(paramOSDMeanCoeff, 
                                           "OSD Mean Coefficient",
-                                          "Onset Detector Mean Coefficient",
-                                          NormalisableRange<float> (0.01, 1.0, 0.01),
-                                          1.0, 
+                                          String(),
+                                          NormalisableRange<float> (0.01, 2.0, 0.01),
+                                          0.8, 
                                           nullptr,
                                           nullptr);
 
-    processorState->addParameterListener(paramOSDMeanCoeff, this);
+    processorState.addParameterListener(paramOSDMeanCoeff, this);
 
 
-    processorState->createAndAddParameter(paramOSDMedianCoeff, 
+    processorState.createAndAddParameter(paramOSDMedianCoeff, 
                                           "OSD Median Coefficient",
-                                          "Onset Detector Median Coefficient",
-                                          NormalisableRange<float> (0.01, 1.0, 0.01),
-                                          1.0, 
+                                          String(),
+                                          NormalisableRange<float> (0.01, 2.0, 0.01),
+                                          0.8, 
                                           nullptr,
                                           nullptr);
 
-    processorState->addParameterListener(paramOSDMedianCoeff, this);
+    processorState.addParameterListener(paramOSDMedianCoeff, this);
 
 
-    processorState->createAndAddParameter(paramOSDMsBetweenOnsets, 
+    processorState.createAndAddParameter(paramOSDMsBetweenOnsets, 
                                           "OSD Ms Between Onsets",
-                                          "Onset Detector Ms Between Onsets",
-                                          NormalisableRange<float> (0.0, 50.0, 5.0),
-                                          20.0,
+                                          String("ms"),
+                                          NormalisableRange<float> (0.0, 100.0, 5.0),
+                                          10.0,
                                           nullptr,
                                           nullptr);
 
-    processorState->addParameterListener(paramOSDMsBetweenOnsets, this);
+    processorState.addParameterListener(paramOSDMsBetweenOnsets, this);
 
 
-    processorState->state = ValueTree("Beatbox Vox");
+    processorState.state = ValueTree(Identifier("BeatboxVox"));
 
     auto onsetDetectMeanCallback = [this] (float newMeanCoeff) { this->classifier.setOnsetDetectorMeanCoeff(newMeanCoeff); };
     auto onsetDetectMedianCallback = [this] (float newMedianCoeff) { this->classifier.setOnsetDetectorMedianCoeff(newMedianCoeff); };
@@ -259,6 +257,7 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     const int totalNumOutputChannels = getTotalNumOutputChannels();
     const float sampleRate = getSampleRate();
     const int numSamples = buffer.getNumSamples();
+
     
     //Holds classifier result for this block. 
     int sound = -1;
@@ -290,11 +289,12 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
 
     
     //Now classification complete clear the input buffer/signal - we only want synth output.
-    for (int i = 0; i < getTotalNumInputChannels(); ++i)
-    {
-        buffer.clear(i, 0, buffer.getNumSamples());
-    }
+    /** for (int i = 0; i < getTotalNumInputChannels(); ++i) */
+    /** { */
+    /**     buffer.clear(i, 0, buffer.getNumSamples()); */
+    /** } */
 
+    buffer.clear();
 
     osdTestSynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());    
     
