@@ -12,14 +12,15 @@
 #define NAIVEBAYES_H_INCLUDED
 
 //For windows compatibility
-#if JUCE_WINDOWS
+/*#if JUCE_WINDOW*/
 
 #define ARMA_64BIT_WORD
 
-#endif
+/*#endi*/
+
+#include <armadillo.h>
 
 
-#include <armadillo>
 
 template<typename T>
 class NaiveBayes

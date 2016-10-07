@@ -97,8 +97,8 @@ void BeatboxVoxAudioProcessor::setupParameters()
     processorState.createAndAddParameter(paramOSDNoiseRatio, 
                                           "OSD Noise Ratio",
                                           String(),
-                                          NormalisableRange<float> (0.01, 1.0, 0.01), 
-                                          0.05, 
+                                          NormalisableRange<float> (0.01, 100.0, 0.01), 
+                                          40.0f, 
                                           nullptr, 
                                           nullptr);
 
@@ -110,7 +110,7 @@ void BeatboxVoxAudioProcessor::setupParameters()
                                           "OSD Mean Coefficient",
                                           String(),
                                           NormalisableRange<float> (0.01, 2.0, 0.01),
-                                          0.8, 
+                                          0.8f, 
                                           nullptr,
                                           nullptr);
 
@@ -121,7 +121,7 @@ void BeatboxVoxAudioProcessor::setupParameters()
                                           "OSD Median Coefficient",
                                           String(),
                                           NormalisableRange<float> (0.01, 2.0, 0.01),
-                                          0.8, 
+                                          0.8f, 
                                           nullptr,
                                           nullptr);
 
@@ -132,19 +132,19 @@ void BeatboxVoxAudioProcessor::setupParameters()
                                           "OSD Ms Between Onsets",
                                           String("ms"),
                                           NormalisableRange<float> (0.0, 100.0, 5.0),
-                                          10.0,
+                                          70.0f,
                                           nullptr,
                                           nullptr);
 
     processorState.addParameterListener(paramOSDMsBetweenOnsets, this);
 
 
-    processorState.state = ValueTree(Identifier("BeatboxVox"));
+    processorState.state = ValueTree (Identifier("BeatboxVox"));
 
     auto onsetDetectMeanCallback = [this] (float newMeanCoeff) { this->classifier.setOnsetDetectorMeanCoeff(newMeanCoeff); };
     auto onsetDetectMedianCallback = [this] (float newMedianCoeff) { this->classifier.setOnsetDetectorMedianCoeff(newMedianCoeff); };
     auto onsetDetectNoiseCallback = [this] (float newNoiseRatio) { this->classifier.setOnsetDetectorNoiseRatio(newNoiseRatio); };
-    auto onsetDetectMsBetweenCallback = [this] (float newMsBetweenOnsets) { this->classifier.setOSDMsBetweenOnsets(newMsBetweenOnsets); };
+    auto onsetDetectMsBetweenCallback = [this] (float newMsBetweenOnsets) { this->classifier.setOSDMsBetweenOnsets(static_cast<int>(newMsBetweenOnsets)); };
     
     paramCallbacks.insert(std::make_pair(paramOSDMeanCoeff, onsetDetectMeanCallback));
     paramCallbacks.insert(std::make_pair(paramOSDMedianCoeff, onsetDetectMedianCallback));
@@ -202,6 +202,7 @@ void BeatboxVoxAudioProcessor::initialiseSynth ()
 
     osdTestSynth.addSound(new SamplerSound("OSD Test Sound", *readerOSDTestSound, osdTestSoundNoteRange, osdTestSoundNoteNumber, 0.0, 0.0, 5.0));
     osdTestSynth.addVoice(new SamplerVoice());
+	
 }
 
 //==============================================================================
@@ -261,7 +262,10 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
     
     //Holds classifier result for this block. 
     int sound = -1;
-    
+	float scaleFactor = 1000.0f;
+
+	//Buffer scale test
+	FloatVectorOperations::multiply(buffer.getWritePointer(0), scaleFactor, numSamples);
 
     classifier.processAudioBuffer(buffer.getReadPointer(0), numSamples); 
 
@@ -289,18 +293,15 @@ void BeatboxVoxAudioProcessor::processBlock (AudioSampleBuffer& buffer, MidiBuff
 
     
     //Now classification complete clear the input buffer/signal - we only want synth output.
-    /** for (int i = 0; i < getTotalNumInputChannels(); ++i) */
-    /** { */
-    /**     buffer.clear(i, 0, buffer.getNumSamples()); */
-    /** } */
-
     buffer.clear();
 
-    osdTestSynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());    
+	if (usingOSDTestSound.load())
+		osdTestSynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());    
+	else
+		drumSynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
     
-    //Render note on sine synth with the ODS triggered MIDI.
-    //drumSynth.renderNextBlock(buffer, midiMessages, 0, buffer.getNumSamples());
-
+	//Not outputting midi so clear after rendering synths
+	midiMessages.clear();
 }
 
 //==============================================================================
@@ -345,12 +346,21 @@ void BeatboxVoxAudioProcessor::getStateInformation (MemoryBlock& destData)
     // You should use this method to store your parameters in the memory block.
     // You could do that either as raw data, or use the XML or ValueTree classes
     // as intermediaries to make it easy to save and load complex data.
+	std::unique_ptr<XmlElement> xml (processorState.state.createXml());
+	copyXmlToBinary(*xml, destData);
 }
 
 void BeatboxVoxAudioProcessor::setStateInformation (const void* data, int sizeInBytes)
 {
     // You should use this method to restore your parameters from this memory block,
     // whose contents will have been created by the getStateInformation() call.
+	std::unique_ptr<XmlElement> xmlState (getXmlFromBinary(data, sizeInBytes));
+	
+	if (xmlState.get() != nullptr)
+	{
+		if (xmlState->hasTagName(processorState.state.getType()))
+			processorState.state = ValueTree::fromXml(*xmlState);
+	}
 }
 
 //==============================================================================

@@ -13,6 +13,13 @@
 
 #include <algorithm>
 
+#ifdef _WIN64
+
+#include <numeric>
+
+#endif // _WIN64
+
+
 namespace MathHelpers
 {
     template<typename T>
@@ -20,7 +27,7 @@ namespace MathHelpers
     {
         std::size_t end = sizeof(vec[0]) * vecSize;
 
-        auto sum = std::accumulate(vec, (vec + end), 0.0);
+        auto sum = std::accumulate(vec, (vec + end), (T) 0.0);
         return sum / vecSize;       
     }
 
@@ -45,7 +52,7 @@ namespace MathHelpers
             std::nth_element(vec, (vec + (middle - 1)), (vec + vecSize)); 
             
             medianEven = vec[middle - 1];
-            return (medianEven + medianOdd) * 0.5;
+            return (medianEven + medianOdd) / 2;
         }
 
     }

@@ -12,16 +12,16 @@
 #define AUDIOCLASSIFIER_H_INCLUDED
 
 //For windows compatibility with armadillo 64bit
-#if JUCE_WINDOWS
+//#if JUCE_WINDOWS
 
 #define ARMA_64BIT_WORD
 
-#endif
+//#endif
 
 #include <memory>
 #include <atomic>
 
-#include <armadillo>
+#include <armadillo.h>
 
 #include "../../Gist/src/Gist.h"
 #include "../AudioClassifyOptions/AudioClassifyOptions.h"

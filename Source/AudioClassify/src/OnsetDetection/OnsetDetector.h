@@ -20,6 +20,10 @@
 #include "../../Gist/src/onset-detection-functions/OnsetDetectionFunction.h"
 
 
+using ClockType = std::chrono::steady_clock;
+using Ms = std::chrono::milliseconds;
+
+
 template<typename T>
 class OnsetDetector
 {
@@ -58,7 +62,7 @@ class OnsetDetector
        
        //Members for minimum milliseconds between onsets behaviour.
        std::atomic_int msBetweenOnsets;
-       std::chrono::steady_clock::time_point lastOnsetTime;
+       std::chrono::time_point<ClockType, Ms> lastOnsetTime;
        bool firstOnsetDetected;
 
        bool usingLocalMaximum;      

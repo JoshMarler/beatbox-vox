@@ -54,7 +54,7 @@ void BeatboxVoxAudioProcessorEditor::buttonClicked(Button* button)
 
 void BeatboxVoxAudioProcessorEditor::paint (Graphics& g)
 {
-    g.fillAll (Colours::white);
+    g.fillAll (Colours::black);
 }
 
 void BeatboxVoxAudioProcessorEditor::resized()

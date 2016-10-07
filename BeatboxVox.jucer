@@ -2,7 +2,7 @@
 
 <JUCERPROJECT id="n4yAfc" name="BeatboxVox" projectType="audioplug" version="1.0.0"
               bundleIdentifier="com.yourcompany.BeatboxVox" includeBinaryInAppConfig="1"
-              buildVST="1" buildVST3="0" buildAU="0" buildAUv3="0" buildRTAS="0"
+              buildVST="0" buildVST3="1" buildAU="0" buildAUv3="0" buildRTAS="0"
               buildAAX="0" pluginName="BeatboxVox" pluginDesc="BeatboxVox"
               pluginManufacturer="RudeAudio" pluginManufacturerCode="RUDE"
               pluginCode="Bvox" pluginChannelConfigs="1, 2" pluginIsSynth="0"
@@ -487,11 +487,11 @@
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
                        isDebug="1" optimisation="1" targetName="BeatboxVox" libraryPath="D:\Development\xianyi-OpenBLAS-3f6398a\lib&#10;D:\Development\armadillo-7.300.1\examples\lib_win64&#10;D:\Development\armadillo-7.300.1\build\Debug"
-                       headerPath="D:\Development\armadillo-7.300.1\include" binaryPath="C:\Users\JOSHUA.MARLER\AudioPlugins\vst"/>
+                       headerPath="D:\Development\armadillo-7.300.1\include" binaryPath="C:\Users\JOSHUA.MARLER\AudioPlugins\VST3"/>
         <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
                        isDebug="0" optimisation="3" targetName="BeatboxVox" headerPath="D:\Development\armadillo-7.300.1\include"
                        libraryPath="D:\Development\xianyi-OpenBLAS-3f6398a\lib&#10;D:\Development\armadillo-7.300.1\examples\lib_win64&#10;D:\Development\armadillo-7.300.1\build\Debug"
-                       binaryPath="C:\Users\JOSHUA.MARLER\AudioPlugins\vst"/>
+                       binaryPath="C:\Users\JOSHUA.MARLER\AudioPlugins\VST3"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
         <MODULEPATH id="juce_video" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
