@@ -108,32 +108,32 @@ void OnsetDetectorComponent::paint(Graphics& g)
 //==============================================================================
 void OnsetDetectorComponent::resized()
 {
-    Rectangle<int> r (getLocalBounds());
-    Rectangle<int> leftSide(r.removeFromLeft(getWidth() / 2));
-    Rectangle<int> rightSide(r);
+	auto r (getLocalBounds());
+	auto leftSide(r.removeFromLeft(getWidth() / 2));
+    auto rightSide(r);
 
     
-    Rectangle<int> odfTypeArea(rightSide.removeFromTop(rightSide.getHeight() / 5));
+    auto odfTypeArea(rightSide.removeFromTop(rightSide.getHeight() / 5));
     
     odfTypeLabel.setBounds(odfTypeArea.removeFromTop(odfTypeArea.getHeight() / 5));
     odfTypeSelector.setBounds(odfTypeArea.reduced(10, 10));
 
     //Rectangle/Bounds for meanCoeff controls
-    Rectangle<int> meanCoeffArea(leftSide.removeFromTop(leftSide.getHeight() / 5));
+    auto meanCoeffArea(leftSide.removeFromTop(leftSide.getHeight() / 5));
 
     meanCoeffLabel.setBounds(meanCoeffArea.removeFromTop(meanCoeffArea.getHeight() / 5));
     meanCoeffSlider->setBounds(meanCoeffArea);
     
     
     //Rectangle/Bounds for noiseRatio controls
-    Rectangle<int> noiseRatioArea(leftSide.removeFromTop(leftSide.getHeight() / 4));
+    auto noiseRatioArea(leftSide.removeFromTop(leftSide.getHeight() / 4));
 
     noiseRatioLabel.setBounds(noiseRatioArea.removeFromTop(noiseRatioArea.getHeight() / 5));
     noiseRatioSlider->setBounds(noiseRatioArea);
     
     
     //Rectangle/Bounds for msBetweenOnsets controls 
-    Rectangle<int> msBetweenOnsetsArea(leftSide.removeFromTop(leftSide.getHeight() / 3));
+    auto msBetweenOnsetsArea(leftSide.removeFromTop(leftSide.getHeight() / 3));
 
     msBetweenOnsetsLabel.setBounds(msBetweenOnsetsArea.removeFromTop(msBetweenOnsetsArea.getHeight() / 5));
     msBetweenOnsetsSlider->setBounds(msBetweenOnsetsArea);
@@ -141,7 +141,7 @@ void OnsetDetectorComponent::resized()
     
     
     //Rectangle/Bounds for useOSDTestSound controls
-    Rectangle<int> medianCoeffArea(leftSide.removeFromTop(leftSide.getHeight() / 2));
+    auto medianCoeffArea(leftSide.removeFromTop(leftSide.getHeight() / 2));
 
     medianCoeffLabel.setBounds(medianCoeffArea.removeFromTop(medianCoeffArea.getHeight() / 5));
     medianCoeffSlider->setBounds(medianCoeffArea); 

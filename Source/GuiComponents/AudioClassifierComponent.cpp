@@ -69,7 +69,7 @@ void AudioClassifierComponent::resized()
 {
     // This is generally where you'll want to lay out the positions of any
     // subcomponents in your editor..
-    Rectangle<int> r (getLocalBounds().reduced(15));
+	auto r (getLocalBounds().reduced(15));
 
     recordSoundButton->setBounds(r.removeFromTop(25));
 

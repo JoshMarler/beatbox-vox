@@ -37,7 +37,7 @@ void NaiveBayes<T>::Train(const arma::Mat<T>& trainingData, const arma::Row<size
 	//Mean sum - sum feature values for each class label instance
 	for (size_t j = 0; j < trainingData.n_cols; ++j)
 	{
-		const size_t label = classLabels[j];
+		const auto label = classLabels[j];
 
 		//increment num occurences of current class in priorProbs set.
 		++priorProbs[label];
@@ -56,7 +56,7 @@ void NaiveBayes<T>::Train(const arma::Mat<T>& trainingData, const arma::Row<size
 	//Variances sum
 	for (size_t j = 0; j < trainingData.n_cols; ++j)
 	{
-		const size_t label = classLabels[j];
+		const auto label = classLabels[j];
 
 		//JWM - NOTE: Should be real-time safe with arma::square not malloc / dynamic allocating
 		//due to use of expression templates.

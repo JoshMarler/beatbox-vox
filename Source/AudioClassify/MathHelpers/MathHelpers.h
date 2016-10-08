@@ -25,9 +25,9 @@ namespace MathHelpers
     template<typename T>
     T getMean(const T* vec, const std::size_t vecSize)
     {
-        std::size_t end = sizeof(vec[0]) * vecSize;
+	    auto end = sizeof(vec[0]) * vecSize;
 
-        auto sum = std::accumulate(vec, (vec + end), (T) 0.0);
+        auto sum = std::accumulate(vec, (vec + end), static_cast<T>(0.0));
         return sum / vecSize;       
     }
 
@@ -35,7 +35,7 @@ namespace MathHelpers
     template<typename T>
     T getMedian(T* vec, const std::size_t vecSize)
     {
-        std::size_t middle = vecSize / 2;
+	    auto middle = vecSize / 2;
         
         std::nth_element(vec, (vec + middle), (vec + vecSize));
 

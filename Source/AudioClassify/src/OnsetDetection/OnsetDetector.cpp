@@ -14,11 +14,11 @@
 
 template<typename T>
 OnsetDetector<T>::OnsetDetector(int initBufferSize)
-    : onsetDetectionFunction(initBufferSize),
+    : numPreviousValues(10),
       lastOnsetTime(),
-      numPreviousValues(10),
       previousValues(std::make_unique<T[]>(numPreviousValues)),
-      previousValuesCopy(std::make_unique<T[]>(numPreviousValues))
+      previousValuesCopy(std::make_unique<T[]>(numPreviousValues)),
+      onsetDetectionFunction(initBufferSize)
 {
     usingLocalMaximum = true;
     threshold = 1.0f;
@@ -53,7 +53,7 @@ OnsetDetector<T>::~OnsetDetector()
 //==============================================================================
 
 template<typename T>
-int OnsetDetector<T>::getCurrentBufferSize()
+int OnsetDetector<T>::getCurrentBufferSize() const
 {
   return bufferSize; 
 }
@@ -68,7 +68,7 @@ void OnsetDetector<T>::setCurrentBufferSize(int newBufferSize)
 //==============================================================================
 
 template<typename T>
-bool OnsetDetector<T>::getUsingLocalMaximum()
+bool OnsetDetector<T>::getUsingLocalMaximum() const
 {
     return usingLocalMaximum;
 }
@@ -114,14 +114,14 @@ void OnsetDetector<T>::setMedianCoefficient(T newCoeff)
 
 //=============================================================================
 template<typename T>
-void OnsetDetector<T>::setMinMsBetweenOnsets(int ms)
+void OnsetDetector<T>::setMinMsBetweenOnsets(unsigned ms)
 {
     msBetweenOnsets.store(ms);
 }
 
 //=============================================================================
 template<typename T>
-int OnsetDetector<T>::getCurrentODFType()
+int OnsetDetector<T>::getCurrentODFType() const
 {
     return static_cast<int>(currentODFType.load());
 }
@@ -137,7 +137,7 @@ template<typename T>
 bool OnsetDetector<T>::checkForOnset(const T* magnitudeSpectrum, const std::size_t magSpectrumSize)
 {
     T featureValue = 0.0f;
-    bool hasOnset = false;
+	auto hasOnset = false;
 
     //JWM - NOTE: Need to check but adaptive whitening of the magnitudeSpectrum would need to occur
     //here before the hfc function call.
@@ -155,6 +155,8 @@ bool OnsetDetector<T>::checkForOnset(const T* magnitudeSpectrum, const std::size
         case AudioClassifyOptions::ODFType::highFrequencyContent : 
             featureValue = onsetDetectionFunction.highFrequencyContent(magnitudeSpectrum, magSpectrumSize);
             break;
+		
+    	default: break;
     }
 
 	//Stops initial detection issues when onset detector is loaded and contected to an active/streaming input.
@@ -206,7 +208,7 @@ bool OnsetDetector<T>::checkForPeak(T featureValue)
 template<typename T>
 bool OnsetDetector<T>::onsetTimeIsValid() 
 {
-    bool isValid = false;
+	auto isValid = false;
 
     /** For the first time an onset is detected set firstOnsetDetected = true 
      *  so that the initial lastOnsetTime is valid.

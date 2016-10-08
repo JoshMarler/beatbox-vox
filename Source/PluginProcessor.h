@@ -79,10 +79,10 @@ public:
     //Initialise the synth object
     void initialiseSynth();
 
-    void triggerKickDrum(MidiBuffer& midiMessages);
-    void triggerSnareDrum(MidiBuffer& midiMessages);
+    void triggerKickDrum(MidiBuffer& midiMessages) const;
+    void triggerSnareDrum(MidiBuffer& midiMessages) const;
     
-    void triggerOSDTestSound(MidiBuffer& midiMessages);
+    void triggerOSDTestSound(MidiBuffer& midiMessages) const;
     
 
     enum soundLabel
@@ -105,8 +105,7 @@ public:
 private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BeatboxVoxAudioProcessor);
-
-
+	
     const int kickNoteNumber = 12;
     const int snareNoteNumber = 43;
     const int osdTestSoundNoteNumber = 57;

@@ -24,7 +24,7 @@ class OnsetDetectorComponent : public Component,
 {
 
 public:
-    OnsetDetectorComponent(BeatboxVoxAudioProcessor& p);    
+	explicit OnsetDetectorComponent(BeatboxVoxAudioProcessor& p);    
     ~OnsetDetectorComponent();
 
     void paint(Graphics& g) override;

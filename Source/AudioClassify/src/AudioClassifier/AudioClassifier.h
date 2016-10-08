@@ -38,13 +38,13 @@ public:
 
     ~AudioClassifier();
 
-    int getCurrentBufferSize();
+    int getCurrentBufferSize() const;
     T getCurrentSampleRate();
 
     void setCurrentBufferSize (int newBufferSize);
     void setCurrentSampleRate (T newSampleRate);
     
-    int getCurrentTrainingSound();
+    int getCurrentTrainingSound() const;
     
     //Onset detector functions
     void setOnsetDetectorMeanCoeff(T newMeanCoeff);
@@ -61,15 +61,15 @@ public:
     void trainModel();
 
 
-    const size_t getNumSounds() const;
+	size_t getNumSounds() const;
     
     void setTrainingSetSize(int newTrainingSetSize);
     
     bool checkTrainingSetReady();
 
-    bool getClassifierReady();
+    bool getClassifierReady() const;
     
-    bool isTraining();
+    bool isTraining() const;
 
     void processAudioBuffer (const T* buffer, const int numSamples);
 
@@ -82,7 +82,7 @@ public:
      * @returns true if an note onset has been detected for the frame/previous frame depending on whether
      * the onset detector is using local maximums.
      */
-    bool noteOnsetDetected();
+    bool noteOnsetDetected() const;
 
     //This function will return -1 for unclassified sounds 
     int classify();
@@ -100,6 +100,9 @@ private:
     T sampleRate;
 
     //Values to indicate which features currently being used by model.
+	std::atomic_bool usingRMS {true};
+	std::atomic_bool usingPeakEnergy {true};
+	std::atomic_bool usingZeroCrossingRate {true};
     std::atomic_bool usingSpecCentroid {true};
     std::atomic_bool usingSpecCrest {true};
     std::atomic_bool usingSpecFlatness {true};
@@ -141,7 +144,7 @@ private:
    
     void configTrainingSetMatrix();
 
-    size_t calcFeatureVecSize();
+    size_t calcFeatureVecSize() const;
 };
 
 

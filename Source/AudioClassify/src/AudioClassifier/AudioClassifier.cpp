@@ -13,12 +13,12 @@
 //==============================================================================
 template<typename T>
 AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int initNumSounds) 
-    : trainingData(18, (trainingSetSize * initNumSounds), arma::fill::zeros),
+    : trainingData(21, (trainingSetSize * initNumSounds), arma::fill::zeros),
       trainingLabels((trainingSetSize * initNumSounds)),
-      currentInstanceVector(18, arma::fill::zeros),
+      currentInstanceVector(21, arma::fill::zeros),
       gistFeatures(initBufferSize, initSampleRate),
       osDetector(initBufferSize),
-      nbc(initNumSounds, 18)
+      nbc(initNumSounds, 21)
 {
     setCurrentSampleRate(initSampleRate);
     setCurrentBufferSize(initBufferSize);
@@ -29,7 +29,7 @@ AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int in
 
     numSounds = initNumSounds;
 
-    int numCoefficients = gistFeatures.getMFCCNumCoefficients();
+    auto numCoefficients = gistFeatures.getMFCCNumCoefficients();
     mfccs.reset(new T[numCoefficients]);
 
     //Set initial sound ready states to false in training set.  
@@ -44,7 +44,7 @@ AudioClassifier<T>::~AudioClassifier()
 
 //==============================================================================
 template<typename T>
-int AudioClassifier<T>::getCurrentBufferSize()
+int AudioClassifier<T>::getCurrentBufferSize() const
 {
     return bufferSize;
 }
@@ -68,7 +68,7 @@ void AudioClassifier<T>::setCurrentBufferSize (int newBufferSize)
 
     osDetector.setCurrentBufferSize(newBufferSize);
     /**
-     * Note: After prototype stage this funciton should probably handle clearing the model
+     * Note: After prototype stage this function should probably handle clearing the model
      * and setting classifier ready to false as well as emptying the trainingDataSet and trainingLables matrices.
      * The NaiveBayes class may require a clear method which clears out the various probability and feature mean vectors etc.
      */
@@ -83,14 +83,14 @@ void AudioClassifier<T>::setCurrentSampleRate (T newSampleRate)
 
 //==============================================================================
 template<typename T>
-const size_t AudioClassifier<T>::getNumSounds() const
+size_t AudioClassifier<T>::getNumSounds() const
 {
     return numSounds;
 }
 
 //==============================================================================
 template<typename T>
-int AudioClassifier<T>::getCurrentTrainingSound()
+int AudioClassifier<T>::getCurrentTrainingSound() const
 {
     return currentTrainingSound.load();
 }
@@ -166,13 +166,13 @@ void AudioClassifier<T>::setTrainingSetSize(int newTrainingSetSize)
 
 //==============================================================================
 template<typename T>
-bool AudioClassifier<T>::getClassifierReady()
+bool AudioClassifier<T>::getClassifierReady() const
 {
     return classifierReady.load();
 }
 //==============================================================================
 template<typename T>
-bool AudioClassifier<T>::isTraining()
+bool AudioClassifier<T>::isTraining() const
 {
     return training.load();
 }
@@ -184,7 +184,7 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer, const int numSampl
     //Reset hasOnset for next process buffer.
     hasOnset = false;
 
-    const int bufferSize = getCurrentBufferSize();
+    const auto bufferSize = getCurrentBufferSize();
 
     /** if (bufferSize != numSamples) */
     /** { */
@@ -205,20 +205,19 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer, const int numSampl
         {
             classifierReady.store(false);
 
-            int sound = currentTrainingSound.load();
+	        auto sound = currentTrainingSound.load();
 
             if (trainingCount < (trainingSetSize * (sound + 1)))
             {
                 trainingData.col(trainingCount) = currentInstanceVector;
-
                 trainingLabels[trainingCount] = static_cast<size_t>(sound);
+
                 trainingCount++;
             }
             else
             {
                 //Set sound ready state to true for current training sound.
                 soundsReady[sound] = true;
-
                 training.store(false);
                 currentTrainingSound.store(-1);
             }
@@ -232,51 +231,44 @@ void AudioClassifier<T>::processCurrentInstance()
 {
     size_t pos = 0;
 
+	if (usingRMS.load())
+		currentInstanceVector[pos++] = gistFeatures.rootMeanSquare();
+
+	if (usingPeakEnergy.load())
+		currentInstanceVector[pos++] = gistFeatures.peakEnergy();
+
+	if (usingZeroCrossingRate.load())
+		currentInstanceVector[pos++] = gistFeatures.zeroCrossingRate();
+
     if (usingSpecCentroid.load())
-    {
-        currentInstanceVector[pos] = gistFeatures.spectralCentroid(); 
-        pos++;
-    }
+        currentInstanceVector[pos++] = gistFeatures.spectralCentroid(); 
 
     if (usingSpecCrest.load())
-    {
-        currentInstanceVector[pos] = gistFeatures.spectralCrest();
-        pos++;
-    }
+        currentInstanceVector[pos++] = gistFeatures.spectralCrest();
 
     if (usingSpecFlatness.load())
-    {
-        currentInstanceVector[pos] = gistFeatures.spectralFlatness(); 
-        pos++;
-    }
+        currentInstanceVector[pos++] = gistFeatures.spectralFlatness(); 
 
     if (usingSpecRolloff.load())
-    {
-        currentInstanceVector[pos] = gistFeatures.spectralRolloff();
-        pos++;
-    }
+        currentInstanceVector[pos++] = gistFeatures.spectralRolloff();
     
     if (usingSpecKurtosis.load())
-    {
-        currentInstanceVector[pos] = gistFeatures.spectralKurtosis();
-        pos++;
-    }
+        currentInstanceVector[pos++] = gistFeatures.spectralKurtosis();
 
     if (usingMfcc.load())
     {
          gistFeatures.melFrequencyCepstralCoefficients(mfccs.get()); 
             
-         int numCoefficients = gistFeatures.getMFCCNumCoefficients();
+         auto numCoefficients = gistFeatures.getMFCCNumCoefficients();
          for (std::size_t i = 0; i < numCoefficients; i++) 
          { 
-           currentInstanceVector[pos] = mfccs[i];  
-           pos++; 
+           currentInstanceVector[pos++] = mfccs[i];  
          } 
     }
 }
 //==============================================================================
 template<typename T>
-bool AudioClassifier<T>::noteOnsetDetected()
+bool AudioClassifier<T>::noteOnsetDetected() const
 {
     return hasOnset;
 }
@@ -285,7 +277,7 @@ bool AudioClassifier<T>::noteOnsetDetected()
 template<typename T>
 int AudioClassifier<T>::classify()
 {
-    int sound = -1;
+	auto sound = -1;
 
     auto ready = classifierReady.load();
       
@@ -331,9 +323,18 @@ void AudioClassifier<T>::configTrainingSetMatrix()
 
 //==============================================================================
 template<typename T>
-size_t AudioClassifier<T>::calcFeatureVecSize()
+size_t AudioClassifier<T>::calcFeatureVecSize() const
 {
     size_t size = 0;
+
+	if (usingRMS.load())
+		size++;
+
+	if (usingPeakEnergy.load())
+		size++;
+
+	if (usingZeroCrossingRate.load())
+		size++;
 
     if (usingSpecCentroid.load())
         size++; 

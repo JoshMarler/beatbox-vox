@@ -25,7 +25,7 @@ class BeatboxVoxAudioProcessorEditor  : public AudioProcessorEditor,
 
 {
 public:
-    BeatboxVoxAudioProcessorEditor (BeatboxVoxAudioProcessor&);
+	explicit BeatboxVoxAudioProcessorEditor (BeatboxVoxAudioProcessor&);
     ~BeatboxVoxAudioProcessorEditor();
 
     //==============================================================================

@@ -19,7 +19,7 @@
 #include "../../MathHelpers/MathHelpers.h"
 #include "../../Gist/src/onset-detection-functions/OnsetDetectionFunction.h"
 
-
+//name defines for clock and duration types
 using ClockType = std::chrono::steady_clock;
 using Ms = std::chrono::milliseconds;
 
@@ -28,14 +28,14 @@ template<typename T>
 class OnsetDetector
 {
     public:
-        OnsetDetector(int initBufferSize);
+	explicit OnsetDetector(int initBufferSize);
         ~OnsetDetector();
         
-        int getCurrentBufferSize();
+        int getCurrentBufferSize() const;
         void setCurrentBufferSize(int newBufferSize);
 
         void setUsingLocalMaximum(bool newUsingLocalMaximum);
-        bool getUsingLocalMaximum();
+        bool getUsingLocalMaximum() const;
 
         void setNoiseRatio(T newNoiseRatio);
         T getNoiseRatio() const;
@@ -46,9 +46,9 @@ class OnsetDetector
         void setMedianCoefficient(T newCoeff);
         
         //JWM - Note: Should probably make ms an unsigned value to avoid negatives.
-        void setMinMsBetweenOnsets(int ms);
+        void setMinMsBetweenOnsets(unsigned ms);
 
-        int getCurrentODFType();
+        int getCurrentODFType() const;
         void setCurrentODFType(AudioClassifyOptions::ODFType newODFType);
     
         

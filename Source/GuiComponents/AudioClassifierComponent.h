@@ -26,7 +26,7 @@ class AudioClassifierComponent : public Component,
 
 public:
 
-    AudioClassifierComponent(BeatboxVoxAudioProcessor& p);
+	explicit AudioClassifierComponent(BeatboxVoxAudioProcessor& p);
     ~AudioClassifierComponent();
 
 
