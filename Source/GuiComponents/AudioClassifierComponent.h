@@ -50,9 +50,9 @@ private:
     //JWM - Test button to swich on classifier training for sound
     std::unique_ptr<TextButton> trainClassifierButton;
 
-
     OwnedArray<Button> soundButtons;
 
+	OwnedArray<Label> soundReadyLabels;
 };
 
 

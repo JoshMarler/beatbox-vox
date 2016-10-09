@@ -86,9 +86,7 @@ class OnsetDetector
         */
        std::unique_ptr<T[]> previousValuesCopy;
 
-
        OnsetDetectionFunction<T> onsetDetectionFunction;
-
 
        bool checkForPeak(T featureValue);
        bool onsetTimeIsValid();

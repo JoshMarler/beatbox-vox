@@ -11,6 +11,7 @@
 #include "AudioClassifierComponent.h"
 
 //===============================================================================
+
 AudioClassifierComponent::AudioClassifierComponent(BeatboxVoxAudioProcessor& p)
           : processor(p),
             recordSoundButton(std::make_unique<TextButton> ("Record Training Sound")),
@@ -31,10 +32,9 @@ AudioClassifierComponent::AudioClassifierComponent(BeatboxVoxAudioProcessor& p)
     
     addAndMakeVisible(*recordSoundButton);
     
-
     auto numSounds = processor.getClassifier().getNumSounds();
 
-    for (size_t i = 0; i < numSounds; ++i)
+    for (auto i = 0; i < numSounds; ++i)
     {
         soundButtons.add(new ToggleButton("Sound " + String(i + 1) + " Button"));
 
@@ -44,11 +44,20 @@ AudioClassifierComponent::AudioClassifierComponent(BeatboxVoxAudioProcessor& p)
         button->setColour(ToggleButton::ColourIds::textColourId, Colours::greenyellow);
         button->setColour(ToggleButton::ColourIds::tickColourId, Colours::greenyellow);
 
+
+		soundReadyLabels.add(new Label());
+
+		auto label = soundReadyLabels[i];
+		label->setText("Sound " + String(i + 1) + " - Not Ready", juce::NotificationType::dontSendNotification);
+		label->setFont(Font("Cracked", 14.0f, Font::plain));
+		label->setColour(Label::textColourId, Colours::greenyellow.withAlpha(static_cast<uint8>(0x4a)));
+		
         addAndMakeVisible(button);
+		addAndMakeVisible(label);
     }
-    
+	
     //Set timer for gui update callback
-    startTimer(10);
+    startTimerHz(30);
 
 }
 
@@ -73,14 +82,19 @@ void AudioClassifierComponent::resized()
 
     recordSoundButton->setBounds(r.removeFromTop(25));
 
-    for (size_t i = 0; i < soundButtons.size(); ++i)
+	auto numSounds = processor.getClassifier().getNumSounds();
+
+    for (auto i = 0; i < numSounds; ++i)
     {
-        auto button = soundButtons[i]; 
-        button->setBounds(r.removeFromTop(75 + (10 * i)));
+        auto button = soundButtons[i];
+		auto buttonBounds = r.removeFromTop(75 + (10 * i));
+        button->setBounds(buttonBounds.removeFromLeft(buttonBounds.getWidth() / 4));
+
+		auto label = soundReadyLabels[i];
+		label->setBounds(buttonBounds);
     }
 
     trainClassifierButton->setBounds(r.removeFromBottom(15));
-
 }
 
 //===============================================================================
@@ -89,6 +103,7 @@ void AudioClassifierComponent::timerCallback()
      auto isTraining = processor.getClassifier().isTraining();
      auto trainingSetReady = processor.getClassifier().checkTrainingSetReady();
      auto classifierReady = processor.getClassifier().getClassifierReady();
+	 auto numSounds = processor.getClassifier().getNumSounds();
 
      if (trainingSetReady)
          trainClassifierButton->setEnabled(true);
@@ -106,6 +121,19 @@ void AudioClassifierComponent::timerCallback()
            recordSoundButton->setToggleState(false, NotificationType::dontSendNotification);
      }
 
+	 //Update individual sounds ready labels
+	 for (auto i = 0; i < numSounds; i++)
+	 {
+		 auto soundReady = processor.getClassifier().checkTrainingSoundReady(i);
+		 auto label = soundReadyLabels[i];
+
+		 if (soundReady)
+		 {
+			 label->setColour(Label::textColourId, Colours::greenyellow);
+			 label->setText("Sound " + String(i + 1) + " Ready", juce::NotificationType::dontSendNotification);
+		 }
+	 }
+	 
 }
 
 //===============================================================================
@@ -127,7 +155,12 @@ void AudioClassifierComponent::buttonClicked(Button* button)
     else if (button == std::addressof(*recordSoundButton))
     {
         if (button->getToggleState())
+        {
             processor.getClassifier().recordTrainingSample(currentTrainingSound);
+			auto label = soundReadyLabels[currentTrainingSound];
+
+			label->setText("Sound " + String(currentTrainingSound + 1) + " Recording Training Set", juce::NotificationType::dontSendNotification);
+        }
     }
 
 }

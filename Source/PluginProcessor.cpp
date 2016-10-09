@@ -97,7 +97,7 @@ void BeatboxVoxAudioProcessor::setupParameters()
 	processorState.createAndAddParameter(paramOSDNoiseRatio,
 	                                     "OSD Noise Ratio",
 	                                     String(),
-	                                     NormalisableRange<float>(0.01, 100.0, 0.01),
+	                                     NormalisableRange<float>(0.01f, 100.0f, 0.01f),
 	                                     40.0f,
 	                                     nullptr,
 	                                     nullptr);
@@ -108,7 +108,7 @@ void BeatboxVoxAudioProcessor::setupParameters()
 	processorState.createAndAddParameter(paramOSDMeanCoeff,
 	                                     "OSD Mean Coefficient",
 	                                     String(),
-	                                     NormalisableRange<float>(0.01, 2.0, 0.01),
+	                                     NormalisableRange<float>(0.01f, 2.0f, 0.01f),
 	                                     0.8f,
 	                                     nullptr,
 	                                     nullptr);
@@ -119,7 +119,7 @@ void BeatboxVoxAudioProcessor::setupParameters()
 	processorState.createAndAddParameter(paramOSDMedianCoeff,
 	                                     "OSD Median Coefficient",
 	                                     String(),
-	                                     NormalisableRange<float>(0.01, 2.0, 0.01),
+	                                     NormalisableRange<float>(0.01f, 2.0f, 0.01f),
 	                                     0.8f,
 	                                     nullptr,
 	                                     nullptr);
@@ -130,7 +130,7 @@ void BeatboxVoxAudioProcessor::setupParameters()
 	processorState.createAndAddParameter(paramOSDMsBetweenOnsets,
 	                                     "OSD Ms Between Onsets",
 	                                     String("ms"),
-	                                     NormalisableRange<float>(0.0, 100.0, 5.0),
+	                                     NormalisableRange<float>(0.0f, 100.0f, 5.0f),
 	                                     70.0f,
 	                                     nullptr,
 	                                     nullptr);

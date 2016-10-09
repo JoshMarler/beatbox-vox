@@ -39,7 +39,7 @@ public:
     ~AudioClassifier();
 
     int getCurrentBufferSize() const;
-    T getCurrentSampleRate();
+    T getCurrentSampleRate() const;
 
     void setCurrentBufferSize (int newBufferSize);
     void setCurrentSampleRate (T newSampleRate);
@@ -50,7 +50,7 @@ public:
     void setOnsetDetectorMeanCoeff(T newMeanCoeff);
     void setOnsetDetectorMedianCoeff(T newMedianCoeff);
     void setOnsetDetectorNoiseRatio(T newNoiseRatio);
-    void setOSDMsBetweenOnsets(int ms);
+    void setOSDMsBetweenOnsets(const int ms);
     void setOnsetDetectorODFType(AudioClassifyOptions::ODFType newODFType);
 
     void recordTrainingSample(int trainingSound);
@@ -65,7 +65,8 @@ public:
     
     void setTrainingSetSize(int newTrainingSetSize);
     
-    bool checkTrainingSetReady();
+    bool checkTrainingSetReady() const;
+	bool checkTrainingSoundReady(const unsigned sound) const;
 
     bool getClassifierReady() const;
     
@@ -144,7 +145,7 @@ private:
    
     void configTrainingSetMatrix();
 
-    size_t calcFeatureVecSize() const;
+    unsigned int calcFeatureVecSize() const;
 };
 
 

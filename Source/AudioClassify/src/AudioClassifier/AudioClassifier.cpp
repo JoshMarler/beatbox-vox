@@ -50,7 +50,7 @@ int AudioClassifier<T>::getCurrentBufferSize() const
 }
 
 template<typename T>
-T AudioClassifier<T>::getCurrentSampleRate()
+T AudioClassifier<T>::getCurrentSampleRate() const
 {
     return sampleRate;
 }
@@ -229,7 +229,7 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer, const int numSampl
 template<typename T>
 void AudioClassifier<T>::processCurrentInstance()
 {
-    size_t pos = 0;
+    auto pos = 0;
 
 	if (usingRMS.load())
 		currentInstanceVector[pos++] = gistFeatures.rootMeanSquare();
@@ -260,7 +260,7 @@ void AudioClassifier<T>::processCurrentInstance()
          gistFeatures.melFrequencyCepstralCoefficients(mfccs.get()); 
             
          auto numCoefficients = gistFeatures.getMFCCNumCoefficients();
-         for (std::size_t i = 0; i < numCoefficients; i++) 
+         for (auto i = 0; i < numCoefficients; i++) 
          { 
            currentInstanceVector[pos++] = mfccs[i];  
          } 
@@ -285,18 +285,16 @@ int AudioClassifier<T>::classify()
         return -1;
    
     if (hasOnset)
-    {
         sound = nbc.Classify(currentInstanceVector);
-    }
 
     return sound;
 }
 
 //==============================================================================
 template<typename T>
-bool AudioClassifier<T>::checkTrainingSetReady()
+bool AudioClassifier<T>::checkTrainingSetReady() const
 {
-    size_t readyCount = 0;
+    auto readyCount = 0;
 
     for (auto v : soundsReady)
     {
@@ -311,7 +309,15 @@ bool AudioClassifier<T>::checkTrainingSetReady()
 }
 
 //==============================================================================
+template <typename T>
+bool AudioClassifier<T>::checkTrainingSoundReady (const unsigned sound) const
+{
+	auto ready = soundsReady[sound];
+	return ready;
+}
 
+
+//==============================================================================
 template<typename T>
 void AudioClassifier<T>::configTrainingSetMatrix()
 {
@@ -323,9 +329,9 @@ void AudioClassifier<T>::configTrainingSetMatrix()
 
 //==============================================================================
 template<typename T>
-size_t AudioClassifier<T>::calcFeatureVecSize() const
+unsigned int AudioClassifier<T>::calcFeatureVecSize() const
 {
-    size_t size = 0;
+    auto size = 0;
 
 	if (usingRMS.load())
 		size++;
