@@ -69,6 +69,7 @@ void OnsetDetector<T>::setCurrentBufferSize(int newFrameSize)
 	std::fill(currentFFTFrame.get(), currentFFTFrame.get() + currentFrameSize, static_cast<T>(0.0));
 
     onsetDetectionFunction.setFrameSize(newFrameSize);
+	adaptiveWhitener.setFFTFrameSize(newFrameSize);
 }
 
 //==============================================================================
@@ -256,15 +257,15 @@ T OnsetDetector<T>::getODFValue()
     switch (currentODFType.load())
     {
         case AudioClassifyOptions::ODFType::spectralDifferenceHWR :
-            featureValue = onsetDetectionFunction.spectralDifferenceHWR(currentFFTFrame, currentFrameSize);
+            featureValue = onsetDetectionFunction.spectralDifferenceHWR(currentFFTFrame.get(), currentFrameSize);
             break;
 
         case AudioClassifyOptions::ODFType::spectralDifference :
-            featureValue = onsetDetectionFunction.spectralDifference(currentFFTFrame, currentFrameSize);
+            featureValue = onsetDetectionFunction.spectralDifference(currentFFTFrame.get(), currentFrameSize);
             break;
 
         case AudioClassifyOptions::ODFType::highFrequencyContent : 
-            featureValue = onsetDetectionFunction.highFrequencyContent(currentFFTFrame, currentFrameSize);
+            featureValue = onsetDetectionFunction.highFrequencyContent(currentFFTFrame.get(), currentFrameSize);
             break;
 		
     	default: break;

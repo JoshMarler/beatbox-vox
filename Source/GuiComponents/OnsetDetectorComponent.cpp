@@ -13,11 +13,13 @@
 
 String OnsetDetectorComponent::useOSDTestSoundButtonID ("UseOSDTestSound");
 String OnsetDetectorComponent::odfComboBoxID ("ODFComboBox");
+String OnsetDetectorComponent::useAdaptWhitenButtonID("UseAdaptWhiten");
 
 OnsetDetectorComponent::OnsetDetectorComponent(BeatboxVoxAudioProcessor& p)
     : processor(p), 
       useOSDTestSoundButton("Use Onset Detection Test Sound"),
-      odfTypeSelector("ODF Type Selector")
+      odfTypeSelector("ODF Type Selector"),
+	  useAdaptWhitenButton("Use Adaptive Whitening")
 {
 
     odfTypeSelector.setComponentID(odfComboBoxID);
@@ -79,17 +81,28 @@ OnsetDetectorComponent::OnsetDetectorComponent(BeatboxVoxAudioProcessor& p)
     odfTypeLabel.setFont(Font("Cracked", 14.0f, Font::plain));
     odfTypeLabel.setColour(Label::textColourId, Colours::greenyellow);
 
+		
+    useAdaptWhitenLabel.setText("Use Adaptive Whitening", juce::NotificationType::dontSendNotification);
+    useAdaptWhitenLabel.setFont(Font("Cracked", 14.0f, Font::plain));
+    useAdaptWhitenLabel.setColour(Label::textColourId, Colours::greenyellow);
+
     addAndMakeVisible(meanCoeffLabel);
     addAndMakeVisible(medianCoeffLabel);
     addAndMakeVisible(noiseRatioLabel);
     addAndMakeVisible(msBetweenOnsetsLabel);
     addAndMakeVisible(useOSDTestSoundLabel);
     addAndMakeVisible(odfTypeLabel);
+	addAndMakeVisible(useAdaptWhitenLabel);
 
     useOSDTestSoundButton.addListener(this);
     useOSDTestSoundButton.setComponentID(useOSDTestSoundButtonID);
     useOSDTestSoundButton.setToggleState(false, juce::NotificationType::dontSendNotification);
     addAndMakeVisible(useOSDTestSoundButton);
+
+	useAdaptWhitenButton.addListener(this);
+	useAdaptWhitenButton.setComponentID(useAdaptWhitenButtonID);
+	useAdaptWhitenButton.setToggleState(false, juce::NotificationType::dontSendNotification);
+	addAndMakeVisible(useAdaptWhitenButton);
     
 }
 
@@ -109,14 +122,21 @@ void OnsetDetectorComponent::paint(Graphics& g)
 void OnsetDetectorComponent::resized()
 {
 	auto r (getLocalBounds());
-	auto leftSide(r.removeFromLeft(getWidth() / 2));
-    auto rightSide(r);
+	auto leftSide(r.removeFromLeft(r.getWidth() / 3));
+    auto rightSide(r.removeFromRight(r.getWidth() / 2));
 
     
+	//Rectangle/Bounds for onset detection function type controls
     auto odfTypeArea(rightSide.removeFromTop(rightSide.getHeight() / 5));
     
     odfTypeLabel.setBounds(odfTypeArea.removeFromTop(odfTypeArea.getHeight() / 5));
     odfTypeSelector.setBounds(odfTypeArea.reduced(10, 10));
+
+	//Rectangle/Bounds for adaptive whitening controls
+	auto adaptWhitenArea(rightSide.removeFromTop(rightSide.getHeight() / 4));
+
+	useAdaptWhitenLabel.setBounds(adaptWhitenArea.removeFromTop(adaptWhitenArea.getHeight() / 8));
+	useAdaptWhitenButton.setBounds(adaptWhitenArea);
 
     //Rectangle/Bounds for meanCoeff controls
     auto meanCoeffArea(leftSide.removeFromTop(leftSide.getHeight() / 5));
@@ -154,10 +174,13 @@ void OnsetDetectorComponent::resized()
 //==============================================================================
 void OnsetDetectorComponent::buttonClicked(Button* button)
 {
-    if (button->getComponentID() == useOSDTestSoundButtonID)
-    {
-        processor.setUsingOSDTestSound(button->getToggleState()); 
-    }
+	auto id = button->getComponentID();
+
+	if (id == useOSDTestSoundButtonID)
+		processor.setUsingOSDTestSound(button->getToggleState());
+	else if (id == useAdaptWhitenButtonID)
+		processor.getClassifier().setOSDUseAdaptiveWhitening(button->getToggleState());
+
 }
 //==============================================================================
 void OnsetDetectorComponent::comboBoxChanged(ComboBox* comboBoxThatHasChanged)
@@ -167,7 +190,7 @@ void OnsetDetectorComponent::comboBoxChanged(ComboBox* comboBoxThatHasChanged)
         auto& classifier = processor.getClassifier();
 
         auto odfType = odfTypeSelector.getSelectedId() - 1;
-        classifier.setOnsetDetectorODFType(static_cast<AudioClassifyOptions::ODFType>(odfType));
+        classifier.setOSDDetectorFunctionType(static_cast<AudioClassifyOptions::ODFType>(odfType));
     }
 }
 

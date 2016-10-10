@@ -35,6 +35,7 @@ public:
 
     static String useOSDTestSoundButtonID;
     static String odfComboBoxID;
+	static String useAdaptWhitenButtonID;
 
 private:
 
@@ -46,9 +47,11 @@ private:
     Label useOSDTestSoundLabel;
     Label msBetweenOnsetsLabel;
     Label odfTypeLabel;
+	Label useAdaptWhitenLabel;
 
     ToggleButton useOSDTestSoundButton;
     ComboBox odfTypeSelector;
+	ToggleButton useAdaptWhitenButton;
 
     //Parameter sliders
     std::unique_ptr<Slider> meanCoeffSlider;

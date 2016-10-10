@@ -42,7 +42,7 @@ void AdaptiveWhitener<T>::processFFTFrame(const T* inputFrame, T* outputFrame, c
 	for (auto i = 0; i < fftFrameSize; i++)
 	{
 		//Divide by PSP value - check against divid by zero
-		if (!peakValues[i] == 0)
+		if (peakValues[i] != static_cast<T>(0.0))
 			outputFrame[i] /= peakValues[i];
 	}
 }

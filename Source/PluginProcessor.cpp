@@ -140,9 +140,9 @@ void BeatboxVoxAudioProcessor::setupParameters()
 
 	processorState.state = ValueTree(Identifier("BeatboxVox"));
 
-	auto onsetDetectMeanCallback = [this] (float newMeanCoeff) { this->classifier.setOnsetDetectorMeanCoeff(newMeanCoeff); };
-	auto onsetDetectMedianCallback = [this] (float newMedianCoeff) { this->classifier.setOnsetDetectorMedianCoeff(newMedianCoeff); };
-	auto onsetDetectNoiseCallback = [this] (float newNoiseRatio) { this->classifier.setOnsetDetectorNoiseRatio(newNoiseRatio); };
+	auto onsetDetectMeanCallback = [this] (float newMeanCoeff) { this->classifier.setOSDMeanCoeff(newMeanCoeff); };
+	auto onsetDetectMedianCallback = [this] (float newMedianCoeff) { this->classifier.setOSDMedianCoeff(newMedianCoeff); };
+	auto onsetDetectNoiseCallback = [this] (float newNoiseRatio) { this->classifier.setOSDNoiseRatio(newNoiseRatio); };
 	auto onsetDetectMsBetweenCallback = [this] (float newMsBetweenOnsets) { this->classifier.setOSDMsBetweenOnsets(static_cast<int>(newMsBetweenOnsets)); };
 
 	paramCallbacks.insert(std::make_pair(paramOSDMeanCoeff, onsetDetectMeanCallback));

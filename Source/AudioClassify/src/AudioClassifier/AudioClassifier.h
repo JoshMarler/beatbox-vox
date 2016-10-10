@@ -47,11 +47,12 @@ public:
     int getCurrentTrainingSound() const;
     
     //Onset detector functions
-    void setOnsetDetectorMeanCoeff(T newMeanCoeff);
-    void setOnsetDetectorMedianCoeff(T newMedianCoeff);
-    void setOnsetDetectorNoiseRatio(T newNoiseRatio);
+    void setOSDMeanCoeff(T newMeanCoeff);
+    void setOSDMedianCoeff(T newMedianCoeff);
+    void setOSDNoiseRatio(T newNoiseRatio);
     void setOSDMsBetweenOnsets(const int ms);
-    void setOnsetDetectorODFType(AudioClassifyOptions::ODFType newODFType);
+    void setOSDDetectorFunctionType(AudioClassifyOptions::ODFType newODFType);
+	void setOSDUseAdaptiveWhitening(bool use);
 
     void recordTrainingSample(int trainingSound);
 

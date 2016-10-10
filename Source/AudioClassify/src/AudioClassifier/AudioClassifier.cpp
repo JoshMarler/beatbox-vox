@@ -96,20 +96,21 @@ int AudioClassifier<T>::getCurrentTrainingSound() const
 
 //==============================================================================
 template<typename T>
-void AudioClassifier<T>::setOnsetDetectorMeanCoeff(T newMeanCoeff)
+void AudioClassifier<T>::setOSDMeanCoeff(T newMeanCoeff)
 {
     osDetector.setMeanCoefficient(newMeanCoeff);
 }
 
+
 //==============================================================================
 template<typename T>
-void AudioClassifier<T>::setOnsetDetectorMedianCoeff(T newMedianCoeff)
+void AudioClassifier<T>::setOSDMedianCoeff(T newMedianCoeff)
 {
     osDetector.setMedianCoefficient(newMedianCoeff);
 }
 //==============================================================================
 template<typename T>
-void AudioClassifier<T>::setOnsetDetectorNoiseRatio(T newNoiseRatio)
+void AudioClassifier<T>::setOSDNoiseRatio(T newNoiseRatio)
 {
     osDetector.setNoiseRatio(newNoiseRatio);
 }
@@ -123,9 +124,15 @@ void AudioClassifier<T>::setOSDMsBetweenOnsets(int ms)
 
 //==============================================================================
 template<typename T>
-void AudioClassifier<T>::setOnsetDetectorODFType(AudioClassifyOptions::ODFType newODFType)
+void AudioClassifier<T>::setOSDDetectorFunctionType(AudioClassifyOptions::ODFType newODFType)
 {
     osDetector.setCurrentODFType(newODFType);
+}
+
+template<typename T>
+void AudioClassifier<T>::setOSDUseAdaptiveWhitening(bool use)
+{
+	osDetector.setUsingAdaptiveWhitening(use);
 }
 
 //==============================================================================
