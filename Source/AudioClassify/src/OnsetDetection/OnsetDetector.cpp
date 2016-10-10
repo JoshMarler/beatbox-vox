@@ -9,18 +9,20 @@
 */
 
 #include "OnsetDetector.h"
-
+#include "../../MathHelpers/MathHelpers.h"
 //==============================================================================
 
 template<typename T>
-OnsetDetector<T>::OnsetDetector(int initBufferSize)
+OnsetDetector<T>::OnsetDetector(int initFrameSize)
     : numPreviousValues(10),
       lastOnsetTime(),
       previousValues(std::make_unique<T[]>(numPreviousValues)),
       previousValuesCopy(std::make_unique<T[]>(numPreviousValues)),
-      onsetDetectionFunction(initBufferSize)
+      onsetDetectionFunction(initFrameSize),
+	  adaptiveWhitener(initFrameSize)
 {
     usingLocalMaximum = true;
+	usingWhitening = false;
     threshold = 1.0f;
     largestPeak = 0.0f;
     msBetweenOnsets.store(70);
@@ -39,7 +41,7 @@ OnsetDetector<T>::OnsetDetector(int initBufferSize)
     std::fill(previousValuesCopy.get(), (previousValuesCopy.get() + numPreviousValues), 0.0f);   
 
 
-    setCurrentBufferSize(initBufferSize);
+    setCurrentBufferSize(initFrameSize);
 }
 
 //==============================================================================
@@ -55,14 +57,18 @@ OnsetDetector<T>::~OnsetDetector()
 template<typename T>
 int OnsetDetector<T>::getCurrentBufferSize() const
 {
-  return bufferSize; 
+  return currentFrameSize; 
 }
 
 template<typename T>
-void OnsetDetector<T>::setCurrentBufferSize(int newBufferSize)
+void OnsetDetector<T>::setCurrentBufferSize(int newFrameSize)
 {
-    bufferSize = newBufferSize;
-    onsetDetectionFunction.setFrameSize(newBufferSize);
+    currentFrameSize = newFrameSize;
+	
+	currentFFTFrame.reset(new T[currentFrameSize]);
+	std::fill(currentFFTFrame.get(), currentFFTFrame.get() + currentFrameSize, static_cast<T>(0.0));
+
+    onsetDetectionFunction.setFrameSize(newFrameSize);
 }
 
 //==============================================================================
@@ -112,6 +118,12 @@ void OnsetDetector<T>::setMedianCoefficient(T newCoeff)
     medianCoeff.store(newCoeff);
 }
 
+template <typename T>
+unsigned OnsetDetector<T>::getMinMsBetweenOnsets() const
+{
+	return msBetweenOnsets.load();
+}
+
 //=============================================================================
 template<typename T>
 void OnsetDetector<T>::setMinMsBetweenOnsets(unsigned ms)
@@ -134,30 +146,31 @@ void OnsetDetector<T>::setCurrentODFType(AudioClassifyOptions::ODFType newODFTyp
 
 //=============================================================================
 template<typename T>
+bool OnsetDetector<T>::getUsingAdaptiveWhitening() const
+{
+	return usingWhitening;
+}
+
+template <typename T>
+void OnsetDetector<T>::setUsingAdaptiveWhitening(bool newUseWhitening)
+{
+	usingWhitening = newUseWhitening;
+}
+
+//=============================================================================
+template<typename T>
 bool OnsetDetector<T>::checkForOnset(const T* magnitudeSpectrum, const std::size_t magSpectrumSize)
 {
-    T featureValue = 0.0f;
+	T featureValue = static_cast<T>(0.0);
 	auto hasOnset = false;
 
-    //JWM - NOTE: Need to check but adaptive whitening of the magnitudeSpectrum would need to occur
-    //here before the hfc function call.
+	std::copy(magnitudeSpectrum, magnitudeSpectrum + magSpectrumSize, currentFFTFrame.get());
 
-    switch (currentODFType.load())
-    {
-        case AudioClassifyOptions::ODFType::spectralDifferenceHWR :
-            featureValue = onsetDetectionFunction.spectralDifferenceHWR(magnitudeSpectrum, magSpectrumSize);
-            break;
+	if (usingWhitening)
+		adaptiveWhitener.processFFTFrame(currentFFTFrame.get(), currentFFTFrame.get(), currentFrameSize);
 
-        case AudioClassifyOptions::ODFType::spectralDifference :
-            featureValue = onsetDetectionFunction.spectralDifference(magnitudeSpectrum, magSpectrumSize);
-            break;
-
-        case AudioClassifyOptions::ODFType::highFrequencyContent : 
-            featureValue = onsetDetectionFunction.highFrequencyContent(magnitudeSpectrum, magSpectrumSize);
-            break;
-		
-    	default: break;
-    }
+	//Get the onset detection funciton/feature value for peak picking/thresholding
+	featureValue = getODFValue();
 
 	//Stops initial detection issues when onset detector is loaded and contected to an active/streaming input.
 	if (featureValue > noiseRatio)
@@ -232,6 +245,32 @@ bool OnsetDetector<T>::onsetTimeIsValid()
     }
 
     return isValid;
+}
+
+//=============================================================================
+template<typename T>
+T OnsetDetector<T>::getODFValue()
+{
+	T featureValue = static_cast<T>(0.0);
+
+    switch (currentODFType.load())
+    {
+        case AudioClassifyOptions::ODFType::spectralDifferenceHWR :
+            featureValue = onsetDetectionFunction.spectralDifferenceHWR(currentFFTFrame, currentFrameSize);
+            break;
+
+        case AudioClassifyOptions::ODFType::spectralDifference :
+            featureValue = onsetDetectionFunction.spectralDifference(currentFFTFrame, currentFrameSize);
+            break;
+
+        case AudioClassifyOptions::ODFType::highFrequencyContent : 
+            featureValue = onsetDetectionFunction.highFrequencyContent(currentFFTFrame, currentFrameSize);
+            break;
+		
+    	default: break;
+    }
+
+	return featureValue;
 }
 
 //=============================================================================

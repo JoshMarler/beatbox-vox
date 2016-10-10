@@ -259,7 +259,7 @@ void BeatboxVoxAudioProcessor::processBlock(AudioSampleBuffer& buffer, MidiBuffe
 
 
 	//Holds classifier result for this block. 
-	int sound = -1;
+	auto sound = -1;
 	auto scaleFactor = 1000.0f;
 
 	//Buffer scale test

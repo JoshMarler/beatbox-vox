@@ -422,6 +422,12 @@
           <FILE id="FMel43" name="MathHelpers.h" compile="1" resource="0" file="Source/AudioClassify/MathHelpers/MathHelpers.h"/>
         </GROUP>
         <GROUP id="{85E02C39-0B9F-AA28-9223-C9BC61429A23}" name="src">
+          <GROUP id="{E994FFA9-D571-2588-9E90-8E74407783BA}" name="AdaptiveWhitener">
+            <FILE id="sg8bsE" name="AdaptiveWhitener.cpp" compile="1" resource="0"
+                  file="Source/AudioClassify/src/AdaptiveWhitener/AdaptiveWhitener.cpp"/>
+            <FILE id="eDUZOf" name="AdaptiveWhitener.h" compile="0" resource="0"
+                  file="Source/AudioClassify/src/AdaptiveWhitener/AdaptiveWhitener.h"/>
+          </GROUP>
           <GROUP id="{A893CC75-7EAE-E4DB-A630-85180E44A872}" name="AudioClassifier">
             <FILE id="FhndgL" name="AudioClassifier.cpp" compile="1" resource="0"
                   file="Source/AudioClassify/src/AudioClassifier/AudioClassifier.cpp"/>
@@ -493,20 +499,20 @@
                        libraryPath="E:\Development\OpenBLAS\lib&#10;" binaryPath="C:\Users\Joshua Marler\AudioPlugins\VST3"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_video" path="..\JUCE\modules"/>
-        <MODULEPATH id="juce_opengl" path="..\JUCE\modules"/>
-        <MODULEPATH id="juce_gui_extra" path="..\JUCE\modules"/>
-        <MODULEPATH id="juce_gui_basics" path="..\JUCE\modules"/>
-        <MODULEPATH id="juce_graphics" path="..\JUCE\modules"/>
-        <MODULEPATH id="juce_events" path="..\JUCE\modules"/>
-        <MODULEPATH id="juce_data_structures" path="..\JUCE\modules"/>
-        <MODULEPATH id="juce_cryptography" path="..\JUCE\modules"/>
-        <MODULEPATH id="juce_core" path="..\JUCE\modules"/>
-        <MODULEPATH id="juce_audio_processors" path="..\JUCE\modules"/>
-        <MODULEPATH id="juce_audio_plugin_client" path="..\JUCE\modules"/>
-        <MODULEPATH id="juce_audio_formats" path="..\JUCE\modules"/>
-        <MODULEPATH id="juce_audio_devices" path="..\JUCE\modules"/>
-        <MODULEPATH id="juce_audio_basics" path="..\JUCE\modules"/>
+        <MODULEPATH id="juce_video" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_opengl" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_gui_extra" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_gui_basics" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_graphics" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_events" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_data_structures" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_cryptography" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_core" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_processors" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_formats" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_devices" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_basics" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
       </MODULEPATHS>
     </VS2015>
   </EXPORTFORMATS>

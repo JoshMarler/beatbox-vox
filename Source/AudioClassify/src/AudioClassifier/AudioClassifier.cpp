@@ -16,7 +16,7 @@ AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int in
     : trainingData(21, (trainingSetSize * initNumSounds), arma::fill::zeros),
       trainingLabels((trainingSetSize * initNumSounds)),
       currentInstanceVector(21, arma::fill::zeros),
-      gistFeatures(initBufferSize, initSampleRate),
+      gistFeatures(initBufferSize, static_cast<int>(initSampleRate)),
       osDetector(initBufferSize),
       nbc(initNumSounds, 21)
 {
@@ -63,8 +63,7 @@ void AudioClassifier<T>::setCurrentBufferSize (int newBufferSize)
     gistFeatures.setAudioFrameSize(newBufferSize);
 
     magSpectrum.reset(new T[newBufferSize / 2]);    
-
-    std::fill(magSpectrum.get(), (magSpectrum.get() + (newBufferSize / 2)), 0.0f);
+    std::fill(magSpectrum.get(), (magSpectrum.get() + (newBufferSize / 2)), static_cast<T>(0.0));
 
     osDetector.setCurrentBufferSize(newBufferSize);
     /**

@@ -16,8 +16,8 @@
 #include <chrono>
 
 #include "../AudioClassifyOptions/AudioClassifyOptions.h"
-#include "../../MathHelpers/MathHelpers.h"
 #include "../../Gist/src/onset-detection-functions/OnsetDetectionFunction.h"
+#include "../AdaptiveWhitener/AdaptiveWhitener.h"
 
 //name defines for clock and duration types
 using ClockType = std::chrono::steady_clock;
@@ -28,7 +28,7 @@ template<typename T>
 class OnsetDetector
 {
     public:
-	explicit OnsetDetector(int initBufferSize);
+	explicit OnsetDetector(int initFrameSize);
         ~OnsetDetector();
         
         int getCurrentBufferSize() const;
@@ -45,18 +45,21 @@ class OnsetDetector
         
         void setMedianCoefficient(T newCoeff);
         
-        //JWM - Note: Should probably make ms an unsigned value to avoid negatives.
+		unsigned getMinMsBetweenOnsets() const;
         void setMinMsBetweenOnsets(unsigned ms);
 
         int getCurrentODFType() const;
         void setCurrentODFType(AudioClassifyOptions::ODFType newODFType);
+		
+		bool getUsingAdaptiveWhitening() const;
+		void setUsingAdaptiveWhitening(bool newUseWhitening);
     
         
         bool checkForOnset(const T* magnitudeSpectrum, const std::size_t magSpectrumSize);
 
     private:
 
-       int bufferSize; 
+       int currentFrameSize; 
        int numPreviousValues;
        int medianWindowSize; 
        
@@ -66,6 +69,7 @@ class OnsetDetector
        bool firstOnsetDetected;
 
        bool usingLocalMaximum;      
+	   bool usingWhitening;
        
        T threshold;
        T largestPeak;
@@ -77,6 +81,7 @@ class OnsetDetector
 
        std::atomic<AudioClassifyOptions::ODFType> currentODFType {AudioClassifyOptions::ODFType::spectralDifference};
 
+	   std::unique_ptr<T[]> currentFFTFrame;
        std::unique_ptr<T[]> previousValues;
 
        /**
@@ -87,9 +92,11 @@ class OnsetDetector
        std::unique_ptr<T[]> previousValuesCopy;
 
        OnsetDetectionFunction<T> onsetDetectionFunction;
+	   AdaptiveWhitener<T> adaptiveWhitener;
 
        bool checkForPeak(T featureValue);
        bool onsetTimeIsValid();
+	   T getODFValue();
 };
 
 
