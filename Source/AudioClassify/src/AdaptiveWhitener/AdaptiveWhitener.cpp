@@ -12,10 +12,15 @@
 
 //==============================================================================
 template<typename T>
-AdaptiveWhitener<T>::AdaptiveWhitener(const std::size_t fftFrameSize)
+AdaptiveWhitener<T>::AdaptiveWhitener(const std::size_t initFrameSize, const unsigned int initSampleRate)
 {
-	decayRate = 20;
-	setFFTFrameSize(fftFrameSize);
+	//In DB - Minimum noise floor value set to -60db 
+	noiseFloor = 0.001;
+
+	//Set initial default peak decay rate of 15 seconds
+	setPeakMemoryDecayRate(15);
+	setFFTFrameSize(initSampleRate);
+	
 }
 
 template<typename T>
@@ -24,45 +29,94 @@ AdaptiveWhitener<typename T>::~AdaptiveWhitener()
 }
 
 //==============================================================================
+template<typename T>
+std::size_t AdaptiveWhitener<T>::getFFTFrameSize() const
+{
+	return fftFrameSize;
+}
+
 template <typename T>
 void AdaptiveWhitener<T>::setFFTFrameSize(const std::size_t newFFTFrameSize)
 {
-	peakValues.reset(new T[newFFTFrameSize]);
-	std::fill(peakValues.get(), peakValues.get() + newFFTFrameSize, static_cast<T>(0.0));
+	fftFrameSize = newFFTFrameSize;
+
+	peakValues.reset(new T[fftFrameSize]);
+	std::fill(peakValues.get(), peakValues.get() + fftFrameSize, static_cast<T>(0.0));
+
+	//Update the memory decay coefficient relative to new frame size
+	updateMemoryDecayCoeff();
+}
+
+//==============================================================================
+template<typename T>
+unsigned int AdaptiveWhitener<T>::getSampleRate() const
+{
+	return sampleRate;
+}
+
+template<typename T>
+void AdaptiveWhitener<T>::setSampleRate(const unsigned int newSampleRate)
+{
+	sampleRate = newSampleRate;
+
+	//Update the memory decay coefficient relative to new sample rate
+	updateMemoryDecayCoeff();
 }
 
 //==============================================================================
 template <typename T>
-void AdaptiveWhitener<T>::processFFTFrame(const T* inputFrame, T* outputFrame, const std::size_t fftFrameSize)
+void AdaptiveWhitener<T>::process(const T* inputFrame, T* outputFrame)
 {
-	updatePeaks(inputFrame, fftFrameSize);
-	
 	std::copy(inputFrame, inputFrame + fftFrameSize, outputFrame);
 
 	for (auto i = 0; i < fftFrameSize; i++)
 	{
-		//Divide by PSP value - check against divid by zero
+
+		T val = outputFrame[i];
+
+		/* If value less than previous bin peak this updates val and then the current peak 
+		 * value for this FFT bin by multiplying with the memory decay rate coefficient.
+		 *
+		 * This will be mitigated in the next check if the resulting value falls below the noise
+		 * floor and will set the current FFT bins PSP/peak value to the minimum noise floor level.		  
+		 */
+		if (val < peakValues[i])
+			val = val + (peakValues[i] - val) * memoryRateCoeff;
+
+		//Do not allow value to fall below noise floor
+		if (val < noiseFloor)
+			val = noiseFloor;
+
+		//Update the peak/PSP value for the current bin
+		peakValues[i] = val;
+
+		//Divide by PSP value - check against divide by zero for first block
 		if (peakValues[i] != static_cast<T>(0.0))
 			outputFrame[i] /= peakValues[i];
 	}
 }
 
 template <typename T>
-void AdaptiveWhitener<T>::setPeakDecayTime(const unsigned int newDecayTime)
+void AdaptiveWhitener<T>::setPeakMemoryDecayRate(const unsigned int newDecayTime)
 {
 	decayRate = newDecayTime;
+	updateMemoryDecayCoeff();
 }
 
 //==============================================================================
-template<typename T>
-void AdaptiveWhitener<T>::updatePeaks(const T * inputFrame, const std::size_t fftFrameSize)
+template <typename T>
+void AdaptiveWhitener<T>::updateMemoryDecayCoeff()
 {
-	for (auto i = 0; i < fftFrameSize; i++)
-	{
-		if (inputFrame[i] > peakValues[i])
-			peakValues[i] = inputFrame[i];
-	}
+
+	//NOTE: Potentially change these to compile time constance with constexpr
+	//log/0.0 - 1.0 db conversions for -60db decay rate calculations
+	auto dbRatio = std::pow(10, (-60 / 20));
+	auto logDbDecayRatio = std::log(dbRatio);
+
+	//Calculate the memory coefficient from the specified decay rate in seconds
+	memoryRateCoeff = (decayRate == 0) ? static_cast<T>(0.0) : std::exp((logDbDecayRatio * fftFrameSize) / (decayRate * sampleRate));
 }
+
 
 //==============================================================================
 template class AdaptiveWhitener<float>;

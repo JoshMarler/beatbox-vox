@@ -28,11 +28,14 @@ template<typename T>
 class OnsetDetector
 {
     public:
-	explicit OnsetDetector(int initFrameSize);
+	explicit OnsetDetector(int initFrameSize, unsigned int initSampleRate);
         ~OnsetDetector();
         
-        int getCurrentBufferSize() const;
-        void setCurrentBufferSize(int newBufferSize);
+        int getCurrentFrameSize() const;
+        void setCurrentFrameSize(unsigned newBufferSize);
+
+		unsigned int getSampleRate() const;
+		void setSampleRate(unsigned int newSampleRate);
 
         void setUsingLocalMaximum(bool newUsingLocalMaximum);
         bool getUsingLocalMaximum() const;
@@ -54,12 +57,14 @@ class OnsetDetector
 		bool getUsingAdaptiveWhitening() const;
 		void setUsingAdaptiveWhitening(bool newUseWhitening);
     
+		void setWhitenerPeakDecayRate(unsigned int newDecayRate);
         
         bool checkForOnset(const T* magnitudeSpectrum, const std::size_t magSpectrumSize);
 
     private:
 
-       int currentFrameSize; 
+       unsigned int currentFrameSize; 
+	   unsigned int sampleRate;
        int numPreviousValues;
        int medianWindowSize; 
        

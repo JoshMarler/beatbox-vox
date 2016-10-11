@@ -13,13 +13,13 @@
 //==============================================================================
 
 template<typename T>
-OnsetDetector<T>::OnsetDetector(int initFrameSize)
+OnsetDetector<T>::OnsetDetector(int initFrameSize, unsigned int initSampleRate)
     : numPreviousValues(10),
       lastOnsetTime(),
       previousValues(std::make_unique<T[]>(numPreviousValues)),
       previousValuesCopy(std::make_unique<T[]>(numPreviousValues)),
       onsetDetectionFunction(initFrameSize),
-	  adaptiveWhitener(initFrameSize)
+	  adaptiveWhitener(initFrameSize, initSampleRate)
 {
     usingLocalMaximum = true;
 	usingWhitening = false;
@@ -41,7 +41,7 @@ OnsetDetector<T>::OnsetDetector(int initFrameSize)
     std::fill(previousValuesCopy.get(), (previousValuesCopy.get() + numPreviousValues), 0.0f);   
 
 
-    setCurrentBufferSize(initFrameSize);
+    setCurrentFrameSize(initFrameSize);
 }
 
 //==============================================================================
@@ -53,15 +53,14 @@ OnsetDetector<T>::~OnsetDetector()
 
 
 //==============================================================================
-
 template<typename T>
-int OnsetDetector<T>::getCurrentBufferSize() const
+int OnsetDetector<T>::getCurrentFrameSize() const
 {
   return currentFrameSize; 
 }
 
 template<typename T>
-void OnsetDetector<T>::setCurrentBufferSize(int newFrameSize)
+void OnsetDetector<T>::setCurrentFrameSize(unsigned newFrameSize)
 {
     currentFrameSize = newFrameSize;
 	
@@ -70,6 +69,20 @@ void OnsetDetector<T>::setCurrentBufferSize(int newFrameSize)
 
     onsetDetectionFunction.setFrameSize(newFrameSize);
 	adaptiveWhitener.setFFTFrameSize(newFrameSize);
+}
+
+//==============================================================================
+template<typename T>
+unsigned int OnsetDetector<T>::getSampleRate() const
+{
+	return sampleRate;
+}
+
+template<typename T>
+void OnsetDetector<T>::setSampleRate(unsigned int newSampleRate)
+{
+	sampleRate = newSampleRate;
+	adaptiveWhitener.setSampleRate(sampleRate);
 }
 
 //==============================================================================
@@ -119,13 +132,13 @@ void OnsetDetector<T>::setMedianCoefficient(T newCoeff)
     medianCoeff.store(newCoeff);
 }
 
+//=============================================================================
 template <typename T>
 unsigned OnsetDetector<T>::getMinMsBetweenOnsets() const
 {
 	return msBetweenOnsets.load();
 }
 
-//=============================================================================
 template<typename T>
 void OnsetDetector<T>::setMinMsBetweenOnsets(unsigned ms)
 {
@@ -158,6 +171,12 @@ void OnsetDetector<T>::setUsingAdaptiveWhitening(bool newUseWhitening)
 	usingWhitening = newUseWhitening;
 }
 
+template<typename T>
+void OnsetDetector<T>::setWhitenerPeakDecayRate(unsigned int newDecayRate)
+{
+	adaptiveWhitener.setPeakMemoryDecayRate(newDecayRate);
+}
+
 //=============================================================================
 template<typename T>
 bool OnsetDetector<T>::checkForOnset(const T* magnitudeSpectrum, const std::size_t magSpectrumSize)
@@ -168,7 +187,7 @@ bool OnsetDetector<T>::checkForOnset(const T* magnitudeSpectrum, const std::size
 	std::copy(magnitudeSpectrum, magnitudeSpectrum + magSpectrumSize, currentFFTFrame.get());
 
 	if (usingWhitening)
-		adaptiveWhitener.processFFTFrame(currentFFTFrame.get(), currentFFTFrame.get(), currentFrameSize);
+		adaptiveWhitener.process(currentFFTFrame.get(), currentFFTFrame.get());
 
 	//Get the onset detection funciton/feature value for peak picking/thresholding
 	featureValue = getODFValue();

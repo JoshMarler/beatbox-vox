@@ -20,24 +20,35 @@ class AdaptiveWhitener
 
 public:
 
-	explicit AdaptiveWhitener(const std::size_t fftFrameSize);
+	explicit AdaptiveWhitener(const std::size_t initFFTFrameSize, const unsigned int initSampleRate);
 	~AdaptiveWhitener();
 
+	std::size_t getFFTFrameSize() const;
 	void setFFTFrameSize(const std::size_t newFFTFrameSize);
-	
-	void processFFTFrame(const T* inputFrame, T* outputFrame, const std::size_t fftFrameSize);
 
-	void setPeakDecayTime(const unsigned int newDecayTime);
+	unsigned int getSampleRate() const;
+	void setSampleRate(const unsigned int newSampleRate);
+	
+	void process(const T* inputFrame, T* outputFrame);
+
+	void setPeakMemoryDecayRate(const unsigned int newDecayTime);
 
 private:
 
+	//The size of the current fft frame
+	unsigned int sampleRate;
+	std::size_t fftFrameSize;
+
+
 	//The decay rate for the peak bin values in seconds.
 	unsigned int decayRate;
+	float noiseFloor;
+	T memoryRateCoeff;
 
 	//The array of peak magnitude values for each of the fft/spectral bins
 	std::unique_ptr<T[]> peakValues;
 
-	void updatePeaks(const T* inputFrame, const std::size_t fftFrameSize);
+	void updateMemoryDecayCoeff();
 
 };
 

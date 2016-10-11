@@ -17,7 +17,7 @@ AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int in
       trainingLabels((trainingSetSize * initNumSounds)),
       currentInstanceVector(21, arma::fill::zeros),
       gistFeatures(initBufferSize, static_cast<int>(initSampleRate)),
-      osDetector(initBufferSize),
+      osDetector(initBufferSize, initSampleRate),
       nbc(initNumSounds, 21)
 {
     setCurrentSampleRate(initSampleRate);
@@ -65,7 +65,7 @@ void AudioClassifier<T>::setCurrentBufferSize (int newBufferSize)
     magSpectrum.reset(new T[newBufferSize / 2]);    
     std::fill(magSpectrum.get(), (magSpectrum.get() + (newBufferSize / 2)), static_cast<T>(0.0));
 
-    osDetector.setCurrentBufferSize(newBufferSize);
+    osDetector.setCurrentFrameSize(newBufferSize / 2);
     /**
      * Note: After prototype stage this function should probably handle clearing the model
      * and setting classifier ready to false as well as emptying the trainingDataSet and trainingLables matrices.
@@ -78,6 +78,7 @@ void AudioClassifier<T>::setCurrentSampleRate (T newSampleRate)
 {
     sampleRate = newSampleRate;
     gistFeatures.setSamplingFrequency(static_cast<int>(newSampleRate));
+	osDetector.setSampleRate(sampleRate);
 }
 
 //==============================================================================
@@ -129,10 +130,17 @@ void AudioClassifier<T>::setOSDDetectorFunctionType(AudioClassifyOptions::ODFTyp
     osDetector.setCurrentODFType(newODFType);
 }
 
+//==============================================================================
 template<typename T>
 void AudioClassifier<T>::setOSDUseAdaptiveWhitening(bool use)
 {
 	osDetector.setUsingAdaptiveWhitening(use);
+}
+
+template<typename T>
+void AudioClassifier<T>::setODSWhitenerPeakDecayRate(unsigned int newDecayRate)
+{
+	osDetector.setWhitenerPeakDecayRate(newDecayRate);
 }
 
 //==============================================================================
@@ -194,7 +202,7 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer, const int numSampl
 
     /** if (bufferSize != numSamples) */
     /** { */
-    /**     //setCurrentBufferSize() needs to be called before continuing processing - training set/model will be invalid strictly speaking. */
+    /**     //setCurrentFrameSize() needs to be called before continuing processing - training set/model will be invalid strictly speaking. */
     /**     return; */
     /** } */
 
