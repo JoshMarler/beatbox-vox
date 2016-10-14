@@ -14,12 +14,13 @@
 template<typename T>
 AdaptiveWhitener<T>::AdaptiveWhitener(const std::size_t initFrameSize, const unsigned int initSampleRate)
 {
-	//In DB - Minimum noise floor value set to -60db 
-	noiseFloor = 0.001;
+	//In DB - Minimum noise floor value set to -40db 
+	noiseFloor = 0.01;
 
 	//Set initial default peak decay rate of 15 seconds
-	setPeakMemoryDecayRate(15);
-	setFFTFrameSize(initSampleRate);
+	setPeakMemoryDecayRate(10);
+	setSampleRate(initSampleRate);
+	setFFTFrameSize(initFrameSize);
 	
 }
 

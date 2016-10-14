@@ -260,10 +260,10 @@ void BeatboxVoxAudioProcessor::processBlock(AudioSampleBuffer& buffer, MidiBuffe
 
 	//Holds classifier result for this block. 
 	auto sound = -1;
-	auto scaleFactor = 1000.0f;
-
+	
 	//Buffer scale test
-	FloatVectorOperations::multiply(buffer.getWritePointer(0), scaleFactor, numSamples);
+	//auto scaleFactor = 1000.0f;
+	//FloatVectorOperations::multiply(buffer.getWritePointer(0), scaleFactor, numSamples);
 
 	classifier.processAudioBuffer(buffer.getReadPointer(0), numSamples);
 

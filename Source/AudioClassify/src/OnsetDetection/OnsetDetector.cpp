@@ -192,8 +192,10 @@ bool OnsetDetector<T>::checkForOnset(const T* magnitudeSpectrum, const std::size
 	//Get the onset detection funciton/feature value for peak picking/thresholding
 	featureValue = getODFValue();
 
+	assert(!MathHelpers::isNaN(featureValue));
+
 	//Stops initial detection issues when onset detector is loaded and contected to an active/streaming input.
-	if (featureValue > noiseRatio)
+	//if (featureValue > noiseRatio)
 		hasOnset = checkForPeak(featureValue);
 
     return hasOnset;
@@ -210,7 +212,7 @@ bool OnsetDetector<T>::checkForPeak(T featureValue)
         std::copy(previousValues.get(), previousValues.get() + numPreviousValues, previousValuesCopy.get());
 
 		//(previousValues[0] > noiseRatio) &&
-        if ((previousValues[0] > threshold) && (previousValues[0] > featureValue) && (previousValues[0] > previousValues[1]))
+        if ((previousValues[0] > noiseRatio) && (previousValues[0] > threshold) && (previousValues[0] > featureValue) && (previousValues[0] > previousValues[1]))
 				isOnset = onsetTimeIsValid();
     }
     else
@@ -222,6 +224,9 @@ bool OnsetDetector<T>::checkForPeak(T featureValue)
 
 	threshold = (meanCoeff.load() * MathHelpers::getMean(previousValues.get(), numPreviousValues)) +
 				(medianCoeff.load() * MathHelpers::getMedian(previousValuesCopy.get(), numPreviousValues));
+
+
+	assert(!MathHelpers::isNaN(threshold));
 
     for (auto i = numPreviousValues - 1; i > 0; i--) 
     { 

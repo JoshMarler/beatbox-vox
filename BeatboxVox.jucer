@@ -492,27 +492,27 @@
             externalLibraries="libopenblas.lib&#10;" extraDefs="USE_KISS_FFT=1&#10;">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="BeatboxVox" libraryPath="E:\Development\OpenBLAS\lib&#10;"
-                       headerPath="E:\Development\armadillo\include" binaryPath="C:\Users\Joshua Marler\AudioPlugins\VST3"/>
+                       isDebug="1" optimisation="1" targetName="BeatboxVox" libraryPath="D:\Development\OpenBLAS\lib&#10;"
+                       headerPath="D:\Development\armadillo\include" binaryPath="C:\Users\JOSHUA.Marler\AudioPlugins\VST3"/>
         <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="0" optimisation="3" targetName="BeatboxVox" headerPath="E:\Development\armadillo\include"
-                       libraryPath="E:\Development\OpenBLAS\lib&#10;" binaryPath="C:\Users\Joshua Marler\AudioPlugins\VST3"/>
+                       isDebug="0" optimisation="3" targetName="BeatboxVox" headerPath="D:\Development\armadillo\include"
+                       libraryPath="D:\Development\OpenBLAS\lib&#10;" binaryPath="C:\Users\JOSHUA.Marler\AudioPlugins\VST3"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_video" path="..\JUCE\modules"/>
-        <MODULEPATH id="juce_opengl" path="..\JUCE\modules"/>
-        <MODULEPATH id="juce_gui_extra" path="..\JUCE\modules"/>
-        <MODULEPATH id="juce_gui_basics" path="..\JUCE\modules"/>
-        <MODULEPATH id="juce_graphics" path="..\JUCE\modules"/>
-        <MODULEPATH id="juce_events" path="..\JUCE\modules"/>
-        <MODULEPATH id="juce_data_structures" path="..\JUCE\modules"/>
-        <MODULEPATH id="juce_cryptography" path="..\JUCE\modules"/>
-        <MODULEPATH id="juce_core" path="..\JUCE\modules"/>
-        <MODULEPATH id="juce_audio_processors" path="..\JUCE\modules"/>
-        <MODULEPATH id="juce_audio_plugin_client" path="..\JUCE\modules"/>
-        <MODULEPATH id="juce_audio_formats" path="..\JUCE\modules"/>
-        <MODULEPATH id="juce_audio_devices" path="..\JUCE\modules"/>
-        <MODULEPATH id="juce_audio_basics" path="..\JUCE\modules"/>
+        <MODULEPATH id="juce_video" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_opengl" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_gui_extra" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_gui_basics" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_graphics" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_events" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_data_structures" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_cryptography" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_core" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_processors" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_formats" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_devices" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_basics" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
       </MODULEPATHS>
     </VS2015>
   </EXPORTFORMATS>
