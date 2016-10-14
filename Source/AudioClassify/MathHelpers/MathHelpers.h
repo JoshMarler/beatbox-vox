@@ -12,7 +12,6 @@
 #define MATHHELPERS_H_INCLUDED
 
 #include <algorithm>
-#include <string>
 #include <cassert>
 
 #ifdef _WIN64
@@ -42,13 +41,9 @@ namespace MathHelpers
     template<typename T>
     T getMean(const T* vec, const std::size_t vecSize)
     {
-	    auto end = sizeof(vec[0]) * vecSize;
-
-        auto sum = std::accumulate(vec, (vec + end), static_cast<T>(0.0));
-
+        auto sum = std::accumulate(vec, (vec + vecSize), static_cast<T>(0.0));
 		sum /= vecSize;
 
-		assert(!isNaN(sum));
         return sum;       
     }
 
@@ -77,6 +72,7 @@ namespace MathHelpers
 
 			assert(!isNaN(medianEven));
 
+			auto result = (medianEven + medianOdd) / 2;
 	        return (medianEven + medianOdd) / 2;
         }
 

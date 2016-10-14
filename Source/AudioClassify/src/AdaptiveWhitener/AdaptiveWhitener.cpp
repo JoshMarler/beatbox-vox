@@ -72,7 +72,6 @@ void AdaptiveWhitener<T>::process(const T* inputFrame, T* outputFrame)
 
 	for (auto i = 0; i < fftFrameSize; i++)
 	{
-
 		T val = outputFrame[i];
 
 		/* If value less than previous bin peak this updates val and then the current peak 
