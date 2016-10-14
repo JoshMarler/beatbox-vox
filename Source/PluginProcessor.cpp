@@ -281,13 +281,13 @@ void BeatboxVoxAudioProcessor::processBlock(AudioSampleBuffer& buffer, MidiBuffe
 
 	switch (sound)
 	{
-	case soundLabel::KickDrum:
-		triggerKickDrum(midiMessages);
-		break;
-	case soundLabel::SnareDrum:
-		triggerSnareDrum(midiMessages);
-		break;
-	default: break;
+		case soundLabel::KickDrum:
+			triggerKickDrum(midiMessages);
+			break;
+		case soundLabel::SnareDrum:
+			triggerSnareDrum(midiMessages);
+			break;
+		default: break;
 	}
 
 

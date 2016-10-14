@@ -57,7 +57,7 @@ AudioClassifierComponent::AudioClassifierComponent(BeatboxVoxAudioProcessor& p)
     }
 	
     //Set timer for gui update callback
-    startTimerHz(30);
+    startTimerHz(20);
 
 }
 
@@ -156,6 +156,19 @@ void AudioClassifierComponent::buttonClicked(Button* button)
     {
         if (button->getToggleState())
         {
+			/** JWM - NOTE:
+			 *  At the moment this code is synchronous. So on the call to recordTrainingSample
+			 *  we could display a "Training" progress bar / spinner and then have the classifiers
+			 *  recordTrainingSample return true/false based on whether the sound was recorded and added
+			 *  to the training set succesfully. 
+			 *  Then the spinner/progress bar could be hidden and the currently selected radio button unticked for GUI/Display
+			 *  purposes. 
+			 *  Would then be worth prompting the user if they go to record the same sound again to check if this is
+			 *  overwriting the previously recorded training/model data or whether it is being added as additional training data to the 
+			 *  model. This would require a call to setTrainingSetSize or something similar. Training data would need to be stored to 
+			 *  then be appended to and the model probably re-trained. Alternativley incremental training could be implemented in 
+			 *  a similar fashion to the mlpack code. 
+			 */ 
             processor.getClassifier().recordTrainingSample(currentTrainingSound);
 			auto label = soundReadyLabels[currentTrainingSound];
 

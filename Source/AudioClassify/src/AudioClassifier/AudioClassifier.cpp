@@ -138,9 +138,15 @@ void AudioClassifier<T>::setOSDUseAdaptiveWhitening(bool use)
 }
 
 template<typename T>
-void AudioClassifier<T>::setODSWhitenerPeakDecayRate(unsigned int newDecayRate)
+void AudioClassifier<T>::setOSDWhitenerPeakDecayRate(unsigned int newDecayRate)
 {
 	osDetector.setWhitenerPeakDecayRate(newDecayRate);
+}
+
+template<typename T>
+void AudioClassifier<T>::setOSDUseLocalMaximum(bool use)
+{
+	osDetector.setUsingLocalMaximum(use);
 }
 
 //==============================================================================

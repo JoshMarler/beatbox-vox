@@ -33,6 +33,7 @@ public:
     void buttonClicked(Button* button) override;
     void comboBoxChanged(ComboBox* comboBoxThatHasChanged) override;
 
+	static String useLocalMaximumButonID;
     static String useOSDTestSoundButtonID;
     static String odfComboBoxID;
 	static String useAdaptWhitenButtonID;
@@ -41,6 +42,7 @@ private:
 
     BeatboxVoxAudioProcessor& processor;
 
+	Label useLocalMaxLabel;
     Label meanCoeffLabel;
     Label medianCoeffLabel;
     Label noiseRatioLabel;
@@ -49,6 +51,7 @@ private:
     Label odfTypeLabel;
 	Label useAdaptWhitenLabel;
 
+	ToggleButton useLocalMaximumButton;
     ToggleButton useOSDTestSoundButton;
     ComboBox odfTypeSelector;
 	ToggleButton useAdaptWhitenButton;

@@ -442,6 +442,12 @@
             <FILE id="s7N0Ox" name="NaiveBayes.cpp" compile="1" resource="0" file="Source/AudioClassify/src/NaiveBayes/NaiveBayes.cpp"/>
             <FILE id="xVTWLX" name="NaiveBayes.h" compile="1" resource="0" file="Source/AudioClassify/src/NaiveBayes/NaiveBayes.h"/>
           </GROUP>
+          <GROUP id="{59C96F5C-A67C-BB23-60E1-1233E102AE55}" name="NearestNeighbour">
+            <FILE id="ZHbR3K" name="NearestNeigbour.cpp" compile="1" resource="0"
+                  file="Source/AudioClassify/src/NearestNeighbour/NearestNeigbour.cpp"/>
+            <FILE id="wdN2ng" name="NearestNeigbour.h" compile="0" resource="0"
+                  file="Source/AudioClassify/src/NearestNeighbour/NearestNeigbour.h"/>
+          </GROUP>
           <GROUP id="{3E7D8448-E5A1-7B6D-144D-BB78A02F7A19}" name="OnsetDetection">
             <FILE id="QZGmsU" name="OnsetDetector.cpp" compile="1" resource="0"
                   file="Source/AudioClassify/src/OnsetDetection/OnsetDetector.cpp"/>

@@ -53,7 +53,8 @@ public:
     void setOSDMsBetweenOnsets(const int ms);
     void setOSDDetectorFunctionType(AudioClassifyOptions::ODFType newODFType);
 	void setOSDUseAdaptiveWhitening(bool use);
-	void setODSWhitenerPeakDecayRate(unsigned int newDecayRate);
+	void setOSDWhitenerPeakDecayRate(unsigned int newDecayRate);
+	void setOSDUseLocalMaximum(bool use);
 
     void recordTrainingSample(int trainingSound);
 

@@ -217,7 +217,7 @@ bool OnsetDetector<T>::checkForPeak(T featureValue)
     }
     else
     {
-		if (featureValue > threshold)
+		if (featureValue > noiseRatio && featureValue > threshold)
 				isOnset = onsetTimeIsValid();
     }
 

@@ -11,12 +11,14 @@
 #include "OnsetDetectorComponent.h"
 //==============================================================================
 
+String OnsetDetectorComponent::useLocalMaximumButonID("UseLocalMaximum");
 String OnsetDetectorComponent::useOSDTestSoundButtonID ("UseOSDTestSound");
 String OnsetDetectorComponent::odfComboBoxID ("ODFComboBox");
 String OnsetDetectorComponent::useAdaptWhitenButtonID("UseAdaptWhiten");
 
 OnsetDetectorComponent::OnsetDetectorComponent(BeatboxVoxAudioProcessor& p)
-    : processor(p), 
+	: processor(p),
+	  useLocalMaximumButton("Use Local Maximum"),
       useOSDTestSoundButton("Use Onset Detection Test Sound"),
       odfTypeSelector("ODF Type Selector"),
 	  useAdaptWhitenButton("Use Adaptive Whitening")
@@ -56,6 +58,11 @@ OnsetDetectorComponent::OnsetDetectorComponent(BeatboxVoxAudioProcessor& p)
                                                                                                  *msBetweenOnsetsSlider);
 
 
+
+    useLocalMaxLabel.setText("Use Local Maximum", juce::NotificationType::dontSendNotification);
+	useLocalMaxLabel.setFont(Font("Cracked", 14.0f, Font::plain));
+    useLocalMaxLabel.setColour(Label::textColourId, Colours::greenyellow);
+	
     meanCoeffLabel.setText("Mean Coefficient", juce::NotificationType::dontSendNotification);
     meanCoeffLabel.setFont(Font("Cracked", 14.0f, Font::plain));
     meanCoeffLabel.setColour(Label::textColourId, Colours::greenyellow);
@@ -86,6 +93,7 @@ OnsetDetectorComponent::OnsetDetectorComponent(BeatboxVoxAudioProcessor& p)
     useAdaptWhitenLabel.setFont(Font("Cracked", 14.0f, Font::plain));
     useAdaptWhitenLabel.setColour(Label::textColourId, Colours::greenyellow);
 
+	addAndMakeVisible(useLocalMaxLabel);
     addAndMakeVisible(meanCoeffLabel);
     addAndMakeVisible(medianCoeffLabel);
     addAndMakeVisible(noiseRatioLabel);
@@ -93,6 +101,11 @@ OnsetDetectorComponent::OnsetDetectorComponent(BeatboxVoxAudioProcessor& p)
     addAndMakeVisible(useOSDTestSoundLabel);
     addAndMakeVisible(odfTypeLabel);
 	addAndMakeVisible(useAdaptWhitenLabel);
+
+    useLocalMaximumButton.addListener(this);
+    useLocalMaximumButton.setComponentID(useLocalMaximumButonID);
+    useLocalMaximumButton.setToggleState(false, juce::NotificationType::dontSendNotification);
+    addAndMakeVisible(useLocalMaximumButton);
 
     useOSDTestSoundButton.addListener(this);
     useOSDTestSoundButton.setComponentID(useOSDTestSoundButtonID);
@@ -132,11 +145,20 @@ void OnsetDetectorComponent::resized()
     odfTypeLabel.setBounds(odfTypeArea.removeFromTop(odfTypeArea.getHeight() / 5));
     odfTypeSelector.setBounds(odfTypeArea.reduced(10, 10));
 
+
 	//Rectangle/Bounds for adaptive whitening controls
 	auto adaptWhitenArea(rightSide.removeFromTop(rightSide.getHeight() / 4));
 
 	useAdaptWhitenLabel.setBounds(adaptWhitenArea.removeFromTop(adaptWhitenArea.getHeight() / 8));
 	useAdaptWhitenButton.setBounds(adaptWhitenArea);
+
+
+	//Rectangle/Bounds for use local maximum controls
+	auto useLocalMaxArea(leftSide.removeFromTop(leftSide.getHeight() / 6));
+
+	useLocalMaxLabel.setBounds(useLocalMaxArea.removeFromTop(useLocalMaxArea.getHeight() / 5));
+	useLocalMaximumButton.setBounds(useLocalMaxArea);
+
 
     //Rectangle/Bounds for meanCoeff controls
     auto meanCoeffArea(leftSide.removeFromTop(leftSide.getHeight() / 5));
@@ -157,7 +179,6 @@ void OnsetDetectorComponent::resized()
 
     msBetweenOnsetsLabel.setBounds(msBetweenOnsetsArea.removeFromTop(msBetweenOnsetsArea.getHeight() / 5));
     msBetweenOnsetsSlider->setBounds(msBetweenOnsetsArea);
-
     
     
     //Rectangle/Bounds for useOSDTestSound controls
@@ -166,6 +187,7 @@ void OnsetDetectorComponent::resized()
     medianCoeffLabel.setBounds(medianCoeffArea.removeFromTop(medianCoeffArea.getHeight() / 5));
     medianCoeffSlider->setBounds(medianCoeffArea); 
     
+
     //Give remaining leftSide space to useOSDTestSound controls
     useOSDTestSoundLabel.setBounds(leftSide.removeFromTop(leftSide.getHeight() / 5));
     useOSDTestSoundButton.setBounds(leftSide);
@@ -176,11 +198,12 @@ void OnsetDetectorComponent::buttonClicked(Button* button)
 {
 	auto id = button->getComponentID();
 
-	if (id == useOSDTestSoundButtonID)
+	if (id == useLocalMaximumButonID)
+		processor.getClassifier().setOSDUseLocalMaximum(button->getToggleState());
+	else if (id == useOSDTestSoundButtonID)
 		processor.setUsingOSDTestSound(button->getToggleState());
 	else if (id == useAdaptWhitenButtonID)
 		processor.getClassifier().setOSDUseAdaptiveWhitening(button->getToggleState());
-
 }
 //==============================================================================
 void OnsetDetectorComponent::comboBoxChanged(ComboBox* comboBoxThatHasChanged)
