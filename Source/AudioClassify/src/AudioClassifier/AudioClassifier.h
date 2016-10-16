@@ -19,6 +19,7 @@
 //#endif
 
 #include <memory>
+#include <string>
 #include <atomic>
 
 #include <armadillo.h>
@@ -63,6 +64,16 @@ public:
     //return bool for successful or not in training. 
     void trainModel();
 
+	/** Saves the current training data set being used by the model/classifier. 
+	 * This can be loaded again on the next application load so that training sets do not have
+	 * to be collected again. 
+     * Note: This method should NOT be called from the audio/callback thread as it involves file IO and will block.
+	 * @param fileName the fully qualified file name/path to save the training set matrix to. i.e. C:\\Models\\model.csv 
+     * @param errorString output parameter which will contain an error message if applicable or default "" blank string.
+     * @return true for successful save otherwise false.
+	 */
+	bool saveTrainingSet(const std::string& fileName, std::string& errorString);
+	bool loadTrainingSet(const std::string& fileName, std::string& errorString);
 
 	size_t getNumSounds() const;
     

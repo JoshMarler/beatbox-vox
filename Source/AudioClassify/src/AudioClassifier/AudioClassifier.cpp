@@ -9,6 +9,7 @@
 */
 
 #include "AudioClassifier.h"
+#include <fstream>
 
 //==============================================================================
 template<typename T>
@@ -79,6 +80,62 @@ void AudioClassifier<T>::setCurrentSampleRate (T newSampleRate)
     sampleRate = newSampleRate;
     gistFeatures.setSamplingFrequency(static_cast<int>(newSampleRate));
 	osDetector.setSampleRate(sampleRate);
+}
+
+//==============================================================================
+template<typename T>
+bool AudioClassifier<T>::saveTrainingSet(const std::string & fileName, std::string & errorString)
+{
+	auto success = false;
+	std::ofstream outFileStream;
+	arma::Mat<T> savedData = trainingData;
+
+	//Insert additional row for training data/instance labels
+	savedData.insert_rows(trainingData.n_rows, 1);
+	
+	for (auto i = 0; i < savedData.n_cols; ++i)
+	{
+		savedData.row(savedData.n_rows - 1)[i] = trainingLabels[i];
+	}
+
+	outFileStream.open(fileName);
+	success = savedData.save(outFileStream, arma::file_type::csv_ascii);
+	outFileStream.close();
+
+
+	return success;
+}
+
+//==============================================================================
+template<typename T>
+bool AudioClassifier<T>::loadTrainingSet(const std::string & fileName, std::string & errorString)
+{
+	auto success = false;
+
+	std::ifstream inFileStream;
+	inFileStream.open(fileName);
+
+	arma::Mat<T> loadedData;
+
+	success = loadedData.load(fileName, arma::file_type::csv_ascii);
+
+	if (success)
+	{
+		for (auto i = 0; i < trainingData.n_rows; ++i)
+			trainingData.row(i) = loadedData.row(i);
+
+		//The last row of the loaded data set will be the training instances class values
+		auto labels = loadedData.row(loadedData.n_rows - 1);
+		for (auto i = 0; i < trainingLabels.n_cols; ++i)
+		{
+			trainingLabels[i] = static_cast<arma::u64>(labels[i]);
+		}
+
+	}
+
+	inFileStream.close();
+
+	return success;
 }
 
 //==============================================================================
@@ -203,7 +260,6 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer, const int numSampl
 {
     //Reset hasOnset for next process buffer.
     hasOnset = false;
-
     const auto bufferSize = getCurrentBufferSize();
 
     /** if (bufferSize != numSamples) */
@@ -230,7 +286,7 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer, const int numSampl
             if (trainingCount < (trainingSetSize * (sound + 1)))
             {
                 trainingData.col(trainingCount) = currentInstanceVector;
-                trainingLabels[trainingCount] = static_cast<size_t>(sound);
+                trainingLabels[trainingCount] = static_cast<std::size_t>(sound);
 
                 trainingCount++;
             }

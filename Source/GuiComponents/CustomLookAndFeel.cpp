@@ -25,14 +25,14 @@
 void CustomLookAndFeel::drawRotarySlider (Graphics& g, int x, int y, int width, int height, float sliderPos,
                                        const float rotaryStartAngle, const float rotaryEndAngle, Slider& slider)
 {
-    const float radius = jmin (width / 2, height / 2) - 2.0f;
-    const float centreX = x + width * 0.5f;
-    const float centreY = y + height * 0.5f;
-    const float rx = centreX - radius;
-    const float ry = centreY - radius;
-    const float rw = radius * 2.0f;
-    const float angle = rotaryStartAngle + sliderPos * (rotaryEndAngle - rotaryStartAngle);
-    const bool isMouseOver = slider.isMouseOverOrDragging() && slider.isEnabled();
+    const auto radius = jmin (width / 2, height / 2) - 2.0f;
+    const auto centreX = x + width * 0.5f;
+    const auto centreY = y + height * 0.5f;
+    const auto rx = centreX - radius;
+    const auto ry = centreY - radius;
+    const auto rw = radius * 2.0f;
+    const auto angle = rotaryStartAngle + sliderPos * (rotaryEndAngle - rotaryStartAngle);
+    const auto isMouseOver = slider.isMouseOverOrDragging() && slider.isEnabled();
     
     if (radius > 12.0f)
     {
@@ -41,7 +41,7 @@ void CustomLookAndFeel::drawRotarySlider (Graphics& g, int x, int y, int width, 
         else
             g.setColour (Colour (0x80808080));
         
-        const float thickness = 0.75f;
+        const auto thickness = 0.75f;
         
         {
             Path filledArc;
@@ -52,7 +52,7 @@ void CustomLookAndFeel::drawRotarySlider (Graphics& g, int x, int y, int width, 
         
         if (thickness > 0)
         {
-            const float innerRadius = radius * 0.5f;
+            const auto innerRadius = radius * 0.5f;
             Path p;
             
             

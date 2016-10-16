@@ -36,7 +36,8 @@ public:
     void timerCallback() override;
     void buttonClicked(Button* button) override;
     
-
+	//ComponentID Strings
+	static String saveTrainingDataButtonID;
 
 private:
     
@@ -50,9 +51,13 @@ private:
     //JWM - Test button to swich on classifier training for sound
     std::unique_ptr<TextButton> trainClassifierButton;
 
+	TextButton saveTrainingDataButton;
+
     OwnedArray<Button> soundButtons;
 
 	OwnedArray<Label> soundReadyLabels;
+
+	void saveTrainingSet();
 };
 
 

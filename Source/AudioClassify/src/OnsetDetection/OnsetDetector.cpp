@@ -37,11 +37,12 @@ OnsetDetector<T>::OnsetDetector(int initFrameSize, unsigned int initSampleRate)
     //Set initial ODF type
     currentODFType.store(AudioClassifyOptions::ODFType::spectralDifference);
 
-    std::fill(previousValues.get(), (previousValues.get() + numPreviousValues), 0.0f);   
-    std::fill(previousValuesCopy.get(), (previousValuesCopy.get() + numPreviousValues), 0.0f);   
+    std::fill(previousValues.get(), (previousValues.get() + numPreviousValues), static_cast<T>(0.0));   
+    std::fill(previousValuesCopy.get(), (previousValuesCopy.get() + numPreviousValues), static_cast<T>(0.0));   
 
 
     setCurrentFrameSize(initFrameSize);
+	setSampleRate(initSampleRate);
 }
 
 //==============================================================================
@@ -211,7 +212,6 @@ bool OnsetDetector<T>::checkForPeak(T featureValue)
     {
         std::copy(previousValues.get(), previousValues.get() + numPreviousValues, previousValuesCopy.get());
 
-		//(previousValues[0] > noiseRatio) &&
         if ((previousValues[0] > noiseRatio) && (previousValues[0] > threshold) && (previousValues[0] > featureValue) && (previousValues[0] > previousValues[1]))
 				isOnset = onsetTimeIsValid();
     }

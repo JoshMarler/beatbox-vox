@@ -72,7 +72,6 @@ namespace MathHelpers
 
 			assert(!isNaN(medianEven));
 
-			auto result = (medianEven + medianOdd) / 2;
 	        return (medianEven + medianOdd) / 2;
         }
 

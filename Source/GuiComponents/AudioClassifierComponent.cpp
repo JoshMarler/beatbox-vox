@@ -10,12 +10,17 @@
 
 #include "AudioClassifierComponent.h"
 
+#include <string>
+
 //===============================================================================
+
+String AudioClassifierComponent::saveTrainingDataButtonID("SaveTrainingDataButton");
 
 AudioClassifierComponent::AudioClassifierComponent(BeatboxVoxAudioProcessor& p)
           : processor(p),
             recordSoundButton(std::make_unique<TextButton> ("Record Training Sound")),
-            trainClassifierButton(std::make_unique<TextButton> ("Train Model"))
+            trainClassifierButton(std::make_unique<TextButton> ("Train Model")),
+			saveTrainingDataButton("Save Current Training Data")
 {
     trainClassifierButton->setClickingTogglesState(true);
     trainClassifierButton->setColour(TextButton::buttonColourId, Colours::white);
@@ -31,7 +36,15 @@ AudioClassifierComponent::AudioClassifierComponent(BeatboxVoxAudioProcessor& p)
     recordSoundButton->addListener(this);
     
     addAndMakeVisible(*recordSoundButton);
+
+
+	saveTrainingDataButton.setComponentID(saveTrainingDataButtonID);
+    saveTrainingDataButton.setColour(TextButton::buttonColourId, Colours::white);
+    saveTrainingDataButton.addListener(this);
     
+    addAndMakeVisible(saveTrainingDataButton);
+    
+
     auto numSounds = processor.getClassifier().getNumSounds();
 
     for (auto i = 0; i < numSounds; ++i)
@@ -82,6 +95,11 @@ void AudioClassifierComponent::resized()
 
     recordSoundButton->setBounds(r.removeFromTop(25));
 
+
+	auto saveLoadArea(r.removeFromTop(r.getHeight() / 8));
+	saveTrainingDataButton.setBounds(saveLoadArea.removeFromLeft(saveLoadArea.getWidth() / 3));
+
+	
 	auto numSounds = processor.getClassifier().getNumSounds();
 
     for (auto i = 0; i < numSounds; ++i)
@@ -147,6 +165,10 @@ void AudioClassifierComponent::buttonClicked(Button* button)
             currentTrainingSound = soundButtons.indexOf(button);
         }
     }
+	else if (button->getComponentID() == saveTrainingDataButtonID)
+	{
+		saveTrainingSet();
+	}
     else if (button == std::addressof(*trainClassifierButton))
     {
         if (button->getToggleState())
@@ -176,6 +198,24 @@ void AudioClassifierComponent::buttonClicked(Button* button)
         }
     }
 
+}
+
+//===============================================================================
+void AudioClassifierComponent::saveTrainingSet()
+{
+	std::string errorString = "";
+
+	//JWM _ Note: can probably replace this directory path with compile time constance or something ? 
+	auto pathName = File::getSpecialLocation(File::SpecialLocationType::userApplicationDataDirectory).getFullPathName()
+																									  + "\\" 
+																									  + processor.getName();
+	File modelsDirectory(pathName);
+
+	if (!modelsDirectory.exists())
+		modelsDirectory.createDirectory();
+
+	auto fileName = modelsDirectory.getFullPathName().toStdString() + "\\" + processor.getName().toStdString() + "TestMatrix.csv";
+	auto successful = processor.getClassifier().saveTrainingSet(fileName, errorString);
 }
 
 //===============================================================================
