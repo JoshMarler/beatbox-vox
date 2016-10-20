@@ -108,8 +108,9 @@ private:
 
     int bufferSize = 0;
     int trainingSetSize = 10;
-    int trainingCount = 0;
     int numSounds = 0; 
+	unsigned int numFeatures;
+    int trainingCount = 0;
     bool hasOnset = false;
 
     T sampleRate;
@@ -156,7 +157,6 @@ private:
     OnsetDetector<T> osDetector;
     NaiveBayes<T> nbc;
 //==============================================================================
-   
     void configTrainingSetMatrix();
 
     unsigned int calcFeatureVecSize() const;

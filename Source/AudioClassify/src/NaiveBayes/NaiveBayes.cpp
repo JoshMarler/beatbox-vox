@@ -85,30 +85,34 @@ size_t NaiveBayes<T>::Classify(const arma::Col<T>& instance)
 	//Calculate standard deviation
     stdDev = arma::sqrt(featureVariances);
 
-	//Pre-Cook stdDev * sqrtTwoPi values for use in distribution calculation - Avoids uneccesary temporary.
+	//Pre-Cook stdDev * sqrtTwoPi values for distribution calculation - Avoids uneccesary temporary - no malloc.
 	stdDev *= sqrtTwoPi;
     stdDev = arma::pow(stdDev, -1);
     
 
 	for (size_t j = 0; j < featureMeans.n_cols; ++j)
 	{
-        /*
-         * JWM
-         * instance and featureMeans.col(j) vectors different size so probably need to use repmat() and possibly specify the training set size in the
-         * class constructor for prototype. Then in later version potentially call train on an offline thread to allow for incremental training. 
-         * Need to check repmat() doesn't create a temporary or malloc when assigment operator is applied to pre-allocated matrix/vector. 
-         * */
 		diffs = instance - featureMeans.col(j);
-
-        //JWM - NOTE: Room exists to simplfy / improve this
-        //Can work out a way to remove exp() function as the log operations make it redundant - check mlpack.
-		exponents = arma::exp(-(arma::square(diffs))) / (2 * featureVariances.col(j));
-        
-		//Calculate Normal/Gaussian distribution. 
-		distribution = exponents % stdDev.col(j);
 		
-        //Convert distribution to log values.
-        distribution = arma::log(distribution);
+		/** Using log probabilities to eliminate/reduce floating point
+		 *  erros when multiplication of small number exceeds representable min. 
+		 *  
+		 *  log(exp(value)) is equal to value so the original calculation below has been
+		 *  altered when calculating normal/Gaussian distribution exponents. 
+		 *  
+		 *  Previous Calculation:
+		 *		
+		 *		exponents = arma::exp(-(arma::square(diffs))) / (2 * featureVariances.col(j));
+		 *		
+		 *	We can use 2 * featureVariances in the calculation below rather than squaring the standard 
+		 *	deviation/stdDev values as square(sqrt(value)) == value.
+		 */ 
+		exponents = arma::log(1 / arma::square(diffs)) - arma::log(2 * featureVariances.col(j));
+
+		//Calculate Normal/Gaussian distribution. 
+		distribution = exponents + arma::log(stdDev.col(j));
+
+		//Use sum of log values for test instance probablities rather than raw multiply (less risk of float errors).
 		testProbs(j) = std::log(priorProbs(j)) + arma::accu(distribution);
 	}
 

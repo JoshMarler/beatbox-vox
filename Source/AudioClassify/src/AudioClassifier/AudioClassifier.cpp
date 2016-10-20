@@ -28,7 +28,13 @@ AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int in
     classifierReady.store(false);
     currentTrainingSound.store(-1);
 
+	/* JWM - Potentially alter later to have an AudioClassifier::Config object/struct
+		     passed to the constructor which specifies numSounds, trainingSetSize and 
+	         the features to be used via AudioClassify::AudioClassifyOptions.
+			 Could also possibly pass a file name to load for model state/training set...
+	*/
     numSounds = initNumSounds;
+	numFeatures = calcFeatureVecSize();
 
     auto numCoefficients = gistFeatures.getMFCCNumCoefficients();
     mfccs.reset(new T[numCoefficients]);
@@ -88,7 +94,16 @@ bool AudioClassifier<T>::saveTrainingSet(const std::string & fileName, std::stri
 {
 	auto success = false;
 	std::ofstream outFileStream;
-	arma::Mat<T> savedData = trainingData;
+	arma::Mat<T> savedData;
+
+	if (!checkTrainingSetReady())
+	{
+		errorString = "The training set is not complete. Complete recording of training set/sounds before save";
+		return false;
+	}
+
+	//Training set ready check passed. Assign to saveable data.
+	savedData = trainingData;
 
 	//Insert additional row for training data/instance labels
 	savedData.insert_rows(trainingData.n_rows, 1);
@@ -102,6 +117,8 @@ bool AudioClassifier<T>::saveTrainingSet(const std::string & fileName, std::stri
 	success = savedData.save(outFileStream, arma::file_type::csv_ascii);
 	outFileStream.close();
 
+	if (!success)
+		errorString = "There was an error saving the training set. Check the filename/path.";
 
 	return success;
 }
@@ -111,29 +128,51 @@ template<typename T>
 bool AudioClassifier<T>::loadTrainingSet(const std::string & fileName, std::string & errorString)
 {
 	auto success = false;
-
-	std::ifstream inFileStream;
-	inFileStream.open(fileName);
-
 	arma::Mat<T> loadedData;
-
+	std::ifstream inFileStream;
+	
+	inFileStream.open(fileName);
 	success = loadedData.load(fileName, arma::file_type::csv_ascii);
-
+	inFileStream.close();
+	
 	if (success)
 	{
+		//NOTE: May change the below so that loading an arbitrary training set alters the members like numSounds etc.
+		//Confirm the loaded data matches the AudioClassifier object's parameters
+		if (loadedData.n_cols != (numSounds * trainingSetSize) && loadedData.n_rows != numFeatures + 1)
+		{
+			errorString = "The loaded training set did not match the AudioClassifier object's state."
+			              "Check the training set loaded matches the following members of the AudioClassifier:"
+						  "numSounds (classes), trainingSetSize (instances) and numFeatures (attributes)";
+			return false;
+		}
+
 		for (auto i = 0; i < trainingData.n_rows; ++i)
+		{
 			trainingData.row(i) = loadedData.row(i);
+		}
 
 		//The last row of the loaded data set will be the training instances class values
 		auto labels = loadedData.row(loadedData.n_rows - 1);
+
 		for (auto i = 0; i < trainingLabels.n_cols; ++i)
 		{
 			trainingLabels[i] = static_cast<arma::u64>(labels[i]);
 		}
 
+		/** Note: Eventually will probably add check that there are equal number of training instances
+		 *  for each of the classes but this is not necessary for now and can be done when AudioClassify reaches
+		 *  library / JUCE Module stage.
+		 */
+
+		//Set all sounds as ready so model can be trained.
+		for (auto v : soundsReady)
+		{
+			v = true;
+		}
+
 	}
 
-	inFileStream.close();
 
 	return success;
 }
@@ -207,7 +246,7 @@ void AudioClassifier<T>::setOSDUseLocalMaximum(bool use)
 }
 
 //==============================================================================
-//JWM - NOTE: revist later - will need assertion if user uses sound value out of range 0 - numSOunds
+//JWM - NOTE: revist later - will need assertion if user uses sound value out of range 0 - numSounds
 template<typename T>
 void AudioClassifier<T>::recordTrainingSample(int sound)
 {

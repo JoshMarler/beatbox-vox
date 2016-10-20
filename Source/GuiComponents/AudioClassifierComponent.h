@@ -12,6 +12,7 @@
 #define AUDIOCLASSIFIERCOMPONENT_H_INCLUDED
 
 #include <memory>
+#include <string>
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
@@ -45,6 +46,8 @@ private:
 
     //JWM - A little dirty maybe but works for now at prototype stage
     int currentTrainingSound = -1;
+	
+	std::string userAppDir;
 
     std::unique_ptr<TextButton> recordSoundButton;
     

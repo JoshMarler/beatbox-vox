@@ -10,8 +10,6 @@
 
 #include "AudioClassifierComponent.h"
 
-#include <string>
-
 //===============================================================================
 
 String AudioClassifierComponent::saveTrainingDataButtonID("SaveTrainingDataButton");
