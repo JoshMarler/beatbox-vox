@@ -213,6 +213,9 @@ void AudioClassifierComponent::buttonClicked(Button* button)
 
 			std::string errorString;
 			processor.getClassifier().loadTrainingSet(filePath.toStdString(), errorString);
+
+			//JWM - added as test - may remove
+			processor.getClassifier().trainModel();
 		}
 	}
 
@@ -247,7 +250,7 @@ void AudioClassifierComponent::initialiseTrainingDataChooser()
 	if (!directory.exists())
 		directory.createDirectory();
 	
-	trainingDataChooser = std::make_unique<FileChooser>("Load Training Data Set", directory, ".csv", false, false);
+	trainingDataChooser = std::make_unique<FileChooser>("Load Training Data Set", directory, "*.csv", false, false);
 }
 
 //===============================================================================

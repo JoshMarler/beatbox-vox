@@ -102,9 +102,10 @@ OnsetDetectorComponent::OnsetDetectorComponent(BeatboxVoxAudioProcessor& p)
     addAndMakeVisible(odfTypeLabel);
 	addAndMakeVisible(useAdaptWhitenLabel);
 
+	auto usingLocalMax = processor.getClassifier().getOSDUsingLocalMaximum();
     useLocalMaximumButton.addListener(this);
     useLocalMaximumButton.setComponentID(useLocalMaximumButonID);
-    useLocalMaximumButton.setToggleState(false, juce::NotificationType::dontSendNotification);
+    useLocalMaximumButton.setToggleState(usingLocalMax, juce::NotificationType::dontSendNotification);
     addAndMakeVisible(useLocalMaximumButton);
 
     useOSDTestSoundButton.addListener(this);
@@ -112,9 +113,10 @@ OnsetDetectorComponent::OnsetDetectorComponent(BeatboxVoxAudioProcessor& p)
     useOSDTestSoundButton.setToggleState(false, juce::NotificationType::dontSendNotification);
     addAndMakeVisible(useOSDTestSoundButton);
 
+	auto usingAdaptWhiten = processor.getClassifier().getOSDUsingAdaptiveWhitening();
 	useAdaptWhitenButton.addListener(this);
 	useAdaptWhitenButton.setComponentID(useAdaptWhitenButtonID);
-	useAdaptWhitenButton.setToggleState(false, juce::NotificationType::dontSendNotification);
+	useAdaptWhitenButton.setToggleState(usingAdaptWhiten, juce::NotificationType::dontSendNotification);
 	addAndMakeVisible(useAdaptWhitenButton);
     
 }

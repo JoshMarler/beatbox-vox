@@ -226,6 +226,12 @@ void AudioClassifier<T>::setOSDDetectorFunctionType(AudioClassifyOptions::ODFTyp
     osDetector.setCurrentODFType(newODFType);
 }
 
+template<typename T>
+bool AudioClassifier<T>::getOSDUsingAdaptiveWhitening()
+{
+	return osDetector.getUsingAdaptiveWhitening();
+}
+
 //==============================================================================
 template<typename T>
 void AudioClassifier<T>::setOSDUseAdaptiveWhitening(bool use)
@@ -237,6 +243,13 @@ template<typename T>
 void AudioClassifier<T>::setOSDWhitenerPeakDecayRate(unsigned int newDecayRate)
 {
 	osDetector.setWhitenerPeakDecayRate(newDecayRate);
+}
+
+//==============================================================================
+template<typename T>
+bool AudioClassifier<T>::getOSDUsingLocalMaximum()
+{
+	return osDetector.getUsingLocalMaximum();
 }
 
 template<typename T>
