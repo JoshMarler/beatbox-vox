@@ -13,13 +13,26 @@
 //===============================================================================
 
 String AudioClassifierComponent::saveTrainingDataButtonID("SaveTrainingDataButton");
+String AudioClassifierComponent::loadTrainingDateButtonID("LoadTrainingDataButton");
 
 AudioClassifierComponent::AudioClassifierComponent(BeatboxVoxAudioProcessor& p)
           : processor(p),
             recordSoundButton(std::make_unique<TextButton> ("Record Training Sound")),
             trainClassifierButton(std::make_unique<TextButton> ("Train Model")),
-			saveTrainingDataButton("Save Current Training Data")
+			saveTrainingDataButton("Save Current Training Data"),
+			loadTrainingDataButton("Load Training Data Set")
 {
+
+	//Initialise training sets directory path
+	auto path = File::getSpecialLocation(File::SpecialLocationType::userApplicationDataDirectory).getFullPathName()
+																									  + "\\" 
+																									  + processor.getName()
+																									  + "\\TrainingSets";
+	trainingSetsDirectory = path.toStdString();
+
+
+	initialiseTrainingDataChooser();
+
     trainClassifierButton->setClickingTogglesState(true);
     trainClassifierButton->setColour(TextButton::buttonColourId, Colours::white);
     trainClassifierButton->setColour(TextButton::buttonOnColourId, Colours::greenyellow);
@@ -42,6 +55,12 @@ AudioClassifierComponent::AudioClassifierComponent(BeatboxVoxAudioProcessor& p)
     
     addAndMakeVisible(saveTrainingDataButton);
     
+
+	loadTrainingDataButton.setComponentID(loadTrainingDateButtonID);
+	loadTrainingDataButton.setColour(TextButton::buttonColourId, Colours::white);
+    loadTrainingDataButton.addListener(this);
+    
+    addAndMakeVisible(loadTrainingDataButton);
 
     auto numSounds = processor.getClassifier().getNumSounds();
 
@@ -95,7 +114,9 @@ void AudioClassifierComponent::resized()
 
 
 	auto saveLoadArea(r.removeFromTop(r.getHeight() / 8));
+	saveLoadArea.reduce(0, saveLoadArea.getHeight() / 10);
 	saveTrainingDataButton.setBounds(saveLoadArea.removeFromLeft(saveLoadArea.getWidth() / 3));
+	loadTrainingDataButton.setBounds(saveLoadArea.removeFromRight(saveLoadArea.getWidth() / 2));
 
 	
 	auto numSounds = processor.getClassifier().getNumSounds();
@@ -176,44 +197,57 @@ void AudioClassifierComponent::buttonClicked(Button* button)
     {
         if (button->getToggleState())
         {
-			/** JWM - NOTE:
-			 *  At the moment this code is synchronous. So on the call to recordTrainingSample
-			 *  we could display a "Training" progress bar / spinner and then have the classifiers
-			 *  recordTrainingSample return true/false based on whether the sound was recorded and added
-			 *  to the training set succesfully. 
-			 *  Then the spinner/progress bar could be hidden and the currently selected radio button unticked for GUI/Display
-			 *  purposes. 
-			 *  Would then be worth prompting the user if they go to record the same sound again to check if this is
-			 *  overwriting the previously recorded training/model data or whether it is being added as additional training data to the 
-			 *  model. This would require a call to setTrainingSetSize or something similar. Training data would need to be stored to 
-			 *  then be appended to and the model probably re-trained. Alternativley incremental training could be implemented in 
-			 *  a similar fashion to the mlpack code. 
-			 */ 
             processor.getClassifier().recordTrainingSample(currentTrainingSound);
 			auto label = soundReadyLabels[currentTrainingSound];
 
 			label->setText("Sound " + String(currentTrainingSound + 1) + " Recording Training Set", juce::NotificationType::dontSendNotification);
         }
     }
+	else if(button->getComponentID() == loadTrainingDateButtonID)
+	{
+		auto fileSelected = trainingDataChooser->browseForFileToOpen();
+		if (fileSelected)
+		{
+			auto fileChosen = trainingDataChooser->getResult();
+			auto filePath = fileChosen.getFullPathName();
+
+			std::string errorString;
+			processor.getClassifier().loadTrainingSet(filePath.toStdString(), errorString);
+		}
+	}
 
 }
+
 
 //===============================================================================
 void AudioClassifierComponent::saveTrainingSet()
 {
 	std::string errorString = "";
 
-	//JWM _ Note: can probably replace this directory path with compile time constance or something ? 
-	auto pathName = File::getSpecialLocation(File::SpecialLocationType::userApplicationDataDirectory).getFullPathName()
-																									  + "\\" 
-																									  + processor.getName();
-	File modelsDirectory(pathName);
+	File directory(trainingSetsDirectory);
 
-	if (!modelsDirectory.exists())
-		modelsDirectory.createDirectory();
+	if (!directory.exists())
+		directory.createDirectory();
 
-	auto fileName = modelsDirectory.getFullPathName().toStdString() + "\\" + processor.getName().toStdString() + "TestMatrix.csv";
+	auto fileName = trainingSetsDirectory + "\\" + processor.getName().toStdString() + "TestMatrix.csv";
 	auto successful = processor.getClassifier().saveTrainingSet(fileName, errorString);
+
+	if (!successful)
+	{
+		auto icon = AlertWindow::AlertIconType::WarningIcon;
+		AlertWindow::showMessageBox(icon, "Error Saving", errorString, "Close", this);
+	}
+}
+
+//===============================================================================
+void AudioClassifierComponent::initialiseTrainingDataChooser()
+{
+	File directory(trainingSetsDirectory);
+
+	if (!directory.exists())
+		directory.createDirectory();
+	
+	trainingDataChooser = std::make_unique<FileChooser>("Load Training Data Set", directory, ".csv", false, false);
 }
 
 //===============================================================================

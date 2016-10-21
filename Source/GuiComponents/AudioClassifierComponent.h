@@ -21,8 +21,8 @@
 #include "../PluginProcessor.h"
 
 class AudioClassifierComponent : public Component,
-                                 private Timer,
-                                 private ButtonListener
+                                 Timer,
+                                 ButtonListener
 {
 
 public:
@@ -39,6 +39,7 @@ public:
     
 	//ComponentID Strings
 	static String saveTrainingDataButtonID;
+	static String loadTrainingDateButtonID;
 
 private:
     
@@ -47,7 +48,7 @@ private:
     //JWM - A little dirty maybe but works for now at prototype stage
     int currentTrainingSound = -1;
 	
-	std::string userAppDir;
+	std::string trainingSetsDirectory;
 
     std::unique_ptr<TextButton> recordSoundButton;
     
@@ -60,7 +61,11 @@ private:
 
 	OwnedArray<Label> soundReadyLabels;
 
+	TextButton loadTrainingDataButton;
+	std::unique_ptr<FileChooser> trainingDataChooser;
+
 	void saveTrainingSet();
+	void initialiseTrainingDataChooser();
 };
 
 
