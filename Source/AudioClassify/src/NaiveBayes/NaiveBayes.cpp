@@ -1,6 +1,8 @@
 
 #include "NaiveBayes.h"
 
+#include <limits>
+
 //=======================================================================================================
 
 template<typename T>
@@ -58,7 +60,7 @@ void NaiveBayes<T>::Train(const arma::Mat<T>& trainingData, const arma::Row<size
 	{
 		const auto label = classLabels[j];
 
-		//JWM - NOTE: Should be real-time safe with arma::square not malloc / dynamic allocating
+		//Should be real-time safe with arma::square not malloc / dynamic allocating
 		//due to use of expression templates.
 		featureVariances.col(label) += arma::square(trainingData.col(j) - featureMeans.col(label));
 	}
@@ -68,6 +70,21 @@ void NaiveBayes<T>::Train(const arma::Mat<T>& trainingData, const arma::Row<size
 	{
 		if (priorProbs[i] > 1)
 			featureVariances.col(i) /= (priorProbs[i] - 1);
+	}
+
+	/** Ensure that the featureVariances can be inverted. 
+	 *  The distribution calculation takes the standard deviation which 
+	 *  is equal to sqrt(featureVariances). The standard deviation is then inverted
+	 *  i.e. 1/stdDev or equivalently arma::pow(stdDev, -1). So this will cause a 
+	 *  divide by zero type error if any attribute variances are equal to 0.0
+	 *  The stdDev will then contain -inf or NaN values which causes calculation errors.
+	 *  Replace 0.0 variances with minimal floating point value.
+	 */
+	
+	for (std::size_t i = 0; i < featureVariances.n_elem; ++i)
+	{
+		if (featureVariances[i] == 0.0)
+			featureVariances[i] = std::numeric_limits<T>::min();
 	}
 
 
@@ -95,9 +112,9 @@ size_t NaiveBayes<T>::Classify(const arma::Col<T>& instance)
 		diffs = instance - featureMeans.col(j);
 		
 		/** Using log probabilities to eliminate/reduce floating point
-		 *  erros when multiplication of small number exceeds representable min. 
+		 *  erros when multiplication of small numbers/attributes exceeds representable min. 
 		 *  
-		 *  log(exp(value)) is equal to value so the original calculation below has been
+		 *  log(exp(value)) == value so the original calculation below has been
 		 *  altered when calculating normal/Gaussian distribution exponents. 
 		 *  
 		 *  Previous Calculation:
@@ -105,7 +122,7 @@ size_t NaiveBayes<T>::Classify(const arma::Col<T>& instance)
 		 *		exponents = arma::exp(-(arma::square(diffs))) / (2 * featureVariances.col(j));
 		 *		
 		 *	We can use 2 * featureVariances in the calculation below rather than squaring the standard 
-		 *	deviation/stdDev values as square(sqrt(value)) == value.
+		 *	deviation/stdDev values as per notation of distribution in the literatue - square(sqrt(value)) == value.
 		 */ 
 		exponents = arma::log(1 / arma::square(diffs)) - arma::log(2 * featureVariances.col(j));
 
@@ -126,6 +143,7 @@ size_t NaiveBayes<T>::Classify(const arma::Col<T>& instance)
 //=======================================================================================================
 
 //Templating on float and double for different audio precision types. 
+//NOTE - May not be best to explicitly instantiate these templates due to memory use - may consider altering this.
 template class NaiveBayes<float>;
 template class NaiveBayes<double>;
 
