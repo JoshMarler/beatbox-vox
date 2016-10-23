@@ -12,11 +12,10 @@
 #define AUDIOCLASSIFIER_H_INCLUDED
 
 //For windows compatibility with armadillo 64bit
-//#if JUCE_WINDOWS
 
+#ifdef _WIN64
 #define ARMA_64BIT_WORD
-
-//#endif
+#endif
 
 #include <memory>
 #include <string>
@@ -28,6 +27,7 @@
 #include "../AudioClassifyOptions/AudioClassifyOptions.h"
 #include "../OnsetDetection/OnsetDetector.h"
 #include "../NaiveBayes/NaiveBayes.h"
+#include "../NearestNeighbour/NearestNeighbour.h"
 
 template<typename T>
 class AudioClassifier
@@ -65,7 +65,7 @@ public:
     //to avoid calling trainModel with unfinished training data set. Alternativley may have this function
     //return bool for successful or not in training. 
     void trainModel();
-
+	
 	/** Saves the current training data set being used by the model/classifier. 
 	 * This can be loaded again on the next application load so that training sets do not have
 	 * to be collected again. 
@@ -158,6 +158,7 @@ private:
     Gist<T> gistFeatures;
     OnsetDetector<T> osDetector;
     NaiveBayes<T> nbc;
+	NearestNeighbour<T> knn;
 //==============================================================================
     void configTrainingSetMatrix();
 

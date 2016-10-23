@@ -443,15 +443,18 @@
             <FILE id="xVTWLX" name="NaiveBayes.h" compile="1" resource="0" file="Source/AudioClassify/src/NaiveBayes/NaiveBayes.h"/>
           </GROUP>
           <GROUP id="{59C96F5C-A67C-BB23-60E1-1233E102AE55}" name="NearestNeighbour">
-            <FILE id="ZHbR3K" name="NearestNeigbour.cpp" compile="1" resource="0"
-                  file="Source/AudioClassify/src/NearestNeighbour/NearestNeigbour.cpp"/>
-            <FILE id="wdN2ng" name="NearestNeigbour.h" compile="0" resource="0"
-                  file="Source/AudioClassify/src/NearestNeighbour/NearestNeigbour.h"/>
+            <FILE id="VLjugo" name="NearestNeighbour.cpp" compile="1" resource="0"
+                  file="Source/AudioClassify/src/NearestNeighbour/NearestNeighbour.cpp"/>
+            <FILE id="lU2XRl" name="NearestNeighbour.h" compile="0" resource="0"
+                  file="Source/AudioClassify/src/NearestNeighbour/NearestNeighbour.h"/>
           </GROUP>
           <GROUP id="{3E7D8448-E5A1-7B6D-144D-BB78A02F7A19}" name="OnsetDetection">
             <FILE id="QZGmsU" name="OnsetDetector.cpp" compile="1" resource="0"
                   file="Source/AudioClassify/src/OnsetDetection/OnsetDetector.cpp"/>
             <FILE id="gIdZ1Q" name="OnsetDetector.h" compile="1" resource="0" file="Source/AudioClassify/src/OnsetDetection/OnsetDetector.h"/>
+          </GROUP>
+          <GROUP id="{228259E3-067A-5EA2-45EA-02BCD9AE6738}" name="PreProcessing">
+            <FILE id="mI65WH" name="PreProcessing.h" compile="0" resource="0" file="Source/AudioClassify/src/PreProcessing/PreProcessing.h"/>
           </GROUP>
           <FILE id="JSLr8o" name="AudioClassify.h" compile="1" resource="0" file="Source/AudioClassify/src/AudioClassify.h"/>
         </GROUP>
@@ -498,27 +501,27 @@
             externalLibraries="libopenblas.lib&#10;" extraDefs="USE_KISS_FFT=1&#10;">
       <CONFIGURATIONS>
         <CONFIGURATION name="Debug" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="1" optimisation="1" targetName="BeatboxVox" libraryPath="D:\Development\OpenBLAS\lib"
-                       headerPath="D:\Development\armadillo\include" binaryPath="C:\Users\JOSHUA.MARLER\AudioPlugins\VST3"/>
+                       isDebug="1" optimisation="1" targetName="BeatboxVox" libraryPath="E:\Development\OpenBLAS\lib"
+                       headerPath="E:\Development\armadillo\include" binaryPath="C:\Users\Joshua Marler\AudioPlugins\VST3"/>
         <CONFIGURATION name="Release" winWarningLevel="4" generateManifest="1" winArchitecture="x64"
-                       isDebug="0" optimisation="3" targetName="BeatboxVox" headerPath="D:\Development\armadillo\include"
-                       libraryPath="D:\Development\OpenBLAS\lib" binaryPath="C:\Users\JOSHUA.MARLER\AudioPlugins\VST3"/>
+                       isDebug="0" optimisation="3" targetName="BeatboxVox" headerPath="E:\Development\armadillo\include"
+                       libraryPath="E:\Development\OpenBLAS\lib" binaryPath="C:\Users\Joshua Marler\AudioPlugins\VST3"/>
       </CONFIGURATIONS>
       <MODULEPATHS>
-        <MODULEPATH id="juce_video" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
-        <MODULEPATH id="juce_opengl" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
-        <MODULEPATH id="juce_gui_extra" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
-        <MODULEPATH id="juce_gui_basics" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
-        <MODULEPATH id="juce_graphics" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
-        <MODULEPATH id="juce_events" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
-        <MODULEPATH id="juce_data_structures" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
-        <MODULEPATH id="juce_cryptography" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
-        <MODULEPATH id="juce_core" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
-        <MODULEPATH id="juce_audio_processors" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
-        <MODULEPATH id="juce_audio_plugin_client" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
-        <MODULEPATH id="juce_audio_formats" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
-        <MODULEPATH id="juce_audio_devices" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
-        <MODULEPATH id="juce_audio_basics" path="C:\Users\JOSHUA.MARLER\JUCE\modules"/>
+        <MODULEPATH id="juce_video" path="..\JUCE\modules"/>
+        <MODULEPATH id="juce_opengl" path="..\JUCE\modules"/>
+        <MODULEPATH id="juce_gui_extra" path="..\JUCE\modules"/>
+        <MODULEPATH id="juce_gui_basics" path="..\JUCE\modules"/>
+        <MODULEPATH id="juce_graphics" path="..\JUCE\modules"/>
+        <MODULEPATH id="juce_events" path="..\JUCE\modules"/>
+        <MODULEPATH id="juce_data_structures" path="..\JUCE\modules"/>
+        <MODULEPATH id="juce_cryptography" path="..\JUCE\modules"/>
+        <MODULEPATH id="juce_core" path="..\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_processors" path="..\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_plugin_client" path="..\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_formats" path="..\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_devices" path="..\JUCE\modules"/>
+        <MODULEPATH id="juce_audio_basics" path="..\JUCE\modules"/>
       </MODULEPATHS>
     </VS2015>
   </EXPORTFORMATS>

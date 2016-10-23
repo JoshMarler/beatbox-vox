@@ -12,7 +12,6 @@
 #define MATHHELPERS_H_INCLUDED
 
 #include <algorithm>
-#include <cassert>
 
 #ifdef _WIN64
 
@@ -57,9 +56,7 @@ namespace MathHelpers
         std::nth_element(vec, (vec + middle), (vec + vecSize));
 
         T medianOdd = vec[middle];
-        T medianEven = 0;
-
-		assert(!isNaN(medianOdd));
+        T medianEven = static_cast<T>(0.0);
 
         if (vecSize % 2 == 1)
             return medianOdd;
@@ -69,8 +66,6 @@ namespace MathHelpers
             std::nth_element(vec, (vec + (middle - 1)), (vec + vecSize)); 
             
             medianEven = vec[middle - 1];
-
-			assert(!isNaN(medianEven));
 
 	        return (medianEven + medianOdd) / 2;
         }

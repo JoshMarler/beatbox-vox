@@ -17,7 +17,7 @@ struct AudioClassifyOptions
     enum class ClassifierType: int
     {
         naiveBayes,
-        neuralNet
+        nearestNeighbour
     };
 
     enum class AudioFeature: int 

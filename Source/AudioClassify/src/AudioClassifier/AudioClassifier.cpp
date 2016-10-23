@@ -13,13 +13,14 @@
 
 //==============================================================================
 template<typename T>
-AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int initNumSounds) 
-    : trainingData(21, (trainingSetSize * initNumSounds), arma::fill::zeros),
-      trainingLabels((trainingSetSize * initNumSounds)),
-      currentInstanceVector(21, arma::fill::zeros),
-      gistFeatures(initBufferSize, static_cast<int>(initSampleRate)),
-      osDetector(initBufferSize, initSampleRate),
-      nbc(initNumSounds, 21)
+AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int initNumSounds)
+	: trainingData(21, (trainingSetSize * initNumSounds), arma::fill::zeros),
+	trainingLabels((trainingSetSize * initNumSounds)),
+	currentInstanceVector(21, arma::fill::zeros),
+	gistFeatures(initBufferSize, static_cast<int>(initSampleRate)),
+	osDetector(initBufferSize, initSampleRate),
+	nbc(initNumSounds, 21),
+	knn(21, initNumSounds, trainingSetSize)
 {
     setCurrentSampleRate(initSampleRate);
     setCurrentBufferSize(initBufferSize);
@@ -132,7 +133,7 @@ bool AudioClassifier<T>::loadTrainingSet(const std::string & fileName, std::stri
 	std::ifstream inFileStream;
 	
 	inFileStream.open(fileName);
-	success = loadedData.load(fileName, arma::file_type::csv_ascii);
+	success = loadedData.load(inFileStream, arma::file_type::csv_ascii);
 	inFileStream.close();
 	
 	if (success)

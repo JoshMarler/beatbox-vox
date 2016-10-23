@@ -143,7 +143,6 @@ size_t NaiveBayes<T>::Classify(const arma::Col<T>& instance)
 //=======================================================================================================
 
 //Templating on float and double for different audio precision types. 
-//NOTE - May not be best to explicitly instantiate these templates due to memory use - may consider altering this.
 template class NaiveBayes<float>;
 template class NaiveBayes<double>;
 
