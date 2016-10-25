@@ -89,7 +89,7 @@ void NaiveBayes<T>::Train(const arma::Mat<T>& trainingData, const arma::Row<size
 
 
 	//Normalise prior probabilities
-	priorProbs /= trainingData.n_cols;
+	priorProbs /= static_cast<T>(trainingData.n_cols);
 }
 
 //=======================================================================================================

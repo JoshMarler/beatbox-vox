@@ -59,6 +59,11 @@ public:
 	bool getOSDUsingLocalMaximum();
 	void setOSDUseLocalMaximum(bool use);
 
+	/** This method sets the classifier type/learning algorithm to be used.
+	 * @param classifierType the classifier type to be used i.e. AudioClassifyOptions::ClassifierType::knn
+	 */
+	void setClassifierType(AudioClassifyOptions::ClassifierType classifierType);
+
     void recordTrainingSample(int trainingSound);
 
     //NOTE - May change this after prototype so that the model is trained incrementally for each sound
@@ -128,6 +133,7 @@ private:
     std::atomic_bool usingSpecKurtosis {true};
     std::atomic_bool usingMfcc {true};
 
+	std::atomic<AudioClassifyOptions::ClassifierType> currentClassfierType;
 
     //This value indicates the current sound being trained declared atomic as may be set by a GUI thread / user control.
     std::atomic_int currentTrainingSound;

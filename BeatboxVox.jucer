@@ -544,6 +544,6 @@
   <JUCEOPTIONS JUCE_QUICKTIME="disabled"/>
   <LIVE_SETTINGS>
     <LINUX/>
-    <WINDOWS/>
+    <WINDOWS systemHeaderPath="C:\Program Files (x86)\VC\include"/>
   </LIVE_SETTINGS>
 </JUCERPROJECT>

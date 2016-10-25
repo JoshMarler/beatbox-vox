@@ -261,13 +261,9 @@ void BeatboxVoxAudioProcessor::processBlock(AudioSampleBuffer& buffer, MidiBuffe
 	//Holds classifier result for this block. 
 	auto sound = -1;
 	
-	//Buffer scale test
-	//auto scaleFactor = 1000.0f;
-	//FloatVectorOperations::multiply(buffer.getWritePointer(0), scaleFactor, numSamples);
-
 	classifier.processAudioBuffer(buffer.getReadPointer(0), numSamples);
 
-
+	
 	//This is used for configuring the onset detector settings from the GUI
 	if (classifier.noteOnsetDetected())
 	{

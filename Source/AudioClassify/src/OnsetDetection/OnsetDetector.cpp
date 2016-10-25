@@ -193,11 +193,9 @@ bool OnsetDetector<T>::checkForOnset(const T* magnitudeSpectrum, const std::size
 	//Get the onset detection funciton/feature value for peak picking/thresholding
 	featureValue = getODFValue();
 
-	assert(!MathHelpers::isNaN(featureValue));
+	//assert(!MathHelpers::isNaN(featureValue));
 
-	//Stops initial detection issues when onset detector is loaded and contected to an active/streaming input.
-	//if (featureValue > noiseRatio)
-		hasOnset = checkForPeak(featureValue);
+	hasOnset = checkForPeak(featureValue);
 
     return hasOnset;
 }
@@ -207,7 +205,6 @@ bool OnsetDetector<T>::checkForPeak(T featureValue)
 {
     auto isOnset = false;
 
-    //JWM - NOTE: add conditional section here to allow lowpass filtering / normalisation as pre-processing of featureValue
     if (usingLocalMaximum) 
     {
         std::copy(previousValues.get(), previousValues.get() + numPreviousValues, previousValuesCopy.get());
@@ -226,7 +223,7 @@ bool OnsetDetector<T>::checkForPeak(T featureValue)
 				(medianCoeff.load() * MathHelpers::getMedian(previousValuesCopy.get(), numPreviousValues));
 
 
-	assert(!MathHelpers::isNaN(threshold));
+	//assert(!MathHelpers::isNaN(threshold));
 
     for (auto i = numPreviousValues - 1; i > 0; i--) 
     { 

@@ -29,6 +29,8 @@ AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int in
     classifierReady.store(false);
     currentTrainingSound.store(-1);
 
+	currentClassfierType.store(AudioClassifyOptions::ClassifierType::nearestNeighbour);
+
 	/* JWM - Potentially alter later to have an AudioClassifier::Config object/struct
 		     passed to the constructor which specifies numSounds, trainingSetSize and 
 	         the features to be used via AudioClassify::AudioClassifyOptions.
@@ -260,6 +262,18 @@ void AudioClassifier<T>::setOSDUseLocalMaximum(bool use)
 }
 
 //==============================================================================
+template<typename T>
+void AudioClassifier<T>::setClassifierType(AudioClassifyOptions::ClassifierType classifierType)
+{
+	currentClassfierType.store(classifierType);
+
+	//NOTE: Eventually it may be worth creating an abstract base class for classifiers and then
+	//holding a std::unique_ptr to a bass classifier which gets set to the current derived classifier type.
+	//Could help with limiting resource usage etc.
+	//Probably also need to check if the classifier is ready and if not check if the training set is ready and call Train()
+}
+
+//==============================================================================
 //JWM - NOTE: revist later - will need assertion if user uses sound value out of range 0 - numSounds
 template<typename T>
 void AudioClassifier<T>::recordTrainingSample(int sound)
@@ -278,7 +292,10 @@ void AudioClassifier<T>::trainModel()
     //If all sound samples collected for training set train model.
     if (checkTrainingSetReady())
     {
+		//JWM - may change this later and not train all models at once.
         nbc.Train(trainingData, trainingLabels); 
+		knn.train(trainingData, trainingLabels);
+
         classifierReady.store(true);    
     }
 
@@ -313,7 +330,7 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer, const int numSampl
 {
     //Reset hasOnset for next process buffer.
     hasOnset = false;
-    const auto bufferSize = getCurrentBufferSize();
+    const auto currentBufferSize = getCurrentBufferSize();
 
     /** if (bufferSize != numSamples) */
     /** { */
@@ -321,10 +338,10 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer, const int numSampl
     /**     return; */
     /** } */
 
-    gistFeatures.processAudioFrame(buffer, bufferSize);
+    gistFeatures.processAudioFrame(buffer, currentBufferSize);
     gistFeatures.getMagnitudeSpectrum(magSpectrum.get());
     
-    hasOnset = osDetector.checkForOnset(magSpectrum.get(), bufferSize / 2);
+    hasOnset = osDetector.checkForOnset(magSpectrum.get(), currentBufferSize / 2);
 
     if (hasOnset)
     {
@@ -414,7 +431,18 @@ int AudioClassifier<T>::classify()
         return -1;
    
     if (hasOnset)
-        sound = nbc.Classify(currentInstanceVector);
+    {
+	    switch (currentClassfierType.load())
+	    {
+			case AudioClassifyOptions::ClassifierType::nearestNeighbour:
+				sound = knn.classify(currentInstanceVector);
+				break;
+			case AudioClassifyOptions::ClassifierType::naiveBayes:
+				sound = nbc.Classify(currentInstanceVector);
+				break;
+			default: break; // sound returned -1 (invalid label - valid labels = 0 to numSounds)
+	    }
+    }
 
     return sound;
 }
