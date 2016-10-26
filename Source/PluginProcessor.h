@@ -79,12 +79,6 @@ public:
     //Initialise the synth object
     void initialiseSynth();
 
-    void triggerKickDrum(MidiBuffer& midiMessages) const;
-    void triggerSnareDrum(MidiBuffer& midiMessages) const;
-    
-    void triggerOSDTestSound(MidiBuffer& midiMessages) const;
-    
-
     enum soundLabel
     {
         KickDrum = 0, 
@@ -108,6 +102,7 @@ private:
 	
     const int kickNoteNumber = 12;
     const int snareNoteNumber = 43;
+	const int hihatNoteNumber = 50;
     const int osdTestSoundNoteNumber = 57;
 
     std::atomic_bool usingOSDTestSound;
@@ -120,6 +115,12 @@ private:
     std::map<String, std::function<void(float)>> paramCallbacks;
 
     AudioClassifier<float> classifier;
+
+    void triggerKickDrum(MidiBuffer& midiMessages) const;
+    void triggerSnareDrum(MidiBuffer& midiMessages) const;
+	void triggerHiHat(MidiBuffer& midiMessages) const;
+    
+    void triggerOSDTestSound(MidiBuffer& midiMessages) const;
 };
 
 

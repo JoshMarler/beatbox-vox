@@ -19,7 +19,7 @@ String BeatboxVoxAudioProcessor::paramOSDMsBetweenOnsets("osd_msbetween");
 //==============================================================================
 BeatboxVoxAudioProcessor::BeatboxVoxAudioProcessor()
 	: processorState(*this, nullptr),
-	  classifier(256, 48000, 2)
+	  classifier(480, 48000, 3)
 
 {
 	usingOSDTestSound.store(false);
@@ -170,6 +170,7 @@ void BeatboxVoxAudioProcessor::initialiseSynth()
 	WavAudioFormat wavFormat;
 	BigInteger kickNoteRange;
 	BigInteger snareNoteRange;
+	BigInteger hihatNoteRange;
 	BigInteger osdTestSoundNoteRange;
 
 	drumSynth.clearSounds();
@@ -185,6 +186,11 @@ void BeatboxVoxAudioProcessor::initialiseSynth()
 	                                                                                                   false),
 	                                                                             true));
 
+	std::unique_ptr<AudioFormatReader> readerHiHat(wavFormat.createReaderFor(new MemoryInputStream(BinaryData::hihat_wav,
+	                                                                                                   BinaryData::hihat_wavSize,
+	                                                                                                   false),
+	                                                                             true));
+	
 	std::unique_ptr<AudioFormatReader> readerOSDTestSound(wavFormat.createReaderFor(new MemoryInputStream(BinaryData::osdTestOne_wav,
 	                                                                                                      BinaryData::osdTestOne_wavSize,
 	                                                                                                      false),
@@ -192,11 +198,13 @@ void BeatboxVoxAudioProcessor::initialiseSynth()
 
 	kickNoteRange.setBit(kickNoteNumber);
 	snareNoteRange.setBit(snareNoteNumber);
+	hihatNoteRange.setBit(hihatNoteNumber);
 	osdTestSoundNoteRange.setBit(osdTestSoundNoteNumber);
 
 
 	drumSynth.addSound(new SamplerSound("Kick Sound", *readerKickDrum, kickNoteRange, kickNoteNumber, 0.0, 0.0, 5.0));
 	drumSynth.addSound(new SamplerSound("Snare Sound", *readerSnareDrum, snareNoteRange, snareNoteNumber, 0.0, 0.0, 5.0));
+	drumSynth.addSound(new SamplerSound("HiHat Sound", *readerHiHat, hihatNoteRange, hihatNoteNumber, 0.0, 0.0, 5.0));
 
 	drumSynth.addVoice(new SamplerVoice());
 
@@ -257,10 +265,6 @@ void BeatboxVoxAudioProcessor::processBlock(AudioSampleBuffer& buffer, MidiBuffe
 	const auto sampleRate = getSampleRate();
 	const auto numSamples = buffer.getNumSamples();
 
-
-	//Holds classifier result for this block. 
-	auto sound = -1;
-	
 	classifier.processAudioBuffer(buffer.getReadPointer(0), numSamples);
 
 	
@@ -273,7 +277,7 @@ void BeatboxVoxAudioProcessor::processBlock(AudioSampleBuffer& buffer, MidiBuffe
 	}
 
 
-	sound = classifier.classify();
+	const auto sound = classifier.classify();
 
 	switch (sound)
 	{
@@ -282,6 +286,9 @@ void BeatboxVoxAudioProcessor::processBlock(AudioSampleBuffer& buffer, MidiBuffe
 			break;
 		case soundLabel::SnareDrum:
 			triggerSnareDrum(midiMessages);
+			break;
+		case soundLabel::HiHat:
+			triggerHiHat(midiMessages);
 			break;
 		default: break;
 	}
@@ -299,25 +306,6 @@ void BeatboxVoxAudioProcessor::processBlock(AudioSampleBuffer& buffer, MidiBuffe
 	midiMessages.clear();
 }
 
-//==============================================================================
-void BeatboxVoxAudioProcessor::triggerKickDrum(MidiBuffer& midiMessages) const
-{
-	midiMessages.addEvent(MidiMessage::noteOn(1, kickNoteNumber, static_cast<uint8>(100)), 0);
-}
-
-//==============================================================================
-void BeatboxVoxAudioProcessor::triggerSnareDrum(MidiBuffer& midiMessages) const
-{
-	midiMessages.addEvent(MidiMessage::noteOn(1, snareNoteNumber, static_cast<uint8>(100)), 0);
-}
-
-//==============================================================================
-void BeatboxVoxAudioProcessor::triggerOSDTestSound(MidiBuffer& midiMessages) const
-{
-	midiMessages.addEvent(MidiMessage::noteOn(1, osdTestSoundNoteNumber, static_cast<uint8>(100)), 0);
-}
-
-//==============================================================================
 AudioClassifier<float>& BeatboxVoxAudioProcessor::getClassifier()
 {
 	return classifier;
@@ -371,3 +359,29 @@ AudioProcessor* JUCE_CALLTYPE createPluginFilter()
 {
 	return new BeatboxVoxAudioProcessor();
 }
+
+//==============================================================================
+void BeatboxVoxAudioProcessor::triggerKickDrum(MidiBuffer& midiMessages) const
+{
+	midiMessages.addEvent(MidiMessage::noteOn(1, kickNoteNumber, static_cast<uint8>(100)), 0);
+}
+
+//==============================================================================
+void BeatboxVoxAudioProcessor::triggerSnareDrum(MidiBuffer& midiMessages) const
+{
+	midiMessages.addEvent(MidiMessage::noteOn(1, snareNoteNumber, static_cast<uint8>(100)), 0);
+}
+
+//==============================================================================
+void BeatboxVoxAudioProcessor::triggerHiHat(MidiBuffer & midiMessages) const
+{
+	midiMessages.addEvent(MidiMessage::noteOn(1, hihatNoteNumber, static_cast<uint8>(100)), 0);
+}
+
+//==============================================================================
+void BeatboxVoxAudioProcessor::triggerOSDTestSound(MidiBuffer& midiMessages) const
+{
+	midiMessages.addEvent(MidiMessage::noteOn(1, osdTestSoundNoteNumber, static_cast<uint8>(100)), 0);
+}
+
+//==============================================================================
