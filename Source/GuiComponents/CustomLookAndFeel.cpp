@@ -10,6 +10,7 @@
 
 #include "CustomLookAndFeel.h"
 
+//===============================================================================
 
 //Basic override of drawRotarySlider function
 
@@ -127,3 +128,130 @@ void CustomLookAndFeel::drawRotarySlider (Graphics& g, int x, int y, int width, 
     }
 }
 
+
+//===============================================================================
+void CustomLookAndFeel::drawLinearSliderThumb (Graphics& g, int x, int y, int width, int height,
+                                float sliderPos, float minSliderPos, float maxSliderPos,
+                                const Slider::SliderStyle style, Slider& slider) 
+    {
+        const auto sliderRadius = static_cast<float>(getSliderThumbRadius(slider));
+
+	    auto isDownOrDragging = slider.isEnabled() && (slider.isMouseOverOrDragging() || slider.isMouseButtonDown());
+	    auto knobColour (slider.findColour (Slider::rotarySliderFillColourId).withMultipliedSaturation ((slider.hasKeyboardFocus (false) || isDownOrDragging) ? 1.3f : 0.9f)
+                           .withMultipliedAlpha (slider.isEnabled() ? 1.0f : 0.7f));
+        g.setColour (knobColour);
+
+        if (style == Slider::LinearHorizontal || style == Slider::LinearVertical)
+        {
+            float kx, ky;
+
+            if (style == Slider::LinearVertical)
+            {
+                kx = x + width * 0.5f;
+                ky = sliderPos;
+                g.fillRect (Rectangle<float> (kx - sliderRadius, ky - 2.5f, sliderRadius * 2.0f, 5.0f));
+            }
+            else
+            {
+                kx = sliderPos;
+                ky = y + height * 0.5f;
+                g.fillRect (Rectangle<float> (kx - 2.5f, ky - sliderRadius, 5.0f, sliderRadius * 2.0f));
+            }
+        }
+        else
+        {
+            // Just call the base class for the demo
+            LookAndFeel_V2::drawLinearSliderThumb (g, x, y, width, height, sliderPos, minSliderPos, maxSliderPos, style, slider);
+        }
+    }
+
+//===============================================================================
+ void CustomLookAndFeel::drawButtonBackground (Graphics& g, Button& button, const Colour& backgroundColour,
+                               bool isMouseOverButton, bool isButtonDown) 
+    {
+        auto baseColour (backgroundColour.withMultipliedSaturation (button.hasKeyboardFocus (true) ? 1.3f : 0.9f)
+                           .withMultipliedAlpha (button.isEnabled() ? 0.9f : 0.5f));
+
+        if (isButtonDown || isMouseOverButton)
+            baseColour = baseColour.contrasting (isButtonDown ? 0.2f : 0.1f);
+
+        const auto flatOnLeft   = button.isConnectedOnLeft();
+        const auto flatOnRight  = button.isConnectedOnRight();
+        const auto flatOnTop    = button.isConnectedOnTop();
+        const auto flatOnBottom = button.isConnectedOnBottom();
+
+        const auto width  = button.getWidth() - 1.0f;
+        const auto height = button.getHeight() - 1.0f;
+
+        if (width > 0 && height > 0)
+        {
+            const auto cornerSize = jmin (10.0f, jmin (width, height) * 0.55f);
+            const auto lineThickness = cornerSize * 0.1f;
+            const auto halfThickness = lineThickness * 0.5f;
+
+            Path outline;
+            outline.addRoundedRectangle (0.5f + halfThickness, 0.5f + halfThickness, width - lineThickness, height - lineThickness,
+                                         cornerSize, cornerSize,
+                                         ! (flatOnLeft  || flatOnTop),
+                                         ! (flatOnRight || flatOnTop),
+                                         ! (flatOnLeft  || flatOnBottom),
+                                         ! (flatOnRight || flatOnBottom));
+
+            const Colour outlineColour (button.findColour (button.getToggleState() ? TextButton::textColourOnId
+                                                                                   : TextButton::textColourOffId));
+
+            g.setColour (baseColour);
+            g.fillPath (outline);
+
+            if (! button.getToggleState())
+            {
+                g.setColour (outlineColour);
+                g.strokePath (outline, PathStrokeType (lineThickness));
+            }
+        }
+    }
+
+//===============================================================================
+ void CustomLookAndFeel::drawTickBox(Graphics& g, Component& component,
+	 float x, float y, float w, float h,
+	 bool ticked,
+	 bool isEnabled,
+	 bool isMouseOverButton,
+	 bool isButtonDown)
+ {
+	 const float diameter = w * 0.7f;
+	 const float outlineThickness = 1.0f;
+	 y = y + (h - diameter) * 0.5f;
+
+	 bool isDownOrDragging = component.isEnabled() && (component.isMouseOverOrDragging() || component.isMouseButtonDown());
+
+	 const Colour outlineColour(component.findColour(TextButton::buttonColourId).withMultipliedSaturation((component.hasKeyboardFocus(false) || isDownOrDragging) ? 1.3f : 0.9f)
+		 .withMultipliedAlpha(component.isEnabled() ? 1.0f : 0.7f));
+
+	 const Rectangle<float> a (x, y, diameter, diameter);
+     const float halfThickness = outlineThickness * 0.5f;
+
+	 Path p;
+	 p.addEllipse (x + halfThickness, y + halfThickness, diameter - outlineThickness, diameter - outlineThickness);
+
+	 const DropShadow ds (Colours::black, 1, Point<int> (0, 0));
+	 ds.drawForPath (g, p);
+
+	 if (ticked)
+	 {
+		 //g.setColour(isEnabled ? findColour(TextButton::buttonOnColourId) : Colours::grey);
+		 g.setColour(findColour(TextButton::buttonOnColourId));
+		 g.fillPath(p);
+	 }
+	 else
+	 {
+		g.setColour (outlineColour);
+		g.fillPath (p);
+	 }
+
+	 g.setColour (outlineColour.brighter());
+	 g.strokePath (p, PathStrokeType (outlineThickness));
+	
+ }
+    
+//===============================================================================

@@ -15,7 +15,7 @@
 #include "CustomLookAndFeel.h"
 
 #include "OnsetDetectorComponent.h"
-#include "AudioClassifierComponent.h"
+#include "AudioClassifier/AudioClassifierComponent.h"
 
 
 
