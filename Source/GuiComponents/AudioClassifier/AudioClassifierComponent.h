@@ -16,11 +16,13 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
-#include "../CustomLookAndFeel.h"
+#include "RecordTrainingSetComponent.h"
+#include "SelectClassifierComponent.h"
+#include "DelayedEvaluationComponent.h"
+
 #include "../../PluginProcessor.h"
 
 class AudioClassifierComponent : public Component,
-                                 Timer,
                                  ButtonListener
 {
 
@@ -29,11 +31,9 @@ public:
 	explicit AudioClassifierComponent(BeatboxVoxAudioProcessor& p);
     ~AudioClassifierComponent();
 
-
     void paint(Graphics&) override;
     void resized() override;
 
-    void timerCallback() override;
     void buttonClicked(Button* button) override;
     
 	//ComponentID Strings
@@ -44,31 +44,11 @@ private:
     
     BeatboxVoxAudioProcessor& processor;
 
+	//Core child components
+	std::unique_ptr<RecordTrainingSetComponent> recordTrainingSetComponent;
+	std::unique_ptr<SelectClassifierComponent> selectClassifierComponent;
+	std::unique_ptr<DelayedEvaluationComponent> delayedEvaluationComponent;
 
-	std::unique_ptr<LookAndFeel> componentLookAndFeel;
-
-
-    //JWM - A little dirty maybe but works for now at prototype stage
-    int currentTrainingSound = -1;
-	
-	std::string trainingSetsDirectory;
-
-    std::unique_ptr<TextButton> recordSoundButton;
-    
-    //JWM - Test button to swich on classifier training for sound
-    std::unique_ptr<TextButton> trainClassifierButton;
-
-	TextButton saveTrainingDataButton;
-
-    OwnedArray<Button> soundButtons;
-
-	OwnedArray<Label> soundReadyLabels;
-
-	TextButton loadTrainingDataButton;
-	std::unique_ptr<FileChooser> trainingDataChooser;
-
-	void saveTrainingSet();
-	void initialiseTrainingDataChooser();
 };
 
 

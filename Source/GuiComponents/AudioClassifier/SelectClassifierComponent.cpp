@@ -16,13 +16,20 @@ String SelectClassifierComponent::saveTrainingDataButtonID("saveTraining_btn");
 String SelectClassifierComponent::loadTrainingDateButtonID("loadTraining_btn");
 
 //===============================================================================
-SelectClassifierComponent::SelectClassifierComponent()
-	: classifierCmbBox("ClassifierSelector"),
+SelectClassifierComponent::SelectClassifierComponent(BeatboxVoxAudioProcessor& p)
+	: processor(p),
+	  classifierCmbBox("ClassifierSelector"),
 	  loadTrainingDataButton("Load Training Data Set"),
 	  saveTrainingDataButton("Save Current Training Data")
 {
-	//JWM - Initialize later with directory from plugin
-	trainingSetsDirectory = "Test";
+
+	//Initialise training sets directory path
+	auto path = File::getSpecialLocation(File::SpecialLocationType::userApplicationDataDirectory).getFullPathName()
+																									  + "\\" 
+																									  + processor.getName()
+																									  + "\\TrainingSets";
+	trainingSetsDirectory = path.toStdString();
+
 
 	headingLabel.setText("Select classifier type", NotificationType::dontSendNotification);
 	headingLabel.setFont(Font("Cracked", 14.0f, Font::plain));
@@ -46,8 +53,10 @@ SelectClassifierComponent::SelectClassifierComponent()
     loadTrainingDataButton.addListener(this);
 	addAndMakeVisible(loadTrainingDataButton);
 
+	initialiseTrainingDataChooser();
 
-	setSize(800, 150);
+
+	//setSize(800, 150);
 }
 
 //===============================================================================
@@ -103,25 +112,25 @@ void SelectClassifierComponent::resized()
 //===============================================================================
 void SelectClassifierComponent::buttonClicked(Button * button)
 {
-	//const auto buttonID = button->getComponentID();
+	const auto buttonID = button->getComponentID();
 
-	//if (buttonID == saveTrainingDataButtonID)
-	//{
-	//	saveTrainingSet();
-	//}
-	//else if(buttonID == loadTrainingDateButtonID)
-	//{
-	//	auto fileSelected = trainingDataChooser->browseForFileToOpen();
-	//	if (fileSelected)
-	//	{
-	//		auto fileChosen = trainingDataChooser->getResult();
-	//		auto filePath = fileChosen.getFullPathName();
+	if (buttonID == saveTrainingDataButtonID)
+	{
+		saveTrainingSet();
+	}
+	else if(buttonID == loadTrainingDateButtonID)
+	{
+		auto fileSelected = trainingDataChooser->browseForFileToOpen();
+		if (fileSelected)
+		{
+			auto fileChosen = trainingDataChooser->getResult();
+			auto filePath = fileChosen.getFullPathName();
 
-	//		std::string errorString;
-	//		processor.getClassifier().loadTrainingSet(filePath.toStdString(), errorString);
-	//		processor.getClassifier().trainModel();
-	//	}
-	//}
+			std::string errorString;
+			processor.getClassifier().loadTrainingSet(filePath.toStdString(), errorString);
+			processor.getClassifier().trainModel();
+		}
+	}
 }
 
 //===============================================================================
@@ -148,55 +157,34 @@ void SelectClassifierComponent::setupClassifierCmbBox()
 }
 
 //===============================================================================
-//void selectclassifiercomponent::savetrainingset()
-//{
-//	std::string errorstring = "";
-//
-//	file directory(trainingsetsdirectory);
-//
-//	if (!directory.exists())
-//		directory.createdirectory();
-//
-//	auto filename = trainingsetsdirectory + "\\" + processor.getname().tostdstring() + "testmatrix.csv";
-//	auto successful = processor.getclassifier().savetrainingset(filename, errorstring);
-//
-//	if (!successful)
-//	{
-//		auto icon = alertwindow::alerticontype::warningicon;
-//		alertwindow::showmessagebox(icon, "error saving", errorstring, "close", this);
-//	}
-//}
+void SelectClassifierComponent::saveTrainingSet()
+{
+	std::string errorstring = "";
+
+	File directory(trainingSetsDirectory);
+
+	if (!directory.exists())
+		directory.createDirectory();
+
+	auto filename = trainingSetsDirectory + "\\" + processor.getName().toStdString() + "TestMatrix.csv";
+	auto successful = processor.getClassifier().saveTrainingSet(filename, errorstring);
+
+	if (!successful)
+	{
+		auto icon = AlertWindow::AlertIconType::WarningIcon;
+		AlertWindow::showMessageBox(icon, "Error Saving", errorstring, "Close", this);
+	}
+}
 
 //===============================================================================
-//void SelectClassifierComponent::initialiseTrainingDataChooser()
-//{
-//	File directory(trainingSetsDirectory);
-//
-//	if (!directory.exists())
-//		directory.createDirectory();
-//
-//	trainingDataChooser = std::make_unique<FileChooser>("Load Training Data Set", directory, "*.csv", false, false);
-//
-//}
+void SelectClassifierComponent::initialiseTrainingDataChooser()
+{
+	File directory(trainingSetsDirectory);
 
+	if (!directory.exists())
+		directory.createDirectory();
 
-//===============================================================================
-//void SelectClassifierComponent::saveTrainingSet()
-//{
-//	std::string errorString = "";
-//
-//	File directory(trainingSetsDirectory);
-//
-//	if (!directory.exists())
-//		directory.createDirectory();
-//
-//	auto fileName = trainingSetsDirectory + "\\" + processor.getName().toStdString() + "TestMatrix.csv";
-//	auto successful = processor.getClassifier().saveTrainingSet(fileName, errorString);
-//
-//	if (!successful)
-//	{
-//		auto icon = AlertWindow::AlertIconType::WarningIcon;
-//		AlertWindow::showMessageBox(icon, "Error Saving", errorString, "Close", this);
-//	}
-//}
+	trainingDataChooser = std::make_unique<FileChooser>("Load Training Data Set", directory, "*.csv", false, false);
+
+}
 

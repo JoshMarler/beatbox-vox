@@ -42,6 +42,8 @@ private:
         return static_cast<BeatboxVoxAudioProcessor&> (processor);
     }
 
+	std::unique_ptr<LookAndFeel> componentLookAndFeel;
+
     TabbedComponent tabs;
 
     AudioClassifierComponent classifierComponent;

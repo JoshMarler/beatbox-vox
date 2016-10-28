@@ -12,14 +12,14 @@
 #include "DelayedEvaluationComponent.h"
 
 //==============================================================================
-DelayedEvaluationComponent::DelayedEvaluationComponent()
+DelayedEvaluationComponent::DelayedEvaluationComponent(BeatboxVoxAudioProcessor& p)
 {
-	setSize(400, 300);
-
 	headingLabel.setText("Delayed Evaluation Settings", NotificationType::dontSendNotification);
 	headingLabel.setFont(Font("Cracked", 14.0f, Font::plain));
 	headingLabel.setColour(Label::textColourId, Colours::greenyellow);
 	addAndMakeVisible(headingLabel);
+
+	//setSize(400, 300);
 }
 
 //==============================================================================

@@ -12,6 +12,7 @@
 #define RECORDTRAININGSETCOMPONENT_H_INCLUDED
 
 #include "JuceHeader.h"
+#include "../../PluginProcessor.h"
 
 class RecordTrainingSetComponent : public Component,
 								   Timer,
@@ -19,7 +20,7 @@ class RecordTrainingSetComponent : public Component,
 {
 public:
 
-	RecordTrainingSetComponent();
+	RecordTrainingSetComponent(BeatboxVoxAudioProcessor& p);
 	~RecordTrainingSetComponent();
 
 	void paint(Graphics& g) override;
@@ -38,6 +39,8 @@ public:
 private:
 
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (RecordTrainingSetComponent)
+
+    BeatboxVoxAudioProcessor& processor;
 
 	int soundButtonsGroupID = 1234;
 

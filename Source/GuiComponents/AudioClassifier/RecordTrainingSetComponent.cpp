@@ -16,13 +16,13 @@ String RecordTrainingSetComponent::recordButtonID("record_btn");
 String RecordTrainingSetComponent::trainButtonID("train_btn");
 
 //===============================================================================
-RecordTrainingSetComponent::RecordTrainingSetComponent()
+RecordTrainingSetComponent::RecordTrainingSetComponent(BeatboxVoxAudioProcessor& p)
+	: processor(p)
 {
-
 	activateButton.setComponentID(activateButtonID);
 	activateButton.addListener(this);
 	addAndMakeVisible(activateButton);
-	
+
 	headingLabel.setComponentID(headingLabelID);
 	headingLabel.setText("Record Training Set", NotificationType::dontSendNotification);
 	headingLabel.setFont(Font("Cracked", 14.0f, Font::plain));
@@ -60,10 +60,10 @@ RecordTrainingSetComponent::RecordTrainingSetComponent()
 	trainButton.addListener(this);
 	addAndMakeVisible(trainButton);
 
-	//JWM - Eventually have an AudioClasifier& member passed by parent in constructor and use to get numSounds etc.
 	setupSoundButtons();
 
-	setSize(400, 300);
+	activateButton.setToggleState(false, NotificationType::sendNotification);
+	setActive(false);
 }
 
 //===============================================================================
@@ -97,11 +97,9 @@ void RecordTrainingSetComponent::resized()
 	numInstancesLabel.setBounds(instanceSliderArea.removeFromTop(instanceSliderArea.getHeight() / 2));
 	instanceSizeSlider.setBounds(instanceSliderArea);
 
-	//auto numSounds = processor.getClassifier().getNumSounds();
-	auto numSounds = 3;
+	auto numSounds = processor.getClassifier().getNumSounds();
 	auto soundsArea = bounds.removeFromTop(bounds.getHeight() / 1.5f);
 
-	//soundsArea.reduce(0, soundsArea.getHeight() / 40);
 	selectRecordingSoundLabel.setBounds(soundsArea.removeFromTop(soundsArea.getHeight() / 8));
 
 	for (auto i = 0; i < numSounds; ++i)
@@ -127,6 +125,54 @@ void RecordTrainingSetComponent::resized()
 //===============================================================================
 void RecordTrainingSetComponent::timerCallback()
 {
+	 auto isTraining = processor.getClassifier().isTraining();
+     auto trainingSetReady = processor.getClassifier().checkTrainingSetReady();
+     auto classifierReady = processor.getClassifier().getClassifierReady();
+	 auto numSounds = processor.getClassifier().getNumSounds();
+
+     if (trainingSetReady)
+         trainButton.setEnabled(true);
+
+     if (trainButton.getToggleState())
+     {
+        if (classifierReady)
+            trainButton.setToggleState(false, NotificationType::dontSendNotification);
+     }
+         
+     //JWM - A little sketchy way of doing things maybe but works for prototype stage. 
+     if (recordButton.getToggleState())
+     {
+        if (isTraining == false)
+           recordButton.setToggleState(false, NotificationType::dontSendNotification);
+     }
+
+	 //Update individual sounds ready labels
+	 for (auto i = 0; i < numSounds; i++)
+	 {
+		 auto soundReady = processor.getClassifier().checkTrainingSoundReady(i);
+		 auto label = soundStatusLabels[i];
+		 String soundName;
+
+		 switch (i)
+		 {
+				case BeatboxVoxAudioProcessor::soundLabel::KickDrum :
+						soundName = "Kick";
+						break;
+				case BeatboxVoxAudioProcessor::soundLabel::SnareDrum :
+						soundName = "Snare";
+						break;
+				case BeatboxVoxAudioProcessor::soundLabel::HiHat : 
+						soundName = "HiHat";
+						break;
+				default: break;
+		 }
+
+		 if (soundReady)
+		 {
+			 label->setColour(Label::textColourId, Colours::greenyellow);
+			 label->setText(soundName + " Ready", juce::NotificationType::dontSendNotification);
+		 }
+	 }
 }
 
 //===============================================================================
@@ -140,15 +186,40 @@ void RecordTrainingSetComponent::buttonClicked(Button * button)
 	}
 	else if(id == recordButtonID)
 	{
-		
+		if (button->getToggleState())
+		{
+			processor.getClassifier().recordTrainingSample(currentTrainingSound);
+			auto label = soundStatusLabels[currentTrainingSound];
+			String soundName;
+
+			switch (currentTrainingSound)
+			{
+				case BeatboxVoxAudioProcessor::soundLabel::KickDrum :
+						soundName = "Kick";
+						break;
+				case BeatboxVoxAudioProcessor::soundLabel::SnareDrum :
+						soundName = "Snare";
+						break;
+				case BeatboxVoxAudioProcessor::soundLabel::HiHat : 
+						soundName = "HiHat";
+						break;
+				default: break;
+			}
+
+			label->setText( soundName + " - Recording training set", juce::NotificationType::dontSendNotification);
+		}	
 	}
 	else if (id == trainButtonID)
 	{
-		
+		 if (button->getToggleState())
+				processor.getClassifier().trainModel();	
 	}
 	else if (button->getRadioGroupId() == soundButtonsGroupID)
 	{
-		
+		if (button->getToggleState())
+        {
+            currentTrainingSound = soundButtons.indexOf(button);
+        }		
 	}
 }
 
@@ -157,25 +228,23 @@ void RecordTrainingSetComponent::buttonClicked(Button * button)
 void RecordTrainingSetComponent::setupSoundButtons()
 {
 	//Replace with classifier.getNumSounds() later
-	int numSounds = 3;
-	//auto numSounds = processor.getClassifier().getNumSounds();
+	auto numSounds = processor.getClassifier().getNumSounds();
 
     for (auto i = 0; i < numSounds; ++i)
     {
 		String soundName;
 
-		//JWM - Replace the below checks against AudioProcessor::sounds enum ?
     	switch (i)
     	{
-			case 0:
-				soundName = "Kick";
-				break;
-			case 1:
-				soundName = "Snare";
-				break;
-			case 2: 
-				soundName = "HiHat";
-				break;
+			case BeatboxVoxAudioProcessor::soundLabel::KickDrum :
+					soundName = "Kick";
+					break;
+			case BeatboxVoxAudioProcessor::soundLabel::SnareDrum :
+					soundName = "Snare";
+					break;
+			case BeatboxVoxAudioProcessor::soundLabel::HiHat : 
+					soundName = "HiHat";
+					break;
 			default: break;
 	    }
 
@@ -190,7 +259,7 @@ void RecordTrainingSetComponent::setupSoundButtons()
 		soundStatusLabels.add(new Label());
 
 		auto label = soundStatusLabels[i];
-		label->setText(soundName + " - Not Ready", juce::NotificationType::dontSendNotification);
+		label->setText(soundName + " - Not ready", juce::NotificationType::dontSendNotification);
 		label->setFont(Font("Cracked", 14.0f, Font::plain));
 		label->setColour(Label::textColourId, Colours::greenyellow.withAlpha(static_cast<uint8>(0x4a)));
 		

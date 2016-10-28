@@ -12,13 +12,14 @@
 #define SELECTCLASSIFIERCOMPONENT_H_INCLUDED
 
 #include "JuceHeader.h"
+#include "../../PluginProcessor.h"
 
 class SelectClassifierComponent : public Component,
 								  ButtonListener,
 								  ComboBoxListener
 {
 public:
-	SelectClassifierComponent();
+	explicit SelectClassifierComponent(BeatboxVoxAudioProcessor& p);
 	~SelectClassifierComponent();
 
 	void paint(Graphics& g) override;
@@ -34,7 +35,9 @@ public:
 	static String loadTrainingDateButtonID;
 	
 private:
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (SelectClassifierComponent)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SelectClassifierComponent)
+
+	BeatboxVoxAudioProcessor& processor;
 
 	std::string trainingSetsDirectory;
 
@@ -45,14 +48,11 @@ private:
 	TextButton loadTrainingDataButton;
 	TextButton saveTrainingDataButton;
 
-
 	void setupClassifierCmbBox();
 	std::unique_ptr<FileChooser> trainingDataChooser;
 
-	/*void saveTrainingSet();
-	void initialiseTrainingDataChooser();
 	void saveTrainingSet();
-	*/
+	void initialiseTrainingDataChooser();
 
 };
 

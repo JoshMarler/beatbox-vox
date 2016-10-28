@@ -12,6 +12,7 @@
 #define DELAYEDEVALUATIONCOMPONENT_H_INCLUDED
 
 #include "../JuceLibraryCode/JuceHeader.h"
+#include "../../PluginProcessor.h"
 
 //==============================================================================
 /*
@@ -19,7 +20,7 @@
 class DelayedEvaluationComponent    : public Component
 {
 public:
-    DelayedEvaluationComponent();
+    DelayedEvaluationComponent(BeatboxVoxAudioProcessor& p);
     ~DelayedEvaluationComponent();
 
     void paint (Graphics&) override;

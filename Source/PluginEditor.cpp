@@ -15,13 +15,23 @@
 //==============================================================================
 BeatboxVoxAudioProcessorEditor::BeatboxVoxAudioProcessorEditor (BeatboxVoxAudioProcessor& p)
     : AudioProcessorEditor (p),
+	  componentLookAndFeel(std::make_unique<CustomLookAndFeel>()),
       tabs(TabbedButtonBar::Orientation::TabsAtTop),
       classifierComponent(p),
       onsetDetectComponent(p)
 {
 
-    tabs.addTab("Onset Detector", Colours::black, &onsetDetectComponent, false, 0);
-    tabs.addTab("Audio Classifier", Colours::black, &classifierComponent, false, 1);
+	componentLookAndFeel->setColour (TextButton::buttonColourId, Colours::black);
+    componentLookAndFeel->setColour (TextButton::textColourOffId, Colours::greenyellow);
+
+    componentLookAndFeel->setColour (TextButton::buttonOnColourId, componentLookAndFeel->findColour (TextButton::textColourOffId));
+    componentLookAndFeel->setColour (TextButton::textColourOnId, componentLookAndFeel->findColour (TextButton::buttonColourId));
+
+	setLookAndFeel(componentLookAndFeel.get());
+
+
+    tabs.addTab("Onset Detector", Colours::darkgrey, &onsetDetectComponent, false, 0);
+    tabs.addTab("Audio Classifier", Colours::darkgrey, &classifierComponent, false, 1);
 
     addAndMakeVisible(tabs);
 
