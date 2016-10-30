@@ -12,13 +12,12 @@
 #define AUDIOCLASSIFIER_H_INCLUDED
 
 //For windows compatibility with armadillo 64bit
-
 #ifdef _WIN64
 #define ARMA_64BIT_WORD
 #endif
 
-#include <memory>
 #include <string>
+#include <memory>
 #include <atomic>
 
 #include <armadillo.h>
@@ -59,11 +58,17 @@ public:
 	bool getOSDUsingLocalMaximum();
 	void setOSDUseLocalMaximum(bool use);
 
+	void setUseDelayedEvaluation(bool use);
+	void setNumBuffersDelayed(unsigned int newNumDelayed);
+
 	/** This method sets the classifier type/learning algorithm to be used.
 	 * @param classifierType the classifier type to be used i.e. AudioClassifyOptions::ClassifierType::knn
 	 */
 	void setClassifierType(AudioClassifyOptions::ClassifierType classifierType);
 
+	/**
+	 *
+	 */
     void recordTrainingSample(int trainingSound);
 
     //NOTE - May change this after prototype so that the model is trained incrementally for each sound
@@ -80,12 +85,20 @@ public:
      * @return true for successful save otherwise false.
 	 */
 	bool saveTrainingSet(const std::string& fileName, std::string& errorString);
+
+	/** Loads the specified training data set according to the file name / path 
+	 * passed in and trains the internal classifier on with the loaded data. 
+     * Note: This method should NOT be called from the audio/callback thread as it involves file IO and will block.
+	 * @param fileName the fully qualified file name/path for the training data set to load. i.e. C:\\Models\\model.csv
+     * @param errorString output parameter which will contain an error message if applicable or default "" blank string.
+     * @return true for successful load otherwise false.
+	 */
 	bool loadTrainingSet(const std::string& fileName, std::string& errorString);
 
+	/** @return the number of sounds currently being used in the model. */
 	size_t getNumSounds() const;
     
-	/**
-	 * Sets the number of instances to be used per sound for the training set. 
+	/** Sets the number of instances to be used per sound for the training set. 
 	 * The model/classifier will need to be re-trained and a fresh training set collected.
 	 * @param newNumInstances the number of instance to be recorded per sound for the training set.
 	 */
@@ -100,13 +113,12 @@ public:
 
     void processAudioBuffer (const T* buffer, const int numSamples);
 
-    void processCurrentInstance();
 
     /** Checks whether the current frame has a detected note onset. This can be called to help 
      * with configuring the AudioClassifier oject's OnsetDetector. This function should be called
      * right after a call to processAudioBuffer() in the same frame i.e. before the next processAudioBuffer() 
      * call.
-     * @returns true if an note onset has been detected for the frame/previous frame depending on whether
+     * @returns true if a note onset has been detected for the frame/previous frame depending on whether
      * the onset detector is using local maximums.
      */
     bool noteOnsetDetected() const;
@@ -124,7 +136,11 @@ private:
     int numSounds = 0; 
 	unsigned int numFeatures;
     int trainingCount = 0;
-    bool hasOnset = false;
+
+	unsigned int numDelayedBuffers = 0;
+	unsigned int delayedCount = 0;
+    
+	bool hasOnset = false;
 
     T sampleRate;
 
@@ -138,6 +154,8 @@ private:
     std::atomic_bool usingSpecRolloff {true};
     std::atomic_bool usingSpecKurtosis {true};
     std::atomic_bool usingMfcc {true};
+
+	std::atomic_bool useDelayedEval {false};
 
 	std::atomic<AudioClassifyOptions::ClassifierType> currentClassfierType;
 
@@ -155,9 +173,15 @@ private:
     //Array/Buffer to hold mag spectrum.
     std::unique_ptr<T[]> magSpectrum;
 
+	//Holds the larger audio buffer to be used if delayed evaluation active.
+	std::unique_ptr<T[]> delayedAudioBuffer;
+
+	//Holds the larger magnitude spectrum buffer to be used if delayed evaluation active.
+	std::unique_ptr<T[]> delayedMagSpectrum;
+
     //Array/Buffer to hold the mel frequency cepstral coefficients.
     std::unique_ptr<T[]> mfccs;
-    
+
     //Holds the training data set.
     arma::Mat<T> trainingData;
 
@@ -168,12 +192,16 @@ private:
     arma::Col<T> currentInstanceVector;
     
     Gist<T> gistFeatures;
+	Gist<T> gistFeaturesDelayed;
     OnsetDetector<T> osDetector;
     NaiveBayes<T> nbc;
 	NearestNeighbour<T> knn;
 //==============================================================================
-    void configTrainingSetMatrix();
 
+    void processCurrentInstance();
+	void resetClassifierState();
+
+    void configTrainingSetMatrix();
     unsigned int calcFeatureVecSize() const;
 };
 
