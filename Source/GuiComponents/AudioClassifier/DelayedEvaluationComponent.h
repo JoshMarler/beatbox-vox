@@ -15,21 +15,53 @@
 #include "../../PluginProcessor.h"
 
 //==============================================================================
-/*
-*/
-class DelayedEvaluationComponent    : public Component
+
+/**
+ *
+ */
+class DelayedEvaluationComponent : public Component,
+								   ButtonListener,
+								   SliderListener
 {
 public:
-    DelayedEvaluationComponent(BeatboxVoxAudioProcessor& p);
+	explicit DelayedEvaluationComponent(BeatboxVoxAudioProcessor& p);
     ~DelayedEvaluationComponent();
 
     void paint (Graphics&) override;
     void resized() override;
 
+	void buttonClicked(Button* button) override;
+	void sliderValueChanged(Slider* slider) override;
+
+	//Component ID's
+	static String headingLabelID;
+	static String activateButtonID;
+	static String bufferDelaySliderID;
+	static String useEarlyAttackButtonID;
+
 private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DelayedEvaluationComponent)
 
+    BeatboxVoxAudioProcessor& processor;
+	
+	//heading section controls
 	Label headingLabel;
+	ToggleButton activateButton;
+
+	Label numSamplesUsedLbl;
+	Label numSamplesUsedVal;
+
+	Label numBuffersUsedLbl;
+	Label numBuffersUsedVal;
+
+	Label earlyAttackLbl;
+	ToggleButton useEarlyAttackButton;
+
+	Label bufferDelayLabel;
+	Slider bufferDelaySlider;
+
+	void setActive(bool active);
+	void setUseEarlyAttack(bool use);
 };
 
 

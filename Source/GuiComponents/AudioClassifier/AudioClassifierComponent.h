@@ -19,6 +19,7 @@
 #include "RecordTrainingSetComponent.h"
 #include "SelectClassifierComponent.h"
 #include "DelayedEvaluationComponent.h"
+#include "FeaturesComponent.h"
 
 #include "../../PluginProcessor.h"
 
@@ -48,6 +49,7 @@ private:
 	std::unique_ptr<RecordTrainingSetComponent> recordTrainingSetComponent;
 	std::unique_ptr<SelectClassifierComponent> selectClassifierComponent;
 	std::unique_ptr<DelayedEvaluationComponent> delayedEvaluationComponent;
+	std::unique_ptr<FeaturesComponent> featuresComponent;
 
 };
 

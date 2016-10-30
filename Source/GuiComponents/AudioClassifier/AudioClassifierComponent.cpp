@@ -17,10 +17,12 @@ AudioClassifierComponent::AudioClassifierComponent(BeatboxVoxAudioProcessor& p)
 {
 	recordTrainingSetComponent = std::make_unique<RecordTrainingSetComponent>(processor);
 	selectClassifierComponent = std::make_unique<SelectClassifierComponent>(processor);
+	featuresComponent = std::make_unique<FeaturesComponent>(processor);
 	delayedEvaluationComponent = std::make_unique<DelayedEvaluationComponent>(processor);
 
 	addAndMakeVisible(recordTrainingSetComponent.get());
 	addAndMakeVisible(selectClassifierComponent.get());
+	addAndMakeVisible(featuresComponent.get());
 	addAndMakeVisible(delayedEvaluationComponent.get());
 }
 
@@ -47,14 +49,20 @@ void AudioClassifierComponent::resized()
 
 	selectClassifierComponent->setBounds(boundsTop);
 
-	auto boundsLeft = bounds.removeFromLeft(bounds.getWidth() / 2);
-	auto boundsRight = bounds;
+	auto centerBounds = bounds.removeFromTop(bounds.getHeight() / 1.5f);
 
-	boundsLeft.reduce(boundsLeft.getWidth() / 50, boundsLeft.getHeight() / 75);
-	boundsRight.reduce(boundsRight.getWidth() / 50, boundsRight.getHeight() / 75);
+	auto boundsLeft = centerBounds.removeFromLeft(centerBounds.getWidth() / 2);
+	auto boundsRight = centerBounds;
+
+	boundsLeft.reduce(boundsLeft.getWidth() / 55, boundsLeft.getHeight() / 75);
+	boundsRight.reduce(boundsRight.getWidth() / 55, boundsRight.getHeight() / 75);
 
 	recordTrainingSetComponent->setBounds(boundsLeft);
-	delayedEvaluationComponent->setBounds(boundsRight);
+	featuresComponent->setBounds(boundsRight);
+
+	auto boundsBottom = bounds;
+	boundsBottom.reduce(boundsBottom.getWidth() / 100, boundsBottom.getHeight() / 50);
+	delayedEvaluationComponent->setBounds(boundsBottom);
 }
 
 //===============================================================================

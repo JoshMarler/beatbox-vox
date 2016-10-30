@@ -35,7 +35,7 @@ class AudioClassifier
 
 public:
 
-    AudioClassifier(int initBufferSize, T initSampleRate, int initNumSounds);
+    AudioClassifier(int initBufferSize, T initSampleRate, int initNumSounds, int initNumInstances);
 
     ~AudioClassifier();
 
@@ -84,7 +84,12 @@ public:
 
 	size_t getNumSounds() const;
     
-    void setTrainingSetSize(int newTrainingSetSize);
+	/**
+	 * Sets the number of instances to be used per sound for the training set. 
+	 * The model/classifier will need to be re-trained and a fresh training set collected.
+	 * @param newNumInstances the number of instance to be recorded per sound for the training set.
+	 */
+    void setNumInstances(int newNumInstances);
     
     bool checkTrainingSetReady() const;
 	bool checkTrainingSoundReady(const unsigned sound) const;
@@ -115,6 +120,7 @@ private:
 
     int bufferSize = 0;
     int trainingSetSize = 10;
+	int numInstances = 0;
     int numSounds = 0; 
 	unsigned int numFeatures;
     int trainingCount = 0;

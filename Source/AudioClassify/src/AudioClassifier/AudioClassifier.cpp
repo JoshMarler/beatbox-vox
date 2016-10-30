@@ -13,17 +13,17 @@
 
 //==============================================================================
 template<typename T>
-AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int initNumSounds)
-	: trainingData(21, (trainingSetSize * initNumSounds), arma::fill::zeros),
-	trainingLabels((trainingSetSize * initNumSounds)),
-	currentInstanceVector(21, arma::fill::zeros),
-	gistFeatures(initBufferSize, static_cast<int>(initSampleRate)),
-	osDetector(initBufferSize, initSampleRate),
-	nbc(initNumSounds, 21),
-	knn(21, initNumSounds, trainingSetSize)
+AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int initNumSounds, int initNumInstances)
+	: gistFeatures(initBufferSize, static_cast<int>(initSampleRate)),
+	  osDetector(initBufferSize, initSampleRate),
+	  nbc(initNumSounds, 21),
+	  knn(21, initNumSounds, initNumInstances)
 {
     setCurrentSampleRate(initSampleRate);
     setCurrentBufferSize(initBufferSize);
+
+	numInstances = initNumInstances;
+    numSounds = initNumSounds;
 
     training.store(false);
     classifierReady.store(false);
@@ -36,7 +36,6 @@ AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int in
 	         the features to be used via AudioClassify::AudioClassifyOptions.
 			 Could also possibly pass a file name to load for model state/training set...
 	*/
-    numSounds = initNumSounds;
 	numFeatures = calcFeatureVecSize();
 
     auto numCoefficients = gistFeatures.getMFCCNumCoefficients();
@@ -44,6 +43,8 @@ AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int in
 
     //Set initial sound ready states to false in training set.  
     soundsReady.resize(numSounds, false);
+
+	configTrainingSetMatrix();
 }
 
 template<typename T>
@@ -176,7 +177,6 @@ bool AudioClassifier<T>::loadTrainingSet(const std::string & fileName, std::stri
 
 	}
 
-
 	return success;
 }
 
@@ -201,13 +201,13 @@ void AudioClassifier<T>::setOSDMeanCoeff(T newMeanCoeff)
     osDetector.setMeanCoefficient(newMeanCoeff);
 }
 
-
 //==============================================================================
 template<typename T>
 void AudioClassifier<T>::setOSDMedianCoeff(T newMedianCoeff)
 {
     osDetector.setMedianCoefficient(newMedianCoeff);
 }
+
 //==============================================================================
 template<typename T>
 void AudioClassifier<T>::setOSDNoiseRatio(T newNoiseRatio)
@@ -229,6 +229,7 @@ void AudioClassifier<T>::setOSDDetectorFunctionType(AudioClassifyOptions::ODFTyp
     osDetector.setCurrentODFType(newODFType);
 }
 
+//==============================================================================
 template<typename T>
 bool AudioClassifier<T>::getOSDUsingAdaptiveWhitening()
 {
@@ -242,6 +243,7 @@ void AudioClassifier<T>::setOSDUseAdaptiveWhitening(bool use)
 	osDetector.setUsingAdaptiveWhitening(use);
 }
 
+//==============================================================================
 template<typename T>
 void AudioClassifier<T>::setOSDWhitenerPeakDecayRate(unsigned int newDecayRate)
 {
@@ -255,6 +257,7 @@ bool AudioClassifier<T>::getOSDUsingLocalMaximum()
 	return osDetector.getUsingLocalMaximum();
 }
 
+//==============================================================================
 template<typename T>
 void AudioClassifier<T>::setOSDUseLocalMaximum(bool use)
 {
@@ -280,7 +283,7 @@ void AudioClassifier<T>::recordTrainingSample(int sound)
 {
     currentTrainingSound.store(sound);
 
-    trainingCount = (sound * trainingSetSize);
+    trainingCount = (sound * numInstances);
 
     training.store(true);
 }
@@ -304,11 +307,13 @@ void AudioClassifier<T>::trainModel()
 
 //==============================================================================
 template<typename T>
-void AudioClassifier<T>::setTrainingSetSize(int newTrainingSetSize)
+void AudioClassifier<T>::setNumInstances(int newTrainingSetSize)
 {
-    trainingSetSize = newTrainingSetSize;
+    numInstances = newTrainingSetSize;
+	trainingSetSize = (numInstances * numSounds);
 
-    //JWM - resize the training set matrix and handle retraiing/keep data.
+    //Resize/configure trainingSet matrix
+	configTrainingSetMatrix();
 }
 
 //==============================================================================
@@ -317,6 +322,7 @@ bool AudioClassifier<T>::getClassifierReady() const
 {
     return classifierReady.load();
 }
+
 //==============================================================================
 template<typename T>
 bool AudioClassifier<T>::isTraining() const
@@ -353,7 +359,7 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer, const int numSampl
 
 	        auto sound = currentTrainingSound.load();
 
-            if (trainingCount < (trainingSetSize * (sound + 1)))
+            if (trainingCount < (numInstances * (sound + 1)))
             {
                 trainingData.col(trainingCount) = currentInstanceVector;
                 trainingLabels[trainingCount] = static_cast<std::size_t>(sound);
@@ -412,6 +418,7 @@ void AudioClassifier<T>::processCurrentInstance()
          } 
     }
 }
+
 //==============================================================================
 template<typename T>
 bool AudioClassifier<T>::noteOnsetDetected() const
@@ -478,11 +485,35 @@ bool AudioClassifier<T>::checkTrainingSoundReady (const unsigned sound) const
 template<typename T>
 void AudioClassifier<T>::configTrainingSetMatrix()
 {
-    //JWM - iterate through feature map to calculate size of matrix needed + trainingSetSize .
+	/** JWM - Currently a naive implementation as just discards the existing
+	 * training set data and requires training set to be re-gathered/populated
+	 * followed by re-train of classifier. 
+	 */
+
+	//Training set and current instance no longer valid so reset state
+	currentTrainingSound.store(-1);
+	training.store(false);
+	trainingCount = 0;
+
+	for (auto v : soundsReady)
+		  v = false;
+
+	auto numFeatures = calcFeatureVecSize();
+
+	trainingData.set_size(numFeatures, trainingSetSize);
+	trainingLabels.set_size(trainingSetSize);
+
+	currentInstanceVector.set_size(numFeatures);
+
+	trainingData.zeros();
+	
+	for (auto i = 0; i < trainingLabels.n_elem; ++i)
+	{
+		trainingLabels[i] = -1;
+	}
+
+	currentInstanceVector.zeros();
 }
-
-
-//==============================================================================
 
 //==============================================================================
 template<typename T>

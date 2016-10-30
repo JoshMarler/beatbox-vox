@@ -19,7 +19,7 @@ String BeatboxVoxAudioProcessor::paramOSDMsBetweenOnsets("osd_msbetween");
 //==============================================================================
 BeatboxVoxAudioProcessor::BeatboxVoxAudioProcessor()
 	: processorState(*this, nullptr),
-	  classifier(480, 48000, 3)
+	  classifier(480, 48000, 3, 10)
 
 {
 	usingOSDTestSound.store(false);
@@ -275,7 +275,6 @@ void BeatboxVoxAudioProcessor::processBlock(AudioSampleBuffer& buffer, MidiBuffe
 		if (usingOSDTestSound.load())
 			triggerOSDTestSound(midiMessages);
 	}
-
 
 	const auto sound = classifier.classify();
 

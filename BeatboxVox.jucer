@@ -22,6 +22,10 @@
                 resource="0" file="Source/GuiComponents/AudioClassifier/DelayedEvaluationComponent.cpp"/>
           <FILE id="fkz33T" name="DelayedEvaluationComponent.h" compile="0" resource="0"
                 file="Source/GuiComponents/AudioClassifier/DelayedEvaluationComponent.h"/>
+          <FILE id="Y9UGex" name="FeaturesComponent.cpp" compile="1" resource="0"
+                file="Source/GuiComponents/AudioClassifier/FeaturesComponent.cpp"/>
+          <FILE id="bG0sV5" name="FeaturesComponent.h" compile="0" resource="0"
+                file="Source/GuiComponents/AudioClassifier/FeaturesComponent.h"/>
           <FILE id="kF9NsT" name="RecordTrainingSetComponent.cpp" compile="1"
                 resource="0" file="Source/GuiComponents/AudioClassifier/RecordTrainingSetComponent.cpp"/>
           <FILE id="oKwl9X" name="RecordTrainingSetComponent.h" compile="0" resource="0"

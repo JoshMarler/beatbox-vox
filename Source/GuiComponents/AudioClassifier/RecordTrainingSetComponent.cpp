@@ -64,6 +64,8 @@ RecordTrainingSetComponent::RecordTrainingSetComponent(BeatboxVoxAudioProcessor&
 
 	activateButton.setToggleState(false, NotificationType::sendNotification);
 	setActive(false);
+
+	startTimerHz(20);
 }
 
 //===============================================================================
