@@ -131,14 +131,15 @@ private:
 //==============================================================================
 
     int bufferSize = 0;
+	int delayedBufferSize = 0;
     int trainingSetSize = 10;
 	int numInstances = 0;
     int numSounds = 0; 
-	unsigned int numFeatures;
+	unsigned int numFeatures = 0;
     int trainingCount = 0;
 
 	unsigned int numDelayedBuffers = 0;
-	unsigned int delayedCount = 0;
+	unsigned int delayedProcessedCount = 0;
     
 	bool hasOnset = false;
 
@@ -199,6 +200,8 @@ private:
 //==============================================================================
 
     void processCurrentInstance();
+	void processDelayedBuffer(const T* buffer);
+
 	void resetClassifierState();
 
     void configTrainingSetMatrix();

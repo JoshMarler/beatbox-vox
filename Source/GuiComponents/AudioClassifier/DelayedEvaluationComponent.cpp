@@ -157,6 +157,7 @@ void DelayedEvaluationComponent::sliderValueChanged(Slider * slider)
 	if (id == bufferDelaySliderID)
 	{
 		//Update num buffers delay	
+		processor.getClassifier().setNumBuffersDelayed(static_cast<unsigned int>(slider->getValue()));
 	}
 }
 
@@ -186,7 +187,6 @@ void DelayedEvaluationComponent::setActive(bool active)
 		else
 		{
 			child->setEnabled(true);
-			//Set using delayed evaluation = true ? but with 0 num buffers delayed if initial? 
 		}
 	}
 }
