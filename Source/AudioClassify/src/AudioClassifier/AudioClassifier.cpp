@@ -74,20 +74,14 @@ template<typename T>
 void AudioClassifier<T>::setCurrentBufferSize (int newBufferSize)
 {
 
-	//Limit number of expensive memory allocations if possible
-	if (newBufferSize != bufferSize)
-	{
-		bufferSize = newBufferSize;
-		
-		gistFeaturesOSD.setAudioFrameSize(bufferSize);
-
-		magSpectrumOSD.reset(new T[bufferSize / 2]);    
-		std::fill(magSpectrumOSD.get(), (magSpectrumOSD.get() + (bufferSize / 2)), static_cast<T>(0.0));
-
-		osDetector.setCurrentFrameSize(bufferSize / 2);
-	}
-
+	bufferSize = newBufferSize;
 	
+	gistFeaturesOSD.setAudioFrameSize(bufferSize);
+
+	magSpectrumOSD.reset(new T[bufferSize / 2]);    
+	std::fill(magSpectrumOSD.get(), (magSpectrumOSD.get() + (bufferSize / 2)), static_cast<T>(0.0));
+
+
 	const auto delayedBufferSize = bufferSize * (numDelayedBuffers + 1);
 
 	audioBuffer.reset(new T[delayedBufferSize]);
@@ -364,7 +358,7 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer, const int numSampl
 {
     const auto currentBufferSize = getCurrentBufferSize();
 	
-	if (numDelayedBuffers != 0 && delayedProcessedCount == 0)
+	if (numDelayedBuffers == 0 || delayedProcessedCount == 0)
 		 hasOnset = false;
 
     /** if (bufferSize != numSamples) */
@@ -390,14 +384,15 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer, const int numSampl
 		 */
 		if (numDelayedBuffers != 0 && delayedProcessedCount < numDelayedBuffers)
 		{
-			++delayedProcessedCount;
-
 			auto writeIndex = delayedProcessedCount * bufferSize;
 			std::copy(buffer, buffer + bufferSize, audioBuffer.get() + writeIndex);
+			
+			++delayedProcessedCount;
 		}
 		else
 		{
-			++delayedProcessedCount;
+			if (numDelayedBuffers != 0)
+				++delayedProcessedCount;
 
 			auto writeIndex = delayedProcessedCount * bufferSize;
 			std::copy(buffer, buffer + bufferSize, audioBuffer.get() + writeIndex);
