@@ -58,7 +58,6 @@ public:
 	bool getOSDUsingLocalMaximum();
 	void setOSDUseLocalMaximum(bool use);
 
-	void setUseDelayedEvaluation(bool use);
 	void setNumBuffersDelayed(unsigned int newNumDelayed);
 
 	/** This method sets the classifier type/learning algorithm to be used.
@@ -138,7 +137,7 @@ private:
 	unsigned int numFeatures = 0;
     int trainingCount = 0;
 
-	unsigned int numDelayedBuffers = 0;
+	int numDelayedBuffers = 0;
 	unsigned int delayedProcessedCount = 0;
     
 	bool hasOnset = false;
@@ -172,13 +171,10 @@ private:
     std::vector<bool> soundsReady;
     
     //Array/Buffer to hold mag spectrum.
-    std::unique_ptr<T[]> magSpectrum;
-
-	//Holds the larger audio buffer to be used if delayed evaluation active.
-	std::unique_ptr<T[]> delayedAudioBuffer;
-
-	//Holds the larger magnitude spectrum buffer to be used if delayed evaluation active.
-	std::unique_ptr<T[]> delayedMagSpectrum;
+    std::unique_ptr<T[]> magSpectrumOSD;
+	
+	//Array/Buffer to hold the current audio buffer - used for delayed evaluation so size will be (bufferSize * (numDelayed + 1))
+	std::unique_ptr<T[]> audioBuffer;
 
     //Array/Buffer to hold the mel frequency cepstral coefficients.
     std::unique_ptr<T[]> mfccs;
@@ -192,15 +188,15 @@ private:
     //Holds the the feature values/vector for the current instance/block.
     arma::Col<T> currentInstanceVector;
     
+	Gist<T> gistFeaturesOSD;
     Gist<T> gistFeatures;
-	Gist<T> gistFeaturesDelayed;
     OnsetDetector<T> osDetector;
     NaiveBayes<T> nbc;
 	NearestNeighbour<T> knn;
 //==============================================================================
 
     void processCurrentInstance();
-	void processDelayedBuffer(const T* buffer);
+	void addToTrainingSet(const arma::Col<T>& newInstance);
 
 	void resetClassifierState();
 

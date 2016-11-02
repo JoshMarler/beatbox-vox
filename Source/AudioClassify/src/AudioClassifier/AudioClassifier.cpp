@@ -10,12 +10,13 @@
 
 #include "AudioClassifier.h"
 #include <fstream>
+#include <cmath>
 
 //==============================================================================
 template<typename T>
 AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int initNumSounds, int initNumInstances)
-	: gistFeatures(initBufferSize, static_cast<int>(initSampleRate)),
-	  gistFeaturesDelayed((initBufferSize * (numDelayedBuffers + 1)), static_cast<T>(initSampleRate)),
+	: gistFeatures((initBufferSize * (numDelayedBuffers + 1)), static_cast<int>(initSampleRate)),
+	  gistFeaturesOSD(initBufferSize, initSampleRate),
 	  osDetector((initBufferSize / 2), initSampleRate),
 	  nbc(initNumSounds, 21),
 	  knn(21, initNumSounds, initNumInstances)
@@ -72,22 +73,31 @@ T AudioClassifier<T>::getCurrentSampleRate() const
 template<typename T>
 void AudioClassifier<T>::setCurrentBufferSize (int newBufferSize)
 {
-    bufferSize = newBufferSize;
 
-    gistFeatures.setAudioFrameSize(newBufferSize);
+	//Limit number of expensive memory allocations if possible
+	if (newBufferSize != bufferSize)
+	{
+		bufferSize = newBufferSize;
+		
+		gistFeaturesOSD.setAudioFrameSize(bufferSize);
 
-    magSpectrum.reset(new T[newBufferSize / 2]);    
-    std::fill(magSpectrum.get(), (magSpectrum.get() + (newBufferSize / 2)), static_cast<T>(0.0));
+		magSpectrumOSD.reset(new T[bufferSize / 2]);    
+		std::fill(magSpectrumOSD.get(), (magSpectrumOSD.get() + (bufferSize / 2)), static_cast<T>(0.0));
 
-    osDetector.setCurrentFrameSize(newBufferSize / 2);
-    /**
-     * Note: After prototype stage this function should probably handle clearing the model
-     * and setting classifier ready to false as well as emptying the trainingDataSet and trainingLables matrices.
-     * The NaiveBayes class may require a clear method which clears out the various probability and feature mean vectors etc.
-     */
+		osDetector.setCurrentFrameSize(bufferSize / 2);
+	}
 
-	//Also update the delayed audio buffer for us in delayed evaluation
-	setNumBuffersDelayed(numDelayedBuffers);
+	
+	const auto delayedBufferSize = bufferSize * (numDelayedBuffers + 1);
+
+	audioBuffer.reset(new T[delayedBufferSize]);
+	std::fill(audioBuffer.get(), (audioBuffer.get() + delayedBufferSize), static_cast<T>(0.0));
+
+	gistFeatures.setAudioFrameSize(delayedBufferSize);
+
+
+	//If changing num delayed buffers current training set no longer valid so reset and require re-train.
+	resetClassifierState();
 }
 
 //==============================================================================
@@ -96,7 +106,7 @@ void AudioClassifier<T>::setCurrentSampleRate (T newSampleRate)
 {
     sampleRate = newSampleRate;
     gistFeatures.setSamplingFrequency(static_cast<int>(sampleRate));
-	gistFeaturesDelayed.setSamplingFrequency(static_cast<int>(sampleRate));
+	gistFeaturesOSD.setSamplingFrequency(static_cast<int>(sampleRate));
 	osDetector.setSampleRate(sampleRate);
 }
 
@@ -274,31 +284,12 @@ void AudioClassifier<T>::setOSDUseLocalMaximum(bool use)
 
 //==============================================================================
 template<typename T>
-void AudioClassifier<T>::setUseDelayedEvaluation(bool use)
-{
-	useDelayedEval.store(use);
-}
-
-//==============================================================================
-template<typename T>
 void AudioClassifier<T>::setNumBuffersDelayed(unsigned int newNumDelayed)
 {
 	numDelayedBuffers = newNumDelayed;
 
-	delayedBufferSize = (getCurrentBufferSize() * (numDelayedBuffers + 1));
-
-	delayedAudioBuffer.reset(new T[delayedBufferSize]);
-	std::fill(delayedAudioBuffer.get(), (delayedAudioBuffer.get() + delayedBufferSize), static_cast<T>(0.0));
-
-	delayedMagSpectrum.reset(new T[delayedBufferSize / 2]);
-	std::fill(delayedMagSpectrum.get(), (delayedMagSpectrum.get() + (delayedBufferSize / 2)), static_cast<T>(0.0));
-
-	gistFeaturesDelayed.setAudioFrameSize(delayedBufferSize);
-
-	setUseDelayedEvaluation(true);
-
-	//If changing num delayed buffers current training set no longer valid so reset and require re-train.
-	resetClassifierState();
+	//Need to resize internal buffers according to new numDelayedBuffers
+	setCurrentBufferSize(bufferSize);
 }
 
 //==============================================================================
@@ -371,9 +362,10 @@ bool AudioClassifier<T>::isTraining() const
 template<typename T> 
 void AudioClassifier<T>::processAudioBuffer (const T* buffer, const int numSamples)
 {
-    //Reset hasOnset for next process buffer.
-    hasOnset = false;
     const auto currentBufferSize = getCurrentBufferSize();
+	
+	if (numDelayedBuffers != 0 && delayedProcessedCount == 0)
+		 hasOnset = false;
 
     /** if (bufferSize != numSamples) */
 
@@ -381,43 +373,44 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer, const int numSampl
     /**     //setCurrentFrameSize() needs to be called before continuing processing - training set/model will be invalid strictly speaking. */
     /**     return; */
     /** } */
+	
+	
+	if (delayedProcessedCount == 0)
+	{
+		gistFeaturesOSD.processAudioFrame(buffer, bufferSize);
+		gistFeaturesOSD.getMagnitudeSpectrum(magSpectrumOSD.get());
+		
+		hasOnset = osDetector.checkForOnset(magSpectrumOSD.get(), bufferSize / 2);
+	}
 
-    gistFeatures.processAudioFrame(buffer, currentBufferSize);
-    gistFeatures.getMagnitudeSpectrum(magSpectrum.get());
-    
-    hasOnset = osDetector.checkForOnset(magSpectrum.get(), currentBufferSize / 2);
-
-    if (hasOnset)
-    {
-		if (useDelayedEval.load())
+	if (hasOnset)
+	{
+		/* Using std::abs is a bit of a dirty trick here to handle when numDelayedBuffers == 0
+		 * Could potentially rethink this at some point.
+		 */
+		if (numDelayedBuffers != 0 && delayedProcessedCount < numDelayedBuffers)
 		{
-			processDelayedBuffer(buffer);
+			++delayedProcessedCount;
+
+			auto writeIndex = delayedProcessedCount * bufferSize;
+			std::copy(buffer, buffer + bufferSize, audioBuffer.get() + writeIndex);
 		}
+		else
+		{
+			++delayedProcessedCount;
 
-        processCurrentInstance();
+			auto writeIndex = delayedProcessedCount * bufferSize;
+			std::copy(buffer, buffer + bufferSize, audioBuffer.get() + writeIndex);
+			
+			gistFeatures.processAudioFrame(audioBuffer.get(), bufferSize * (numDelayedBuffers + 1));
+			processCurrentInstance();
 
-        if (currentTrainingSound.load() != -1 && training.load())
-        {
-            classifierReady.store(false);
+			//Reset state until next detected onset
+			delayedProcessedCount = 0;
+		}
+				
+	}
 
-	        auto sound = currentTrainingSound.load();
-
-            if (trainingCount < (numInstances * (sound + 1)))
-            {
-                trainingData.col(trainingCount) = currentInstanceVector;
-                trainingLabels[trainingCount] = static_cast<std::size_t>(sound);
-
-                ++trainingCount;
-            }
-            else
-            {
-                //Set sound ready state to true for current training sound.
-                soundsReady[sound] = true;
-                training.store(false);
-                currentTrainingSound.store(-1);
-            }
-        }
-    }
 }
 
 //==============================================================================
@@ -425,70 +418,70 @@ template<typename T>
 void AudioClassifier<T>::processCurrentInstance()
 {
     auto pos = 0;
-	Gist<T>* featureExtractor = nullptr;
-
-	//Potentially alter this at later stage as seems less than ideal, possibly better not to require two Gist instances.
-	if (useDelayedEval.load())
-		featureExtractor = &gistFeaturesDelayed;
-	else
-		featureExtractor = &gistFeatures;
-
 
 	if (usingRMS.load())
-		currentInstanceVector[pos++] = featureExtractor->rootMeanSquare();
+		currentInstanceVector[pos++] = gistFeatures.rootMeanSquare();
 
 	if (usingPeakEnergy.load())
-		currentInstanceVector[pos++] = featureExtractor->peakEnergy();
+		currentInstanceVector[pos++] = gistFeatures.peakEnergy();
 
 	if (usingZeroCrossingRate.load())
-		currentInstanceVector[pos++] = featureExtractor->zeroCrossingRate();
+		currentInstanceVector[pos++] = gistFeatures.zeroCrossingRate();
 
     if (usingSpecCentroid.load())
-        currentInstanceVector[pos++] = featureExtractor->spectralCentroid(); 
+        currentInstanceVector[pos++] = gistFeatures.spectralCentroid(); 
 
     if (usingSpecCrest.load())
-        currentInstanceVector[pos++] = featureExtractor->spectralCrest();
+        currentInstanceVector[pos++] = gistFeatures.spectralCrest();
 
     if (usingSpecFlatness.load())
-        currentInstanceVector[pos++] = featureExtractor->spectralFlatness(); 
+        currentInstanceVector[pos++] = gistFeatures.spectralFlatness(); 
 
     if (usingSpecRolloff.load())
-        currentInstanceVector[pos++] = featureExtractor->spectralRolloff();
+        currentInstanceVector[pos++] = gistFeatures.spectralRolloff();
     
     if (usingSpecKurtosis.load())
-        currentInstanceVector[pos++] = featureExtractor->spectralKurtosis();
+        currentInstanceVector[pos++] = gistFeatures.spectralKurtosis();
 
     if (usingMfcc.load())
     {
-         featureExtractor->melFrequencyCepstralCoefficients(mfccs.get()); 
+         gistFeatures.melFrequencyCepstralCoefficients(mfccs.get()); 
             
-         auto numCoefficients = featureExtractor->getMFCCNumCoefficients();
+         auto numCoefficients = gistFeatures.getMFCCNumCoefficients();
          for (auto i = 0; i < numCoefficients; i++) 
          { 
            currentInstanceVector[pos++] = mfccs[i];  
          } 
     }
+	
+    //If currently training update the training set with new instance 
+	if (currentTrainingSound.load() != -1 && training.load())
+		addToTrainingSet(currentInstanceVector);
+
 }
 
 //==============================================================================
 template<typename T>
-void AudioClassifier<T>::processDelayedBuffer(const T * buffer)
+void AudioClassifier<T>::addToTrainingSet(const arma::Col<T>& newInstance)
 {
-	++delayedProcessedCount;
+	classifierReady.store(false);
 
-	if (delayedProcessedCount < numDelayedBuffers)
+	auto sound = currentTrainingSound.load();
+
+	if (trainingCount < (numInstances * (sound + 1)))
 	{
-		auto writeIndex = (delayedProcessedCount - 1) * bufferSize;
-		std::copy(buffer, buffer + bufferSize, delayedAudioBuffer.get() + writeIndex);
+		trainingData.col(trainingCount) = newInstance;
+		trainingLabels[trainingCount] = static_cast<std::size_t>(sound);
+
+		++trainingCount;
 	}
 	else
 	{
-		gistFeaturesDelayed.processAudioFrame(buffer, bufferSize);
-		gistFeaturesDelayed.getMagnitudeSpectrum(magSpectrum.get());
-		
-		delayedProcessedCount = 0;
+		//Set sound ready state to true for current training sound.
+		soundsReady[sound] = true;
+		training.store(false);
+		currentTrainingSound.store(-1);
 	}
-
 }
 
 //==============================================================================
@@ -508,7 +501,11 @@ void AudioClassifier<T>::resetClassifierState()
 template<typename T>
 bool AudioClassifier<T>::noteOnsetDetected() const
 {
-    return hasOnset;
+	//Don't want to trigger onset response in middle of delayed evaluation handling
+	if (delayedProcessedCount == 0)
+		return hasOnset;
+	else
+		return false;
 }
 
 //==============================================================================
@@ -522,7 +519,7 @@ int AudioClassifier<T>::classify()
     if (!ready)
         return -1;
    
-    if (hasOnset)
+    if (noteOnsetDetected())
     {
 	    switch (currentClassfierType.load())
 	    {
@@ -570,7 +567,7 @@ bool AudioClassifier<T>::checkTrainingSoundReady (const unsigned sound) const
 template<typename T>
 void AudioClassifier<T>::configTrainingSetMatrix()
 {
-	/** JWM - Currently a naive implementation as just discards the existing
+	/** Currently a naive implementation as just discards the existing
 	 * training set data and requires training set to be re-gathered/populated
 	 * followed by re-train of classifier. 
 	 */
@@ -585,7 +582,7 @@ void AudioClassifier<T>::configTrainingSetMatrix()
 
 	for (auto i = 0; i < trainingLabels.n_elem; ++i)
 	{
-		//Consider making trainingLabel <unsigned int> rather than signed to init with -1 label vals
+		//Consider making trainingLabel <int> rather than unsigned to init with -1 label vals
 		trainingLabels[i] = 0;
 	}
 
