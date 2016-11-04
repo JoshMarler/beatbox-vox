@@ -15,6 +15,7 @@
 String DelayedEvaluationComponent::headingLabelID("heading_lbl");
 String DelayedEvaluationComponent::activateButtonID("activate_btn");
 String DelayedEvaluationComponent::bufferDelaySliderID("bufferDelay_sld");
+String DelayedEvaluationComponent::bufferDelayUpdateButtonID("buffer_delay_update_btn");
 String DelayedEvaluationComponent::useEarlyAttackButtonID("useEarlyAttack_btn");
 //==============================================================================
 DelayedEvaluationComponent::DelayedEvaluationComponent(BeatboxVoxAudioProcessor& p)
@@ -44,8 +45,13 @@ DelayedEvaluationComponent::DelayedEvaluationComponent(BeatboxVoxAudioProcessor&
 	bufferDelaySlider.setColour(Slider::textBoxBackgroundColourId, Colours::black);
 	bufferDelaySlider.setColour(Slider::textBoxTextColourId, Colours::greenyellow);
 	bufferDelaySlider.setColour(Slider::textBoxOutlineColourId, Colours::black);
+	bufferDelaySlider.addListener(this);
 	addAndMakeVisible (bufferDelaySlider);
 
+	bufferDelayUpdateButton.setComponentID(bufferDelayUpdateButtonID);
+	bufferDelayUpdateButton.setButtonText("Update");
+	bufferDelayUpdateButton.addListener(this);
+	addAndMakeVisible(bufferDelayUpdateButton);
 
 	numSamplesUsedLbl.setText("Samples used per instance: ", NotificationType::dontSendNotification);
 	numSamplesUsedLbl.setFont(Font("Cracked", 14.0f, Font::plain));
@@ -110,13 +116,16 @@ void DelayedEvaluationComponent::resized()
 	auto rightCenter = bounds;
 	
 	//Set buffer delay component bounds
-	auto setDelayArea = leftCenter.removeFromTop(leftCenter.getHeight() / 1.75f)
-								  .removeFromLeft(leftCenter.getWidth() / 2);
-
+	auto setDelayArea = leftCenter.removeFromTop(leftCenter.getHeight() / 1.75f);
 	setDelayArea.reduce(0, setDelayArea.getHeight() / 10);
+	
+	auto setDelaySliderArea = setDelayArea.removeFromLeft(setDelayArea.getWidth() / 2);
+	bufferDelayLabel.setBounds(setDelaySliderArea.removeFromTop(setDelaySliderArea.getHeight() / 2));
+	bufferDelaySlider.setBounds(setDelaySliderArea.removeFromTop(setDelaySliderArea.getHeight() / 1.5f));
 
-	bufferDelayLabel.setBounds(setDelayArea.removeFromTop(setDelayArea.getHeight() / 2));
-	bufferDelaySlider.setBounds(setDelayArea.removeFromTop(setDelayArea.getHeight() / 1.5f));
+	auto setDelayButtonArea = setDelayArea;
+	setDelayButtonArea.reduce(setDelayArea.getWidth() / 5, setDelayArea.getHeight() / 9);
+	bufferDelayUpdateButton.setBounds(setDelayButtonArea.removeFromBottom(setDelayButtonArea.getHeight() / 1.5f));
 
 	auto bufferDelayLblArea = leftCenter.removeFromTop(leftCenter.getHeight() / 2);
 	numBuffersUsedLbl.setBounds(bufferDelayLblArea.removeFromLeft(bufferDelayLblArea.getWidth() / 2));
@@ -143,6 +152,12 @@ void DelayedEvaluationComponent::buttonClicked(Button * button)
 	{
 		setActive(button->getToggleState());
 	}
+	else if (id == bufferDelayUpdateButtonID)
+	{
+		//Update num buffers delay	
+		processor.getClassifier().setNumBuffersDelayed(static_cast<unsigned int>(bufferDelaySlider.getValue()));
+		setNeedsUpdate(false);
+	}
 	else if (id == useEarlyAttackButtonID)
 	{
 		setUseEarlyAttack(button->getToggleState());
@@ -156,8 +171,13 @@ void DelayedEvaluationComponent::sliderValueChanged(Slider * slider)
 
 	if (id == bufferDelaySliderID)
 	{
-		//Update num buffers delay	
-		processor.getClassifier().setNumBuffersDelayed(static_cast<unsigned int>(slider->getValue()));
+		auto currentVal = processor.getClassifier().getNumBuffersDelayed();
+		auto newVal = static_cast<int>(slider->getValue());
+
+		if (newVal != currentVal)
+			setNeedsUpdate(true);
+		else
+			setNeedsUpdate(false);
 	}
 }
 
@@ -194,6 +214,22 @@ void DelayedEvaluationComponent::setActive(bool active)
 //==============================================================================
 void DelayedEvaluationComponent::setUseEarlyAttack(bool use)
 {
+}
+
+//==============================================================================
+void DelayedEvaluationComponent::setNeedsUpdate(bool needsUpdate)
+{
+	if (needsUpdate)
+	{
+		bufferDelayUpdateButton.setColour(TextButton::buttonColourId, Colours::greenyellow);
+		bufferDelayUpdateButton.setColour(TextButton::textColourOffId, Colours::black);
+	}
+	else
+	{
+		bufferDelayUpdateButton.setColour(TextButton::buttonColourId, Colours::black);
+		bufferDelayUpdateButton.setColour(TextButton::textColourOffId, Colours::greenyellow);
+	}
+
 }
 
 //==============================================================================

@@ -59,6 +59,7 @@ public:
 	void setOSDUseLocalMaximum(bool use);
 
 	void setNumBuffersDelayed(unsigned int newNumDelayed);
+	int getNumBuffersDelayed() const;
 
 	/** This method sets the classifier type/learning algorithm to be used.
 	 * @param classifierType the classifier type to be used i.e. AudioClassifyOptions::ClassifierType::knn
@@ -102,6 +103,7 @@ public:
 	 * @param newNumInstances the number of instance to be recorded per sound for the training set.
 	 */
     void setNumInstances(int newNumInstances);
+	int getNumInstances() const;
     
     bool checkTrainingSetReady() const;
 	bool checkTrainingSoundReady(const unsigned sound) const;
@@ -188,8 +190,8 @@ private:
     //Holds the the feature values/vector for the current instance/block.
     arma::Col<T> currentInstanceVector;
     
-	Gist<T> gistFeaturesOSD;
     Gist<T> gistFeatures;
+	Gist<T> gistFeaturesOSD;
     OnsetDetector<T> osDetector;
     NaiveBayes<T> nbc;
 	NearestNeighbour<T> knn;

@@ -16,7 +16,8 @@
 
 class RecordTrainingSetComponent : public Component,
 								   Timer,
-								   ButtonListener	
+								   ButtonListener,
+								   SliderListener
 {
 public:
 
@@ -28,11 +29,14 @@ public:
 
 	void timerCallback() override;
 	void buttonClicked(Button* button) override;
+	void sliderValueChanged(Slider* slider) override;
+
 
 	//Control ID's
 	static String headingLabelID;
 	static String activateButtonID;
 	static String instanceSizeSliderID;
+	static String instanceSizeButtonID;
 	static String recordButtonID;
 	static String trainButtonID;
 
@@ -57,13 +61,14 @@ private:
 	
 
 	Slider instanceSizeSlider;
+	TextButton instanceSizeButton;
 
 	OwnedArray<Button> soundButtons;
 	OwnedArray<Label> soundStatusLabels;
 
 	void setupSoundButtons();
 	void setActive(bool active);
-
+	void setNeedsUpdate(bool needsUpdate);
 };
 
 

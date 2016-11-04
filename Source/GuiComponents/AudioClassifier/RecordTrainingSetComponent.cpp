@@ -12,6 +12,8 @@
 
 String RecordTrainingSetComponent::headingLabelID("heading_lbl");
 String RecordTrainingSetComponent::activateButtonID("activate_btn");
+String RecordTrainingSetComponent::instanceSizeSliderID("instance_size_sld");
+String RecordTrainingSetComponent::instanceSizeButtonID("instance_size_btn");
 String RecordTrainingSetComponent::recordButtonID("record_btn");
 String RecordTrainingSetComponent::trainButtonID("train_btn");
 
@@ -34,6 +36,7 @@ RecordTrainingSetComponent::RecordTrainingSetComponent(BeatboxVoxAudioProcessor&
 	numInstancesLabel.setColour(Label::textColourId, Colours::greenyellow);
 	addAndMakeVisible(numInstancesLabel);
 
+	instanceSizeSlider.setComponentID(instanceSizeSliderID);
 	instanceSizeSlider.setSliderStyle (Slider::IncDecButtons);
 	instanceSizeSlider.setRange (10.0, 40.0, 1.0);
 	instanceSizeSlider.setIncDecButtonsMode (Slider::incDecButtonsDraggable_Horizontal);
@@ -41,7 +44,14 @@ RecordTrainingSetComponent::RecordTrainingSetComponent(BeatboxVoxAudioProcessor&
 	instanceSizeSlider.setColour(Slider::textBoxBackgroundColourId, Colours::black);
 	instanceSizeSlider.setColour(Slider::textBoxTextColourId, Colours::greenyellow);
 	instanceSizeSlider.setColour(Slider::textBoxOutlineColourId, Colours::black);
+	instanceSizeSlider.addListener(this);
 	addAndMakeVisible (instanceSizeSlider);
+
+	instanceSizeButton.setComponentID(instanceSizeButtonID);
+	instanceSizeButton.setButtonText("Update");
+	instanceSizeButton.addListener(this);
+	//instanceSizeButton.setEnabled(false);
+	addAndMakeVisible(instanceSizeButton);
 
 	selectRecordingSoundLabel.setText("Select sound to record", NotificationType::dontSendNotification);
 	selectRecordingSoundLabel.setFont(Font("Cracked", 14.0f, Font::plain));
@@ -94,10 +104,15 @@ void RecordTrainingSetComponent::resized()
 	activateButton.setBounds(headingSection.removeFromLeft(headingSection.getWidth() / 14));
 	headingLabel.setBounds(headingSection);
 
-	auto instanceSliderArea = bounds.removeFromTop(bounds.getHeight() / 3).removeFromLeft(bounds.getWidth() / 2);
+	auto instanceSizeArea = bounds.removeFromTop(bounds.getHeight() / 3);
+	auto instanceSliderArea = instanceSizeArea.removeFromLeft(bounds.getWidth() / 2);
 	instanceSliderArea.reduce(0, instanceSliderArea.getHeight() / 4);
-	numInstancesLabel.setBounds(instanceSliderArea.removeFromTop(instanceSliderArea.getHeight() / 2));
+	numInstancesLabel.setBounds(instanceSliderArea.removeFromTop(instanceSliderArea.getHeight() / 3));
 	instanceSizeSlider.setBounds(instanceSliderArea);
+
+	auto instanceButtonArea = instanceSizeArea;
+	instanceButtonArea.reduce(instanceButtonArea.getWidth() / 5, instanceButtonArea.getHeight() / 4);
+	instanceSizeButton.setBounds(instanceButtonArea.removeFromBottom(instanceButtonArea.getHeight() / 1.5f));
 
 	auto numSounds = processor.getClassifier().getNumSounds();
 	auto soundsArea = bounds.removeFromTop(bounds.getHeight() / 1.5f);
@@ -186,6 +201,12 @@ void RecordTrainingSetComponent::buttonClicked(Button * button)
 	{
 		setActive(button->getToggleState());
 	}
+	else if (id == instanceSizeButtonID)
+	{
+		auto numInstances = static_cast<int>(instanceSizeSlider.getValue());
+		processor.getClassifier().setNumInstances(numInstances);
+		setNeedsUpdate(false);
+	}
 	else if(id == recordButtonID)
 	{
 		if (button->getToggleState())
@@ -225,6 +246,23 @@ void RecordTrainingSetComponent::buttonClicked(Button * button)
 	}
 }
 
+//===============================================================================
+void RecordTrainingSetComponent::sliderValueChanged(Slider * slider)
+{
+
+	auto id = slider->getComponentID();
+
+	if (id == instanceSizeSliderID)
+	{
+		auto currentVal = processor.getClassifier().getNumInstances();
+		auto newVal = static_cast<int>(slider->getValue());
+
+		if (newVal != currentVal)
+			setNeedsUpdate(true);
+		else
+			setNeedsUpdate(false);
+	}
+}
 
 //===============================================================================
 void RecordTrainingSetComponent::setupSoundButtons()
@@ -296,4 +334,21 @@ void RecordTrainingSetComponent::setActive(bool active)
 		}
 	}
 }
+
+//===============================================================================
+void RecordTrainingSetComponent::setNeedsUpdate(bool needsUpdate)
+{
+	if (needsUpdate)
+	{
+		instanceSizeButton.setColour(TextButton::buttonColourId, Colours::greenyellow);
+		instanceSizeButton.setColour(TextButton::textColourOffId, Colours::black);
+	}
+	else
+	{
+		instanceSizeButton.setColour(TextButton::buttonColourId, Colours::black);
+		instanceSizeButton.setColour(TextButton::textColourOffId, Colours::greenyellow);
+	}
+
+}
+
 //===============================================================================

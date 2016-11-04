@@ -286,6 +286,12 @@ void AudioClassifier<T>::setNumBuffersDelayed(unsigned int newNumDelayed)
 	setCurrentBufferSize(bufferSize);
 }
 
+template<typename T>
+int AudioClassifier<T>::getNumBuffersDelayed() const
+{
+	return numDelayedBuffers;
+}
+
 //==============================================================================
 template<typename T>
 void AudioClassifier<T>::setClassifierType(AudioClassifyOptions::ClassifierType classifierType)
@@ -336,6 +342,12 @@ void AudioClassifier<T>::setNumInstances(int newNumInstances)
 
     //Resize/configure trainingSet matrix
 	configTrainingSetMatrix();
+}
+
+template<typename T>
+int AudioClassifier<T>::getNumInstances() const
+{
+	 return numInstances;
 }
 
 //==============================================================================

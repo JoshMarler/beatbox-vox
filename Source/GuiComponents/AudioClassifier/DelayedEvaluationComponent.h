@@ -37,6 +37,7 @@ public:
 	static String headingLabelID;
 	static String activateButtonID;
 	static String bufferDelaySliderID;
+	static String bufferDelayUpdateButtonID;
 	static String useEarlyAttackButtonID;
 
 private:
@@ -59,9 +60,11 @@ private:
 
 	Label bufferDelayLabel;
 	Slider bufferDelaySlider;
+	TextButton bufferDelayUpdateButton;
 
 	void setActive(bool active);
 	void setUseEarlyAttack(bool use);
+	void setNeedsUpdate(bool needsUpdate);
 };
 
 
