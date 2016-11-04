@@ -12,6 +12,12 @@
               pluginAAXCategory="AAX_ePlugInCategory_Dynamics" jucerVersion="4.3.0">
   <MAINGROUP id="z3DhfV" name="BeatboxVox">
     <GROUP id="{B8A10E5D-D185-1FFC-CC44-E732222EC3EB}" name="Source">
+      <GROUP id="{2BF0481D-B687-BD44-712E-E0B7D85A78EE}" name="Dsp">
+        <GROUP id="{6BC207CA-C50D-C965-E3B5-A7993960777F}" name="NoiseSynth">
+          <FILE id="GfxYCu" name="NoiseSynth.h" compile="0" resource="0" file="Source/Dsp/NoiseSynth/NoiseSynth.h"/>
+        </GROUP>
+        <FILE id="VPpxtK" name="Dsp.h" compile="0" resource="0" file="Source/Dsp/Dsp.h"/>
+      </GROUP>
       <GROUP id="{9C2B9F3E-88F4-4456-7A0E-5B312DD877F3}" name="GuiComponents">
         <GROUP id="{4F12CC56-0C52-75B4-5D09-08DB14973301}" name="AudioClassifier">
           <FILE id="LDQeq5" name="AudioClassifierComponent.cpp" compile="1" resource="0"

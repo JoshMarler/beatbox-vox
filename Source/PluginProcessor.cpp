@@ -208,6 +208,10 @@ void BeatboxVoxAudioProcessor::initialiseSynth()
 
 	drumSynth.addVoice(new SamplerVoice());
 
+	drumSynth.addSound(new NoiseSound(noiseNoteNumber));
+	drumSynth.addVoice(new NoiseVoice());
+
+
 	osdTestSynth.addSound(new SamplerSound("OSD Test Sound", *readerOSDTestSound, osdTestSoundNoteRange, osdTestSoundNoteNumber, 0.0, 0.0, 5.0));
 	osdTestSynth.addVoice(new SamplerVoice());
 }
@@ -265,6 +269,9 @@ void BeatboxVoxAudioProcessor::processBlock(AudioSampleBuffer& buffer, MidiBuffe
 	const auto sampleRate = getSampleRate();
 	const auto numSamples = buffer.getNumSamples();
 
+	//Reset the noise synth if triggered
+	midiMessages.addEvent(MidiMessage::noteOff(1, noiseNoteNumber), 0);
+
 	classifier.processAudioBuffer(buffer.getReadPointer(0), numSamples);
 
 	
@@ -273,7 +280,13 @@ void BeatboxVoxAudioProcessor::processBlock(AudioSampleBuffer& buffer, MidiBuffe
 	{
 		//NOTE: Potentially add a flag to onset detected in an fifo or something for visual response on onset.
 		if (usingOSDTestSound.load())
+		{
 			triggerOSDTestSound(midiMessages);
+		}
+		else if (classifier.getNumBuffersDelayed() > 0)
+		{
+			triggerNoise(midiMessages);
+		}
 	}
 
 	const auto sound = classifier.classify();
@@ -375,6 +388,12 @@ void BeatboxVoxAudioProcessor::triggerSnareDrum(MidiBuffer& midiMessages) const
 void BeatboxVoxAudioProcessor::triggerHiHat(MidiBuffer & midiMessages) const
 {
 	midiMessages.addEvent(MidiMessage::noteOn(1, hihatNoteNumber, static_cast<uint8>(100)), 0);
+}
+
+//==============================================================================
+void BeatboxVoxAudioProcessor::triggerNoise(MidiBuffer & midiMessages) const
+{
+	midiMessages.addEvent(MidiMessage::noteOn(1, noiseNoteNumber, static_cast<uint8>(100)), 0);
 }
 
 //==============================================================================

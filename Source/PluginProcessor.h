@@ -15,6 +15,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 
+#include "Dsp/Dsp.h"
 #include "AudioClassify/src/AudioClassify.h"
 
 
@@ -103,6 +104,7 @@ private:
     const int kickNoteNumber = 12;
     const int snareNoteNumber = 43;
 	const int hihatNoteNumber = 50;
+	const int noiseNoteNumber = 54;
     const int osdTestSoundNoteNumber = 57;
 
     std::atomic_bool usingOSDTestSound;
@@ -119,6 +121,7 @@ private:
     void triggerKickDrum(MidiBuffer& midiMessages) const;
     void triggerSnareDrum(MidiBuffer& midiMessages) const;
 	void triggerHiHat(MidiBuffer& midiMessages) const;
+	void triggerNoise(MidiBuffer& midiMessages) const;
     
     void triggerOSDTestSound(MidiBuffer& midiMessages) const;
 };

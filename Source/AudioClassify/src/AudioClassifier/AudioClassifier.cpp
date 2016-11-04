@@ -403,7 +403,7 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer, const int numSampl
 		}
 		else
 		{
-			if (numDelayedBuffers != 0)
+			if (numDelayedBuffers != 0 && delayedProcessedCount != numDelayedBuffers)
 				++delayedProcessedCount;
 
 			auto writeIndex = delayedProcessedCount * bufferSize;
