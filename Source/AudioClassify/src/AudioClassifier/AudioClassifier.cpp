@@ -28,7 +28,7 @@ AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int in
 
 	numFeatures = calcFeatureVecSize();
 
-	currentClassfierType.store(AudioClassifyOptions::ClassifierType::nearestNeighbour);
+	currentClassfierType.store(AudioClassifyOptions::ClassifierType::naiveBayes);
 
     setCurrentSampleRate(initSampleRate);
     setCurrentBufferSize(initBufferSize);
@@ -339,6 +339,8 @@ void AudioClassifier<T>::setNumInstances(int newNumInstances)
 {
     numInstances = newNumInstances;
 	trainingSetSize = (numInstances * numSounds);
+
+	knn.setNumInstances(numInstances);
 
     //Resize/configure trainingSet matrix
 	configTrainingSetMatrix();

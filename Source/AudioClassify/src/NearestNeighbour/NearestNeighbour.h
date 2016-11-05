@@ -34,9 +34,9 @@ public:
 	/** Constructor - Creates a (K) NearestNeighbour for classifiying instance vectors in real-time.
 	 * @param initNumFeatures the number of features/attributes to be used in the model.
 	 * @param initNumClasses the number of different classes in the model.
-	 * @param initTrainingSetSize the number of instances in the initial training set for the model.
+	 * @param initNumInstances the number of instances in the initial training set for the model.
 	 */
-	NearestNeighbour(unsigned int initNumFeatures, unsigned int initNumClasses, std::size_t initTrainingSetSize);
+	NearestNeighbour(unsigned int initNumFeatures, unsigned int initNumClasses, std::size_t initNumInstances);
 	
 	~NearestNeighbour();
 
@@ -52,6 +52,16 @@ public:
 	* @param newNumNeighbours The number of neighbours (K) compared in the search.
 	*/
 	void setNumNeighbours(const unsigned int newNumNeighbours);
+
+	/** Sets the number of instance to be used per class for the training set.
+	 * @param newNumInstances the number of instances per class
+	 */
+	void setNumInstances(const unsigned int newNumInstances);
+
+	/** Sets the number of features / attributes to be used by training and classifiable instances.
+	 * @param newNumFeatures the number of features/attributes to be used.
+	 */
+	void setNumFeatures(const unsigned int newNumFeatures);
 
 
 	/** Adds a new training data set to the NearestNeighbour model which will be used
@@ -106,7 +116,9 @@ private:
 	 */
 	T euclideanDistance(const arma::Col<T>& testInstance, const arma::Col<T>& referenceInstance);
 
+	unsigned int numInstances;
 	unsigned int trainingSetSize;
+	unsigned int numFeatures;
 	unsigned int numClasses;
 	unsigned int numNeighbours;
 
@@ -118,6 +130,8 @@ private:
 
 	//Vector of squared differences for use in euclidean distance function
 	arma::Col<T> squaredDistances;
+
+	void configureTrainingSetMatrix();
 };
 
 
