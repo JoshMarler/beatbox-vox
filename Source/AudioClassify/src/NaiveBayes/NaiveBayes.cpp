@@ -6,18 +6,13 @@
 //=======================================================================================================
 
 template<typename T>
-NaiveBayes<T>::NaiveBayes(const size_t numClasses, const size_t numFeatures) 
-	: sqrtTwoPi(std::sqrt(2 * arma::datum::pi))
+NaiveBayes<T>::NaiveBayes(const size_t initNumClasses, const size_t initNumFeatures)
+	: sqrtTwoPi(std::sqrt(2 * arma::datum::pi)),
+	  numFeatures(initNumFeatures),
+	  numClasses(initNumClasses)	
 {
 	//Initialize matrices with size and fill with zeros
-	priorProbs.zeros(numClasses);
-	featureMeans.zeros(numFeatures, numClasses);
-	featureVariances.zeros(numFeatures, numClasses);
-	stdDev.zeros(numFeatures, numClasses);
-	exponents.zeros(numFeatures);
-	diffs.zeros(numFeatures);
-	distribution.zeros(numFeatures);
-	testProbs.zeros(numClasses);
+	initialise();
 }
 
 template<typename T>
@@ -138,6 +133,28 @@ size_t NaiveBayes<T>::Classify(const arma::Col<T>& instance)
 	classVal = testProbs.index_max();
 
 	return classVal;
+}
+
+//=======================================================================================================
+template<typename T>
+void NaiveBayes<T>::setNumFeatures(unsigned int newNumFeatures)
+{
+	numFeatures = newNumFeatures;
+	initialise();
+}
+
+//=======================================================================================================
+template<typename T>
+void NaiveBayes<T>::initialise()
+{
+	priorProbs.zeros(numClasses);
+	featureMeans.zeros(numFeatures, numClasses);
+	featureVariances.zeros(numFeatures, numClasses);
+	stdDev.zeros(numFeatures, numClasses);
+	exponents.zeros(numFeatures);
+	diffs.zeros(numFeatures);
+	distribution.zeros(numFeatures);
+	testProbs.zeros(numClasses);
 }
 
 //=======================================================================================================

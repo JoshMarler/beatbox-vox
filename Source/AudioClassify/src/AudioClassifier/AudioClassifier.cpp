@@ -15,7 +15,7 @@
 //==============================================================================
 template<typename T>
 AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int initNumSounds, int initNumInstances)
-	: gistFeatures((initBufferSize * (numDelayedBuffers + 1)), static_cast<int>(initSampleRate)),
+	: gistFeatures((initBufferSize), static_cast<int>(initSampleRate)), //JWM - Eventually initialise with slice size?
 	  gistFeaturesOSD(initBufferSize, initSampleRate),
 	  osDetector((initBufferSize / 2), initSampleRate),
 	  nbc(initNumSounds, 21),
@@ -82,12 +82,15 @@ void AudioClassifier<T>::setCurrentBufferSize (int newBufferSize)
 	std::fill(magSpectrumOSD.get(), (magSpectrumOSD.get() + (bufferSize / 2)), static_cast<T>(0.0));
 
 
-	const auto delayedBufferSize = bufferSize * (numDelayedBuffers + 1);
+	//JWM - will eventually replace the below with audio buffer slicing - 
+	// audioBufferSize == bufferSliceSize rather than delayed buffer size
 
-	audioBuffer.reset(new T[delayedBufferSize]);
-	std::fill(audioBuffer.get(), (audioBuffer.get() + delayedBufferSize), static_cast<T>(0.0));
+	//const auto delayedBufferSize = bufferSize * (numDelayedBuffers + 1);
 
-	gistFeatures.setAudioFrameSize(delayedBufferSize);
+	//audioBuffer.reset(new T[delayedBufferSize]);
+	//std::fill(audioBuffer.get(), (audioBuffer.get() + delayedBufferSize), static_cast<T>(0.0));
+
+	gistFeatures.setAudioFrameSize(bufferSize);
 
 
 	//If changing num delayed buffers current training set no longer valid so reset and require re-train.
@@ -281,9 +284,15 @@ template<typename T>
 void AudioClassifier<T>::setNumBuffersDelayed(unsigned int newNumDelayed)
 {
 	numDelayedBuffers = newNumDelayed;
+	
+	auto featureSize = calcFeatureVecSize();
+	numFeatures = featureSize * (numDelayedBuffers + 1);
 
-	//Need to resize internal buffers according to new numDelayedBuffers
-	setCurrentBufferSize(bufferSize);
+	knn.setNumFeatures(numFeatures);
+	nbc.setNumFeatures(numFeatures);
+
+	//Re-configure training set matrix and reset model state as new feature/attribute rows required
+	configTrainingSetMatrix();
 }
 
 template<typename T>
@@ -393,25 +402,22 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer, const int numSampl
 
 	if (hasOnset)
 	{
-		/* Using std::abs is a bit of a dirty trick here to handle when numDelayedBuffers == 0
-		 * Could potentially rethink this at some point.
-		 */
 		if (numDelayedBuffers != 0 && delayedProcessedCount < numDelayedBuffers)
 		{
-			auto writeIndex = delayedProcessedCount * bufferSize;
-			std::copy(buffer, buffer + bufferSize, audioBuffer.get() + writeIndex);
+			//JWM - soon replace with buffer slicing - gistFeatures will have buffer size equal to slice size
+			//auto writeIndex = delayedProcessedCount * bufferSize;
+			//std::copy(buffer, buffer + bufferSize, audioBuffer.get() + writeIndex);
 			
+			gistFeatures.processAudioFrame(buffer, bufferSize);
+			processCurrentInstance();
+
 			++delayedProcessedCount;
 		}
 		else
 		{
-			if (numDelayedBuffers != 0 && delayedProcessedCount != numDelayedBuffers)
-				++delayedProcessedCount;
+			//JWM - Implement buffer slice processing again here 
 
-			auto writeIndex = delayedProcessedCount * bufferSize;
-			std::copy(buffer, buffer + bufferSize, audioBuffer.get() + writeIndex);
-			
-			gistFeatures.processAudioFrame(audioBuffer.get(), bufferSize * (numDelayedBuffers + 1));
+			gistFeatures.processAudioFrame(buffer, bufferSize);
 			processCurrentInstance();
 
 			//Reset state until next detected onset
@@ -426,7 +432,11 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer, const int numSampl
 template<typename T>
 void AudioClassifier<T>::processCurrentInstance()
 {
-    auto pos = 0;
+	auto pos = 0;
+
+	if (delayedProcessedCount != 0)
+		pos = delayedProcessedCount * (numFeatures / (numDelayedBuffers + 1)) - 1;
+	
 
 	if (usingRMS.load())
 		currentInstanceVector[pos++] = gistFeatures.rootMeanSquare();

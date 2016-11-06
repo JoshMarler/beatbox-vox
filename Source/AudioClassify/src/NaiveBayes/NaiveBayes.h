@@ -25,7 +25,7 @@ template<typename T>
 class NaiveBayes
 {
 public:
-	NaiveBayes(const size_t numClasses, const size_t numFeatures);
+	NaiveBayes(const size_t numClasses, const size_t initNumFeatures);
 	~NaiveBayes();
 
 	void Train(const arma::Mat<T>& newTrainingData, const arma::Row<size_t>& labels);
@@ -36,10 +36,17 @@ public:
 	*/
 	size_t Classify(const arma::Col<T>& instance);
 
+	/** Sets the number of features/attributes to be used per training/classifiable instance.
+	 * @param newNumFeatures the new number of features per instance. 
+	 */
+	void setNumFeatures(unsigned int newNumFeatures);
+
 private:
 
 	//Pre calculated constant initialized at construction for Guassian distribution calc.
 	const T sqrtTwoPi;
+	unsigned int numFeatures;
+	unsigned int numClasses;
 	
 	arma::Mat<T> trainingSet;
 
@@ -64,6 +71,8 @@ private:
 
 	//Vector placeholder for final prob values for each class. 
 	arma::Col<T> testProbs;
+
+	void initialise();
 };
 
 #endif  // NAIVEBAYES_H_INCLUDED
