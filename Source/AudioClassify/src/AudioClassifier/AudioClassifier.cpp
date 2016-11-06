@@ -313,6 +313,12 @@ void AudioClassifier<T>::setClassifierType(AudioClassifyOptions::ClassifierType 
 	//Probably also need to check if the classifier is ready and if not check if the training set is ready and call Train()
 }
 
+template<typename T>
+AudioClassifyOptions::ClassifierType AudioClassifier<T>::getClassifierType() const
+{
+	return currentClassfierType.load();
+}
+
 //==============================================================================
 //JWM - NOTE: revist later - will need assertion if user uses sound value out of range 0 - numSounds
 template<typename T>

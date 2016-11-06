@@ -27,7 +27,7 @@ public:
 
 	void buttonClicked(Button* button) override;
 
-	void comboBoxChanged(ComboBox* comboBOxThatHasChanged) override;
+	void comboBoxChanged(ComboBox* comboBoxThatHasChanged) override;
 
 	//ComponentID Strings
 	static String classifierCmbBoxID;

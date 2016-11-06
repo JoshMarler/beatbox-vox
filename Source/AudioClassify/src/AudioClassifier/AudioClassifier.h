@@ -66,6 +66,8 @@ public:
 	 */
 	void setClassifierType(AudioClassifyOptions::ClassifierType classifierType);
 
+	AudioClassifyOptions::ClassifierType getClassifierType() const;
+
 	/**
 	 *
 	 */

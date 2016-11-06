@@ -134,16 +134,27 @@ void SelectClassifierComponent::buttonClicked(Button * button)
 }
 
 //===============================================================================
-void SelectClassifierComponent::comboBoxChanged(ComboBox * comboBOxThatHasChanged)
+void SelectClassifierComponent::comboBoxChanged(ComboBox* comboBoxThatHasChanged)
 {
+	auto id = comboBoxThatHasChanged->getComponentID();
+
+	if (id == classifierCmbBoxID)
+	{
+		auto& classifier = processor.getClassifier();
+		auto classifierType = comboBoxThatHasChanged->getSelectedId() - 1;
+
+		classifier.setClassifierType(static_cast<AudioClassifyOptions::ClassifierType>(classifierType));
+	}
 }
 
 //===============================================================================
 void SelectClassifierComponent::setupClassifierCmbBox()
 {
+	classifierCmbBox.setComponentID(classifierCmbBoxID);
+
 	//Use AudioClassifyOptions enum in combobox selection
-	classifierCmbBox.addItem("Naive Bayes", 1);
-	classifierCmbBox.addItem("K-Nearest Neighbour", 2);
+	classifierCmbBox.addItem("Naive Bayes", static_cast<int>(AudioClassifyOptions::ClassifierType::naiveBayes) + 1);
+	classifierCmbBox.addItem("K-Nearest Neighbour", static_cast<int>(AudioClassifyOptions::ClassifierType::nearestNeighbour) + 1);
 
 	classifierCmbBox.addListener(this);
 
@@ -152,7 +163,10 @@ void SelectClassifierComponent::setupClassifierCmbBox()
 	classifierCmbBox.setColour(ComboBox::textColourId, Colours::greenyellow);
 	classifierCmbBox.setColour(ComboBox::arrowColourId, Colours::greenyellow);
 
-	classifierCmbBox.setSelectedId(1);
+	//Set selected item to the current classifier type
+	auto currentType = processor.getClassifier().getClassifierType();
+	classifierCmbBox.setSelectedId(static_cast<int>(currentType) + 1);
+
 	addAndMakeVisible(classifierCmbBox);
 }
 
