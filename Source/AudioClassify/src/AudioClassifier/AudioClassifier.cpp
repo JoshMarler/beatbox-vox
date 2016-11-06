@@ -435,7 +435,7 @@ void AudioClassifier<T>::processCurrentInstance()
 	auto pos = 0;
 
 	if (delayedProcessedCount != 0)
-		pos = delayedProcessedCount * (numFeatures / (numDelayedBuffers + 1)) - 1;
+		pos = delayedProcessedCount * (numFeatures / (numDelayedBuffers + 1));
 	
 
 	if (usingRMS.load())
@@ -475,7 +475,12 @@ void AudioClassifier<T>::processCurrentInstance()
 	
     //If currently training update the training set with new instance 
 	if (currentTrainingSound.load() != -1 && training.load())
-		addToTrainingSet(currentInstanceVector);
+	{
+		if (numDelayedBuffers == 0)
+			addToTrainingSet(currentInstanceVector);
+		else if (delayedProcessedCount == numDelayedBuffers)
+			addToTrainingSet(currentInstanceVector);
+	}
 
 }
 
