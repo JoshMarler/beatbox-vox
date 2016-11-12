@@ -661,5 +661,51 @@ unsigned int AudioClassifier<T>::calcFeatureVecSize() const
 }
 
 //==============================================================================
+template<typename T>
+float AudioClassifier<T>::test(unsigned testInstancesPerSound, std::pair<unsigned int, unsigned int>* outputResults)
+{
+	unsigned int numCorrect = 0;
+	auto testSetSize = testInstancesPerSound * numSounds;
+
+	arma::Mat<T> testSet(numFeatures, testSetSize);
+	arma::Row<std::size_t> testLabels;
+
+	for (auto i = 0; i < testSetSize; ++i)
+	{
+		
+	}
+	
+	trainingSetSize -= testSetSize;
+	configTrainingSetMatrix();
+	trainModel();
+
+	for (auto i = 0; i < testSetSize; ++i)
+	{
+		arma::Col<T> testInstance = testSet.col(i);
+		auto actual = testLabels[i];
+		auto predicted = -1;
+		
+	    switch (currentClassfierType.load())
+	    {
+			case AudioClassifyOptions::ClassifierType::nearestNeighbour:
+				predicted = knn.classify(testInstance);
+				break;
+			case AudioClassifyOptions::ClassifierType::naiveBayes:
+				predicted = nbc.Classify(testInstance);
+				break;
+			default: break; 
+	    }
+
+		if (actual == predicted)
+			++numCorrect;
+
+		outputResults[i] = std::make_pair(actual, predicted);
+	}
+
+	//Return percentage accuracy
+	return static_cast<float>(numCorrect / (testSetSize * numSounds) * 100);
+}
+
+//==============================================================================
 template class AudioClassifier<float>;
 template class AudioClassifier<double>;

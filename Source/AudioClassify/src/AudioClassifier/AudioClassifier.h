@@ -206,6 +206,8 @@ private:
 
     void configTrainingSetMatrix();
     unsigned int calcFeatureVecSize() const;
+
+	float test(unsigned testInstancesPerSound, std::pair<unsigned int, unsigned int>* outputResults);
 };
 
 
