@@ -54,6 +54,7 @@ SelectClassifierComponent::SelectClassifierComponent(BeatboxVoxAudioProcessor& p
 	addAndMakeVisible(loadTrainingDataButton);
 
 	initialiseTrainingDataChooser();
+	initialiseSaveDataChooser();
 
 
 	//setSize(800, 150);
@@ -116,7 +117,14 @@ void SelectClassifierComponent::buttonClicked(Button * button)
 
 	if (buttonID == saveTrainingDataButtonID)
 	{
-		saveTrainingSet();
+		auto result = saveDataChooser->browseForFileToSave(false);
+		if (result)
+		{
+			auto fileSaved = saveDataChooser->getResult();
+			auto filePath = fileSaved.getFullPathName();
+			saveTrainingSet(filePath.toStdString());
+		}
+	
 	}
 	else if(buttonID == loadTrainingDateButtonID)
 	{
@@ -171,17 +179,11 @@ void SelectClassifierComponent::setupClassifierCmbBox()
 }
 
 //===============================================================================
-void SelectClassifierComponent::saveTrainingSet()
+void SelectClassifierComponent::saveTrainingSet(std::string fileName)
 {
 	std::string errorstring = "";
 
-	File directory(trainingSetsDirectory);
-
-	if (!directory.exists())
-		directory.createDirectory();
-
-	auto filename = trainingSetsDirectory + "\\" + processor.getName().toStdString() + "TestMatrix.csv";
-	auto successful = processor.getClassifier().saveTrainingSet(filename, errorstring);
+	auto successful = processor.getClassifier().saveTrainingSet(fileName, errorstring);
 
 	if (!successful)
 	{
@@ -198,7 +200,17 @@ void SelectClassifierComponent::initialiseTrainingDataChooser()
 	if (!directory.exists())
 		directory.createDirectory();
 
-	trainingDataChooser = std::make_unique<FileChooser>("Load Training Data Set", directory, "*.csv", false, false);
-
+	trainingDataChooser = std::make_unique<FileChooser>("Load Training Data Set", directory, "*.csv");
 }
 
+//===============================================================================
+void SelectClassifierComponent::initialiseSaveDataChooser()
+{
+	File directory(trainingSetsDirectory);
+
+	if (!directory.exists())
+		directory.createDirectory();
+
+	saveDataChooser = std::make_unique<FileChooser>("Save Training Data Set", File(directory.getFullPathName() + "\\untitled.csv"), "*.csv");
+	
+}

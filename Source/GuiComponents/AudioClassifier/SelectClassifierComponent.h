@@ -49,10 +49,14 @@ private:
 	TextButton saveTrainingDataButton;
 
 	void setupClassifierCmbBox();
+	
+	//At some point may change saveDataChoser to be a dialog windows with FileNameComponent to force .csv suffix etc.
 	std::unique_ptr<FileChooser> trainingDataChooser;
+	std::unique_ptr<FileChooser> saveDataChooser;
 
-	void saveTrainingSet();
+	void saveTrainingSet(std::string fileName);
 	void initialiseTrainingDataChooser();
+	void initialiseSaveDataChooser();
 
 };
 
