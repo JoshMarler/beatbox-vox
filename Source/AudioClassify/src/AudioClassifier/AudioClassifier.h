@@ -71,13 +71,17 @@ public:
 	/**
 	 *
 	 */
-    void recordTrainingSample(int trainingSound);
+    void recordTrainingData(int trainingSound);
+	
+	void recordTestData(int testSound);
 
     //NOTE - May change this after prototype so that the model is trained incrementally for each sound
-    //to avoid calling trainModel with unfinished training data set. Alternativley may have this function
+    //to avoid calling train with unfinished training data set. Alternativley may have this function
     //return bool for successful or not in training. 
-    void trainModel();
+    void train();
 	
+	float test(unsigned testInstancesPerSound, std::pair<unsigned int, unsigned int>* outputResults);
+
 	/** Saves the current training data set being used by the model/classifier. 
 	 * This can be loaded again on the next application load so that training sets do not have
 	 * to be collected again. 
@@ -97,6 +101,9 @@ public:
 	 */
 	bool loadTrainingSet(const std::string& fileName, std::string& errorString);
 
+	bool saveTestSet(const std::string& fileName, std::string& errorString);
+	bool loadTestSet(const std::string& fileName, std::string& errorString);
+
 	/** @return the number of sounds currently being used in the model. */
 	size_t getNumSounds() const;
     
@@ -104,11 +111,17 @@ public:
 	 * The model/classifier will need to be re-trained and a fresh training set collected.
 	 * @param newNumInstances the number of instance to be recorded per sound for the training set.
 	 */
-    void setNumInstances(int newNumInstances);
-	int getNumInstances() const;
-    
+    void setNumTrainingInstances(int newNumInstances);
+	int getNumTrainingInstances() const;
+
+	void setNumTestInstances(int newNumInstances);
+	int getNumTestInstances() const;
+
     bool checkTrainingSetReady() const;
 	bool checkTrainingSoundReady(const unsigned sound) const;
+
+    bool checkTestSetReady() const;
+	bool checkTestSoundReady(const unsigned sound) const;
 
     bool getClassifierReady() const;
     
@@ -135,12 +148,17 @@ private:
 
     int bufferSize = 0;
 	int delayedBufferSize = 0;
-    int trainingSetSize = 10;
-	int numInstances = 0;
+
+    int trainingSetSize = 0;
+	int testSetSize = 0;
+	int numTrainingInstances = 0;
+	int numTestInstances = 0;
+    int trainingCount = 0;
+	int testCount = 0;
+
     int numSounds = 0; 
 	unsigned int numFeatures = 0;
-    int trainingCount = 0;
-
+	
 	int numDelayedBuffers = 0;
 	unsigned int delayedProcessedCount = 0;
     
@@ -165,14 +183,20 @@ private:
 
     //This value indicates the current sound being trained declared atomic as may be set by a GUI thread / user control.
     std::atomic_int currentTrainingSound;
+	
+	std::atomic_int currentTestSound;
 
     //Inidicates if the model has been trained with full training set and classifier is ready, declared atomic as may be set by a GUI thread / user control.
     std::atomic_bool classifierReady;
 
-    std::atomic_bool training;
+    std::atomic_bool recordingTrainingData;
+
+	std::atomic_bool recordingTestData;
 
     //Holds states for each sound in model to confirm whether sound's training set has been recorded.
-    std::vector<bool> soundsReady;
+    std::vector<bool> trainingSoundsReady;
+
+	std::vector<bool> testSoundsReady;
     
     //Array/Buffer to hold mag spectrum.
     std::unique_ptr<T[]> magSpectrumOSD;
@@ -188,6 +212,9 @@ private:
 
     //Holds the trainingData matrix's corresponding label values for labelled training data.
     arma::Row<size_t> trainingLabels;
+
+	arma::Mat<T> testData;
+	arma::Mat<size_t> testLabels;
     
     //Holds the the feature values/vector for the current instance/block.
     arma::Col<T> currentInstanceVector;
@@ -207,7 +234,6 @@ private:
     void configTrainingSetMatrix();
     unsigned int calcFeatureVecSize() const;
 
-	float test(unsigned testInstancesPerSound, std::pair<unsigned int, unsigned int>* outputResults);
 };
 
 

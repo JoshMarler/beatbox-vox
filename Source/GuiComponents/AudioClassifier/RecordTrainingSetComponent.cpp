@@ -204,14 +204,14 @@ void RecordTrainingSetComponent::buttonClicked(Button * button)
 	else if (id == instanceSizeButtonID)
 	{
 		auto numInstances = static_cast<int>(instanceSizeSlider.getValue());
-		processor.getClassifier().setNumInstances(numInstances);
+		processor.getClassifier().setNumTrainingInstances(numInstances);
 		setNeedsUpdate(false);
 	}
 	else if(id == recordButtonID)
 	{
 		if (button->getToggleState())
 		{
-			processor.getClassifier().recordTrainingSample(currentTrainingSound);
+			processor.getClassifier().recordTrainingData(currentTrainingSound);
 			auto label = soundStatusLabels[currentTrainingSound];
 			String soundName;
 
@@ -235,7 +235,7 @@ void RecordTrainingSetComponent::buttonClicked(Button * button)
 	else if (id == trainButtonID)
 	{
 		 if (button->getToggleState())
-				processor.getClassifier().trainModel();	
+				processor.getClassifier().train();	
 	}
 	else if (button->getRadioGroupId() == soundButtonsGroupID)
 	{
@@ -254,7 +254,7 @@ void RecordTrainingSetComponent::sliderValueChanged(Slider * slider)
 
 	if (id == instanceSizeSliderID)
 	{
-		auto currentVal = processor.getClassifier().getNumInstances();
+		auto currentVal = processor.getClassifier().getNumTrainingInstances();
 		auto newVal = static_cast<int>(slider->getValue());
 
 		if (newVal != currentVal)

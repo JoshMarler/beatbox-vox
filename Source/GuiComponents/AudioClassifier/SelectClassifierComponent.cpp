@@ -136,7 +136,7 @@ void SelectClassifierComponent::buttonClicked(Button * button)
 
 			std::string errorString;
 			processor.getClassifier().loadTrainingSet(filePath.toStdString(), errorString);
-			processor.getClassifier().trainModel();
+			processor.getClassifier().train();
 		}
 	}
 }
