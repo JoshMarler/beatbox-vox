@@ -56,7 +56,7 @@ public:
 	/** Sets the number of instance to be used per class for the training set.
 	 * @param newNumInstances the number of instances per class
 	 */
-	void setNumInstances(const unsigned int newNumInstances);
+	void setNumTrainingInstances(const unsigned int newNumInstances);
 
 	/** Sets the number of features / attributes to be used by training and classifiable instances.
 	 * @param newNumFeatures the number of features/attributes to be used.

@@ -227,11 +227,16 @@ private:
 //==============================================================================
 
     void processCurrentInstance();
+
 	void addToTrainingSet(const arma::Col<T>& newInstance);
+	void addToTestSet(const arma::Col<T>& newInstance);
 
 	void resetClassifierState();
+	void resetTestState();
+	void configTrainingSetMatrix();
+	void configTestSetMatrix();
 
-    void configTrainingSetMatrix();
+
     unsigned int calcFeatureVecSize() const;
 
 };

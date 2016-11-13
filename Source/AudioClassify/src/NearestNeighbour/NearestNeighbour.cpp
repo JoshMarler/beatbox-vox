@@ -88,7 +88,7 @@ void NearestNeighbour<T>::setNumNeighbours(const unsigned int newNumNeighbours)
 
 //=======================================================================================================
 template<typename T>
-void NearestNeighbour<T>::setNumInstances(const unsigned int newNumInstances)
+void NearestNeighbour<T>::setNumTrainingInstances(const unsigned int newNumInstances)
 {
 	numInstances = newNumInstances;
 

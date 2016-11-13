@@ -26,6 +26,10 @@ AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int in
 
 	trainingSetSize = numSounds * numTrainingInstances;
 
+	//Set initial num test instance per sound to 5
+	numTestInstances = 5;
+	testSetSize = numSounds * numTestInstances;
+
 	numFeatures = calcFeatureVecSize();
 
 	currentClassfierType.store(AudioClassifyOptions::ClassifierType::naiveBayes);
@@ -33,19 +37,15 @@ AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int in
     setCurrentSampleRate(initSampleRate);
     setCurrentBufferSize(initBufferSize);
 
-	/* JWM - Potentially alter later to have an AudioClassifier::Config object/struct
-		     passed to the constructor which specifies numSounds, trainingSetSize and 
-	         the features to be used via AudioClassify::AudioClassifyOptions.
-			 Could also possibly pass a file name to load for model state/training set...
-	*/
-
     auto numCoefficients = gistFeatures.getMFCCNumCoefficients();
     mfccs.reset(new T[numCoefficients]);
 
     //Set initial sound ready states to false in training set.  
     trainingSoundsReady.resize(numSounds, false);
+	testSoundsReady.resize(numSounds, false);
 
 	configTrainingSetMatrix();
+	configTestSetMatrix();
 }
 
 //==============================================================================
@@ -179,11 +179,6 @@ bool AudioClassifier<T>::loadTrainingSet(const std::string & fileName, std::stri
 			trainingLabels[i] = static_cast<arma::u64>(labels[i]);
 		}
 
-		/** Note: Eventually will probably add check that there are equal number of training instances
-		 *  for each of the classes but this is not necessary for now and can be done when AudioClassify reaches
-		 *  library / JUCE Module stage.
-		 */
-
 		//Set all sounds as ready so model can be trained.
 		for (auto v : trainingSoundsReady)
 		{
@@ -195,16 +190,84 @@ bool AudioClassifier<T>::loadTrainingSet(const std::string & fileName, std::stri
 	return success;
 }
 
+//==============================================================================
 template<typename T>
 bool AudioClassifier<T>::saveTestSet(const std::string & fileName, std::string & errorString)
 {
-	return false;
+	auto success = false;
+	std::ofstream outFileStream;
+	arma::Mat<T> savedData;
+
+	if (!checkTestSetReady())
+	{
+		errorString = "The test set is not complete. Complete recording of test set/sounds before save";
+		return false;
+	}
+
+	savedData = testData;
+
+	//Insert additional row for test data/instance labels
+	savedData.insert_rows(testData.n_rows, 1);
+	
+	for (auto i = 0; i < savedData.n_cols; ++i)
+	{
+		savedData.row(savedData.n_rows - 1)[i] = testLabels[i];
+	}
+
+	outFileStream.open(fileName);
+	success = savedData.save(outFileStream, arma::file_type::csv_ascii);
+	outFileStream.close();
+
+	if (!success)
+		errorString = "There was an error saving the test set. Check the filename/path.";
+
+	return success;
 }
 
+//==============================================================================
 template<typename T>
 bool AudioClassifier<T>::loadTestSet(const std::string & fileName, std::string & errorString)
 {
-	return false;
+	auto success = false;
+	arma::Mat<T> loadedData;
+	std::ifstream inFileStream;
+	
+	inFileStream.open(fileName);
+	success = loadedData.load(inFileStream, arma::file_type::csv_ascii);
+	inFileStream.close();
+	
+	if (success)
+	{
+		if (loadedData.n_cols != (numSounds * numTestInstances) && loadedData.n_rows != numFeatures + 1)
+		{
+			errorString = "The loaded test set did not match the AudioClassifier object's state."
+			              "Check the test set loaded matches the following members of the AudioClassifier:"
+						  "numSounds (classes), testSetSize (instances) and numFeatures (attributes)";
+			return false;
+		}
+
+		for (auto i = 0; i < testData.n_rows; ++i)
+		{
+			testData.row(i) = loadedData.row(i);
+		}
+
+		//The last row of the loaded data set will be the test instances class values
+		auto labels = loadedData.row(loadedData.n_rows - 1);
+
+		for (auto i = 0; i < testLabels.n_cols; ++i)
+		{
+			testLabels[i] = static_cast<arma::u64>(labels[i]);
+		}
+
+		//Set all sounds as ready so model can be tested.
+		for (auto v : testSoundsReady)
+		{
+			v = true;
+		}
+
+	}
+
+	return success;
 }
 
 //==============================================================================
@@ -305,8 +368,10 @@ void AudioClassifier<T>::setNumBuffersDelayed(unsigned int newNumDelayed)
 
 	//Re-configure training set matrix and reset model state as new feature/attribute rows required
 	configTrainingSetMatrix();
+	configTestSetMatrix();
 }
 
+//==============================================================================
 template<typename T>
 int AudioClassifier<T>::getNumBuffersDelayed() const
 {
@@ -325,6 +390,7 @@ void AudioClassifier<T>::setClassifierType(AudioClassifyOptions::ClassifierType 
 	//Probably also need to check if the classifier is ready and if not check if the training set is ready and call Train()
 }
 
+//==============================================================================
 template<typename T>
 AudioClassifyOptions::ClassifierType AudioClassifier<T>::getClassifierType() const
 {
@@ -336,16 +402,26 @@ AudioClassifyOptions::ClassifierType AudioClassifier<T>::getClassifierType() con
 template<typename T>
 void AudioClassifier<T>::recordTrainingData(int sound)
 {
+	//Cannot record test set and training set data at same time. Should be seperate instances.
+	currentTestSound.store(-1);
+	recordingTestData.store(false);
+
     currentTrainingSound.store(sound);
-
     trainingCount = (sound * numTrainingInstances);
-
     recordingTrainingData.store(true);
 }
 
+//==============================================================================
 template<typename T>
 void AudioClassifier<T>::recordTestData(int testSound)
 {
+	//Cannot record test set and training set data at same time. Should be seperate instances.
+	currentTrainingSound.store(-1);
+	recordingTrainingData.store(false);
+
+	currentTestSound.store(testSound);
+	testCount = (testSound * numTestInstances);
+	recordingTestData.store(true);
 }
 
 //==============================================================================
@@ -378,21 +454,28 @@ void AudioClassifier<T>::setNumTrainingInstances(int newNumInstances)
 	configTrainingSetMatrix();
 }
 
+//==============================================================================
 template<typename T>
 int AudioClassifier<T>::getNumTrainingInstances() const
 {
 	 return numTrainingInstances;
 }
 
+//==============================================================================
 template<typename T>
 void AudioClassifier<T>::setNumTestInstances(int newNumInstances)
 {
+	numTestInstances = newNumInstances;
+	testSetSize = (numTestInstances * numSounds);
+
+	configTestSetMatrix();
 }
 
+//==============================================================================
 template<typename T>
 int AudioClassifier<T>::getNumTestInstances() const
 {
-	return 0;
+	return numTestInstances;
 }
 
 //==============================================================================
@@ -515,7 +598,13 @@ void AudioClassifier<T>::processCurrentInstance()
 		else if (delayedProcessedCount == numDelayedBuffers)
 			addToTrainingSet(currentInstanceVector);
 	}
-
+	else if (currentTestSound.load() != -1 && recordingTestData.load())
+	{
+		if (numDelayedBuffers == 0)
+			addToTestSet(currentInstanceVector);
+		else if (delayedProcessedCount == numDelayedBuffers)
+			addToTestSet(currentInstanceVector);
+	}
 }
 
 //==============================================================================
@@ -544,6 +633,27 @@ void AudioClassifier<T>::addToTrainingSet(const arma::Col<T>& newInstance)
 
 //==============================================================================
 template<typename T>
+void AudioClassifier<T>::addToTestSet(const arma::Col<T>& newInstance)
+{
+	auto sound = currentTestSound.load();
+
+	if (testCount < numTestInstances * (sound + 1))
+	{
+		testData.col(testCount) = newInstance;
+		testLabels[testCount] = static_cast<std::size_t>(sound);
+
+		++testCount;
+	}
+	else
+	{
+		testSoundsReady[sound] = true;
+		recordingTestData.store(false);
+		currentTestSound.store(-1);
+	}
+}
+
+//==============================================================================
+template<typename T>
 void AudioClassifier<T>::resetClassifierState()
 {
 	currentTrainingSound.store(-1);
@@ -552,6 +662,18 @@ void AudioClassifier<T>::resetClassifierState()
     classifierReady.store(false);
 
 	for (auto v : trainingSoundsReady)
+		  v = false;
+}
+
+//==============================================================================
+template<typename T>
+void AudioClassifier<T>::resetTestState()
+{
+	currentTestSound.store(-1);
+	recordingTestData.store(false);
+	testCount = 0; 
+
+	for (auto v : testSoundsReady)
 		  v = false;
 }
 
@@ -620,18 +742,30 @@ bool AudioClassifier<T>::checkTrainingSoundReady (const unsigned sound) const
 	return ready;
 }
 
+//==============================================================================
 template<typename T>
 bool AudioClassifier<T>::checkTestSetReady() const
 {
-	return false;
+    auto readyCount = 0;
+
+    for (auto v : testSoundsReady)
+    {
+        if (v == true)
+            readyCount++;
+    }
+
+    if (readyCount == numSounds)
+        return true;
+    else
+        return false;
 }
 
+//==============================================================================
 template<typename T>
 bool AudioClassifier<T>::checkTestSoundReady(const unsigned sound) const
 {
-	return false;
+	return testSoundsReady[sound];
 }
-
 
 //==============================================================================
 template<typename T>
@@ -659,6 +793,24 @@ void AudioClassifier<T>::configTrainingSetMatrix()
 	currentInstanceVector.set_size(numFeatures);
 	currentInstanceVector.zeros();
 
+}
+
+//==============================================================================
+template<typename T>
+void AudioClassifier<T>::configTestSetMatrix()
+{
+	//Test set no longer valid so reset state
+	resetTestState();
+
+	testData.set_size(numFeatures, testSetSize);
+	testData.zeros();
+
+	testLabels.set_size(testSetSize);
+
+	for (auto i = 0; i < testLabels.n_elem; ++i)
+	{
+		testLabels[i] = 0;
+	}
 }
 
 //==============================================================================
@@ -704,6 +856,10 @@ unsigned int AudioClassifier<T>::calcFeatureVecSize() const
 template<typename T>
 float AudioClassifier<T>::test(unsigned testInstancesPerSound, std::pair<unsigned int, unsigned int>* outputResults)
 {
+	//Possibly add an error string input param if test set not ready
+	if (!checkTestSetReady())
+		return 0.0f;
+
 	unsigned int numCorrect = 0;
 	auto testSetSize = testInstancesPerSound * numSounds;
 
