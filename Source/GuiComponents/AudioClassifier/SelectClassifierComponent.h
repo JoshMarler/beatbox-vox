@@ -13,6 +13,7 @@
 
 #include "JuceHeader.h"
 #include "../../PluginProcessor.h"
+#include "TestClassifierComponent.h"
 
 class SelectClassifierComponent : public Component,
 								  ButtonListener,
@@ -33,6 +34,8 @@ public:
 	static String classifierCmbBoxID;
 	static String saveTrainingDataButtonID;
 	static String loadTrainingDateButtonID;
+	static String testClassifierButtonID;
+	static String trainClassifierButtonID;
 	
 private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(SelectClassifierComponent)
@@ -42,11 +45,13 @@ private:
 	std::string trainingSetsDirectory;
 
 	Label headingLabel;
-	Label classifierParamsLabel;
 	ComboBox classifierCmbBox;
 
 	TextButton loadTrainingDataButton;
 	TextButton saveTrainingDataButton;
+
+	TextButton testClassifierButton;
+	TextButton trainClassifierButton;
 
 	void setupClassifierCmbBox();
 	
@@ -57,6 +62,8 @@ private:
 	void saveTrainingSet(std::string fileName);
 	void initialiseTrainingDataChooser();
 	void initialiseSaveDataChooser();
+
+	std::unique_ptr<TestClassifierComponent> testComponent;
 
 };
 

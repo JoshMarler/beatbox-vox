@@ -37,7 +37,7 @@ BeatboxVoxAudioProcessorEditor::BeatboxVoxAudioProcessorEditor (BeatboxVoxAudioP
 
     // Make sure that before the constructor has finished, you've set the
     // editor's size to whatever you need it to be.
-    setSize (800, 700);
+    setSize (800, 850);
     
     //Set timer for gui update callback
     //startTimer(10);

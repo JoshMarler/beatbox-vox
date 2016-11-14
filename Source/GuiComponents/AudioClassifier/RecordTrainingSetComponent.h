@@ -17,7 +17,8 @@
 class RecordTrainingSetComponent : public Component,
 								   Timer,
 								   ButtonListener,
-								   SliderListener
+								   SliderListener,
+								   ComboBoxListener
 {
 public:
 
@@ -30,6 +31,8 @@ public:
 	void timerCallback() override;
 	void buttonClicked(Button* button) override;
 	void sliderValueChanged(Slider* slider) override;
+	void comboBoxChanged(ComboBox* comboBOxThatHasChanged) override;
+
 
 
 	//Control ID's
@@ -55,6 +58,8 @@ private:
 	Label numInstancesLabel;
 	Label selectRecordingSoundLabel;
 
+	ComboBox recordTypeCmb;
+
 	ToggleButton activateButton;
 	TextButton recordButton;
 	TextButton trainButton;
@@ -69,6 +74,7 @@ private:
 	void setupSoundButtons();
 	void setActive(bool active);
 	void setNeedsUpdate(bool needsUpdate);
+	void setupRecordTypeCmb();
 };
 
 

@@ -71,6 +71,7 @@ RecordTrainingSetComponent::RecordTrainingSetComponent(BeatboxVoxAudioProcessor&
 	addAndMakeVisible(trainButton);
 
 	setupSoundButtons();
+	setupRecordTypeCmb();
 
 	activateButton.setToggleState(false, NotificationType::sendNotification);
 	setActive(false);
@@ -104,14 +105,18 @@ void RecordTrainingSetComponent::resized()
 	activateButton.setBounds(headingSection.removeFromLeft(headingSection.getWidth() / 14));
 	headingLabel.setBounds(headingSection);
 
+	auto comboBoxArea = bounds.removeFromTop(bounds.getHeight() / 5);
+	comboBoxArea.reduce(0, comboBoxArea.getHeight() / 4);
+	recordTypeCmb.setBounds(comboBoxArea);
+	
 	auto instanceSizeArea = bounds.removeFromTop(bounds.getHeight() / 3);
 	auto instanceSliderArea = instanceSizeArea.removeFromLeft(bounds.getWidth() / 2);
-	instanceSliderArea.reduce(0, instanceSliderArea.getHeight() / 4);
-	numInstancesLabel.setBounds(instanceSliderArea.removeFromTop(instanceSliderArea.getHeight() / 3));
+	instanceSliderArea.reduce(0, instanceSliderArea.getHeight() / 3.5f);
+	numInstancesLabel.setBounds(instanceSliderArea.removeFromTop(instanceSliderArea.getHeight() / 2));
 	instanceSizeSlider.setBounds(instanceSliderArea);
 
 	auto instanceButtonArea = instanceSizeArea;
-	instanceButtonArea.reduce(instanceButtonArea.getWidth() / 5, instanceButtonArea.getHeight() / 4);
+	instanceButtonArea.reduce(instanceButtonArea.getWidth() / 5, instanceButtonArea.getHeight() / 5);
 	instanceSizeButton.setBounds(instanceButtonArea.removeFromBottom(instanceButtonArea.getHeight() / 1.5f));
 
 	auto numSounds = processor.getClassifier().getNumSounds();
@@ -130,12 +135,12 @@ void RecordTrainingSetComponent::resized()
 		label->setBounds(buttonBounds);
 	} 
 
-	auto btnBottomArea = bounds.removeFromBottom(bounds.getHeight() / 1.5f);
+	auto btnBottomArea = bounds.removeFromBottom(bounds.getHeight() / 2);
 	auto recordButtonBounds = btnBottomArea.removeFromLeft(bounds.getWidth() / 3);
 	recordButton.setBounds(recordButtonBounds);
 
 	auto trainButtonBounds = btnBottomArea.removeFromRight(btnBottomArea.getWidth() / 2);
-	trainButton.setBounds(trainButtonBounds);
+	trainButton.setBounds(trainButtonBounds);	
 
 }
 
@@ -264,6 +269,10 @@ void RecordTrainingSetComponent::sliderValueChanged(Slider * slider)
 	}
 }
 
+void RecordTrainingSetComponent::comboBoxChanged(ComboBox * comboBOxThatHasChanged)
+{
+}
+
 //===============================================================================
 void RecordTrainingSetComponent::setupSoundButtons()
 {
@@ -352,3 +361,19 @@ void RecordTrainingSetComponent::setNeedsUpdate(bool needsUpdate)
 }
 
 //===============================================================================
+void RecordTrainingSetComponent::setupRecordTypeCmb()
+{
+	//Use AudioClassifyOptions enum in combobox selection
+	recordTypeCmb.addItem("Record Training Instances", 1);
+	recordTypeCmb.addItem("Record Test Instances", 2);
+
+	recordTypeCmb.addListener(this);
+
+	recordTypeCmb.setColour(ComboBox::backgroundColourId, Colours::black);
+	recordTypeCmb.setColour(ComboBox::outlineColourId, Colours::greenyellow);
+	recordTypeCmb.setColour(ComboBox::textColourId, Colours::greenyellow);
+	recordTypeCmb.setColour(ComboBox::arrowColourId, Colours::greenyellow);
+
+	recordTypeCmb.setSelectedId(1);
+	addAndMakeVisible(recordTypeCmb);
+}

@@ -14,15 +14,19 @@
 String SelectClassifierComponent::classifierCmbBoxID("classifier_cmb");
 String SelectClassifierComponent::saveTrainingDataButtonID("saveTraining_btn");
 String SelectClassifierComponent::loadTrainingDateButtonID("loadTraining_btn");
+String SelectClassifierComponent::testClassifierButtonID("test_classifier_btn");
+String SelectClassifierComponent::trainClassifierButtonID("train_classifier_btn");
 
 //===============================================================================
 SelectClassifierComponent::SelectClassifierComponent(BeatboxVoxAudioProcessor& p)
 	: processor(p),
 	  classifierCmbBox("ClassifierSelector"),
 	  loadTrainingDataButton("Load Training Data Set"),
-	  saveTrainingDataButton("Save Current Training Data")
+	  saveTrainingDataButton("Save Current Training Data"),
+	  testClassifierButton("Test"),
+	  trainClassifierButton("Train"),
+	  testComponent(std::make_unique<TestClassifierComponent>())
 {
-
 	//Initialise training sets directory path
 	auto path = File::getSpecialLocation(File::SpecialLocationType::userApplicationDataDirectory).getFullPathName()
 																									  + "\\" 
@@ -36,11 +40,6 @@ SelectClassifierComponent::SelectClassifierComponent(BeatboxVoxAudioProcessor& p
 	headingLabel.setColour(Label::textColourId, Colours::greenyellow);
 	addAndMakeVisible(headingLabel);
 
-	classifierParamsLabel.setText("Classifier Parameters", NotificationType::dontSendNotification);
-	classifierParamsLabel.setFont(Font("Cracked", 14.0f, Font::plain));
-	classifierParamsLabel.setColour(Label::textColourId, Colours::greenyellow);
-	addAndMakeVisible(classifierParamsLabel);
-
 	setupClassifierCmbBox();
 
 	saveTrainingDataButton.setComponentID(saveTrainingDataButtonID);
@@ -52,6 +51,14 @@ SelectClassifierComponent::SelectClassifierComponent(BeatboxVoxAudioProcessor& p
 	loadTrainingDataButton.setClickingTogglesState (true);
     loadTrainingDataButton.addListener(this);
 	addAndMakeVisible(loadTrainingDataButton);
+
+	testClassifierButton.setComponentID(testClassifierButtonID);
+	testClassifierButton.addListener(this);
+	addAndMakeVisible(testClassifierButton);
+
+	trainClassifierButton.setComponentID(trainClassifierButtonID);
+	trainClassifierButton.addListener(this);
+	addAndMakeVisible(trainClassifierButton);
 
 	initialiseTrainingDataChooser();
 	initialiseSaveDataChooser();
@@ -106,7 +113,14 @@ void SelectClassifierComponent::resized()
 	
 	auto boundsRight = bounds;
 	boundsRight.reduce(boundsRight.getWidth() / 20, 0);
-	classifierParamsLabel.setBounds(boundsRight.removeFromTop(boundsRight.getHeight() / 5));
+
+	auto trainClassifierBounds = boundsRight.removeFromLeft(boundsRight.getWidth() / 2);
+	trainClassifierBounds.reduce(trainClassifierBounds.getWidth() / 10, trainClassifierBounds.getHeight() / 3);
+	trainClassifierButton.setBounds(trainClassifierBounds);
+
+	auto testClassifierBounds = boundsRight;
+	testClassifierBounds.reduce(testClassifierBounds.getWidth() / 10, testClassifierBounds.getHeight() / 3);
+	testClassifierButton.setBounds(testClassifierBounds);	
 
 }
 
@@ -138,6 +152,18 @@ void SelectClassifierComponent::buttonClicked(Button * button)
 			processor.getClassifier().loadTrainingSet(filePath.toStdString(), errorString);
 			processor.getClassifier().train();
 		}
+	}
+	else if (buttonID == testClassifierButtonID)
+	{
+		DialogWindow::LaunchOptions dialog;
+		dialog.dialogTitle = "Test Classifier";
+		dialog.dialogBackgroundColour = Colours::black;
+		dialog.content.setNonOwned(testComponent.get());
+		dialog.componentToCentreAround = this->getParentComponent();
+		dialog.useNativeTitleBar = false;
+		dialog.resizable = false;
+		dialog.escapeKeyTriggersCloseButton = true;
+		dialog.launchAsync();
 	}
 }
 

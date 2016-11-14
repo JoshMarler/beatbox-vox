@@ -40,6 +40,10 @@
                 resource="0" file="Source/GuiComponents/AudioClassifier/SelectClassifierComponent.cpp"/>
           <FILE id="ZE6aom" name="SelectClassifierComponent.h" compile="0" resource="0"
                 file="Source/GuiComponents/AudioClassifier/SelectClassifierComponent.h"/>
+          <FILE id="kMxAfu" name="TestClassifierComponent.cpp" compile="1" resource="0"
+                file="Source/GuiComponents/AudioClassifier/TestClassifierComponent.cpp"/>
+          <FILE id="y9E7bv" name="TestClassifierComponent.h" compile="0" resource="0"
+                file="Source/GuiComponents/AudioClassifier/TestClassifierComponent.h"/>
         </GROUP>
         <FILE id="j338eL" name="CustomLookAndFeel.cpp" compile="1" resource="0"
               file="Source/GuiComponents/CustomLookAndFeel.cpp"/>
