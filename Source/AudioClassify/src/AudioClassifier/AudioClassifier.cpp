@@ -27,7 +27,7 @@ AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int in
 	trainingSetSize = numSounds * numTrainingInstances;
 
 	//Set initial num test instance per sound to 5
-	numTestInstances = 5;
+	numTestInstances = 10;
 	testSetSize = numSounds * numTestInstances;
 
 	numFeatures = calcFeatureVecSize();
@@ -158,7 +158,7 @@ bool AudioClassifier<T>::loadTrainingSet(const std::string & fileName, std::stri
 	{
 		//NOTE: May change the below so that loading an arbitrary training set alters the members like numSounds etc.
 		//Confirm the loaded data matches the AudioClassifier object's parameters
-		if (loadedData.n_cols != (numSounds * numTrainingInstances) && loadedData.n_rows != numFeatures + 1)
+		if (loadedData.n_cols != trainingSetSize && loadedData.n_rows != numFeatures + 1)
 		{
 			errorString = "The loaded training set did not match the AudioClassifier object's state."
 			              "Check the training set loaded matches the following members of the AudioClassifier:"
@@ -226,7 +226,7 @@ bool AudioClassifier<T>::saveTestSet(const std::string & fileName, std::string &
 
 //==============================================================================
 template<typename T>
-bool AudioClassifier<T>::loadTestSet(const std::string & fileName, std::string & errorString)
+bool AudioClassifier<T>::loadTestSet(const std::string& fileName, std::string & errorString)
 {
 	auto success = false;
 	arma::Mat<T> loadedData;
@@ -238,7 +238,7 @@ bool AudioClassifier<T>::loadTestSet(const std::string & fileName, std::string &
 	
 	if (success)
 	{
-		if (loadedData.n_cols != (numSounds * numTestInstances) && loadedData.n_rows != numFeatures + 1)
+		if (loadedData.n_cols != testSetSize && loadedData.n_rows != numFeatures + 1)
 		{
 			errorString = "The loaded test set did not match the AudioClassifier object's state."
 			              "Check the test set loaded matches the following members of the AudioClassifier:"
@@ -256,6 +256,7 @@ bool AudioClassifier<T>::loadTestSet(const std::string & fileName, std::string &
 
 		for (auto i = 0; i < testLabels.n_cols; ++i)
 		{
+			auto labelVal = labels[i];
 			testLabels[i] = static_cast<arma::u64>(labels[i]);
 		}
 
@@ -383,11 +384,6 @@ template<typename T>
 void AudioClassifier<T>::setClassifierType(AudioClassifyOptions::ClassifierType classifierType)
 {
 	currentClassfierType.store(classifierType);
-
-	//NOTE: Eventually it may be worth creating an abstract base class for classifiers and then
-	//holding a std::unique_ptr to a bass classifier which gets set to the current derived classifier type.
-	//Could help with limiting resource usage etc.
-	//Probably also need to check if the classifier is ready and if not check if the training set is ready and call Train()
 }
 
 //==============================================================================
@@ -854,30 +850,17 @@ unsigned int AudioClassifier<T>::calcFeatureVecSize() const
 
 //==============================================================================
 template<typename T>
-float AudioClassifier<T>::test(unsigned testInstancesPerSound, std::pair<unsigned int, unsigned int>* outputResults)
+float AudioClassifier<T>::test(std::vector<std::pair<unsigned int, unsigned int>>& outputResults)
 {
 	//Possibly add an error string input param if test set not ready
 	if (!checkTestSetReady())
 		return 0.0f;
 
 	unsigned int numCorrect = 0;
-	auto testSetSize = testInstancesPerSound * numSounds;
-
-	arma::Mat<T> testSet(numFeatures, testSetSize);
-	arma::Row<std::size_t> testLabels;
 
 	for (auto i = 0; i < testSetSize; ++i)
 	{
-		
-	}
-	
-	trainingSetSize -= testSetSize;
-	configTrainingSetMatrix();
-	train();
-
-	for (auto i = 0; i < testSetSize; ++i)
-	{
-		arma::Col<T> testInstance = testSet.col(i);
+		arma::Col<T> testInstance = testData.col(i);
 		auto actual = testLabels[i];
 		auto predicted = -1;
 		
@@ -895,11 +878,12 @@ float AudioClassifier<T>::test(unsigned testInstancesPerSound, std::pair<unsigne
 		if (actual == predicted)
 			++numCorrect;
 
-		outputResults[i] = std::make_pair(actual, predicted);
+		outputResults.push_back(std::make_pair(actual, predicted));
 	}
 
 	//Return percentage accuracy
-	return static_cast<float>(numCorrect / (testSetSize * numSounds) * 100);
+	auto result = static_cast<float>(numCorrect) / static_cast<float>(testSetSize) * 100.0f;
+	return result;
 }
 
 //==============================================================================

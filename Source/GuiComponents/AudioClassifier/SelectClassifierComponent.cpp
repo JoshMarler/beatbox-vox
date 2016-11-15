@@ -25,7 +25,7 @@ SelectClassifierComponent::SelectClassifierComponent(BeatboxVoxAudioProcessor& p
 	  saveTrainingDataButton("Save Current Training Data"),
 	  testClassifierButton("Test"),
 	  trainClassifierButton("Train"),
-	  testComponent(std::make_unique<TestClassifierComponent>())
+	  testComponent(std::make_unique<TestClassifierComponent>(processor))
 {
 	//Initialise training sets directory path
 	auto path = File::getSpecialLocation(File::SpecialLocationType::userApplicationDataDirectory).getFullPathName()

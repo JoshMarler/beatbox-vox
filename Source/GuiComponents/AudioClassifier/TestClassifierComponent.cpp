@@ -11,13 +11,15 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "TestClassifierComponent.h"
 
-String TestClassifierComponent::testSetSliderID("test_set_sld");
 String TestClassifierComponent::runTestButtonID("run_test_btn");
+String TestClassifierComponent::loadTestSetButtonID("load_test_set_btn");
 
 //==============================================================================
-TestClassifierComponent::TestClassifierComponent()
-	: componentLookAndFeel(std::make_unique<CustomLookAndFeel>()),
+TestClassifierComponent::TestClassifierComponent(BeatboxVoxAudioProcessor& p)
+	: processor(p),
+	  componentLookAndFeel(std::make_unique<CustomLookAndFeel>()),
 	  runTestButton("Run Test"),
+	  loadTestSetButton("Load Test Set"),
 	  table("Test Results Table", this)
 {
 	setLookAndFeel(componentLookAndFeel.get());
@@ -33,21 +35,21 @@ TestClassifierComponent::TestClassifierComponent()
 	runTestButton.addListener(this);
 	addAndMakeVisible(runTestButton);
 
-	testSetSizeLabel.setText("Test set size", NotificationType::dontSendNotification);
-	testSetSizeLabel.setFont(Font("Cracked", 20.0f, Font::plain));
-	testSetSizeLabel.setColour(Label::textColourId, Colours::greenyellow);
-	addAndMakeVisible(testSetSizeLabel);
+	loadTestSetButton.setComponentID(loadTestSetButtonID);
+	loadTestSetButton.addListener(this);
+	addAndMakeVisible(loadTestSetButton);
 
-	testSetSizeSlider.setComponentID(testSetSliderID);
-	testSetSizeSlider.setSliderStyle (Slider::IncDecButtons);
-	testSetSizeSlider.setRange (10.0, 40.0, 1.0);
-	testSetSizeSlider.setIncDecButtonsMode (Slider::incDecButtonsDraggable_Horizontal);
-	testSetSizeSlider.setTextBoxStyle(Slider::TextBoxRight, true, 90, 20);
-	testSetSizeSlider.setColour(Slider::textBoxBackgroundColourId, Colours::black);
-	testSetSizeSlider.setColour(Slider::textBoxTextColourId, Colours::greenyellow);
-	testSetSizeSlider.setColour(Slider::textBoxOutlineColourId, Colours::black);
-	testSetSizeSlider.addListener(this);
-	addAndMakeVisible (testSetSizeSlider);
+	auto ready = processor.getClassifier().checkTestSetReady();
+
+	if (ready)
+		testSetStatusLabel.setText("Test set status: Ready", NotificationType::dontSendNotification);
+	else
+		testSetStatusLabel.setText("Test set status: Not Available", NotificationType::dontSendNotification);
+
+	testSetStatusLabel.setFont(Font("Cracked", 20.0f, Font::plain));
+	testSetStatusLabel.setColour(Label::textColourId, Colours::greenyellow);
+	addAndMakeVisible(testSetStatusLabel);
+
 
 	accuracyLabel.setText("Accuracy: ", NotificationType::dontSendNotification);
 	accuracyLabel.setFont(Font("Cracked", 20.0f, Font::plain));
@@ -94,11 +96,10 @@ void TestClassifierComponent::resized()
 	auto testControlsBoundsLeft = testControlsBounds.removeFromLeft(testControlsBounds.getWidth() / 2);
 	auto testControlBoundsRight = testControlsBounds;
 
-	auto setTestSizeArea = testControlsBoundsLeft.removeFromTop(testControlsBoundsLeft.getHeight() / 1.5f);
-	setTestSizeArea.reduce(setTestSizeArea.getWidth() / 10, setTestSizeArea.getHeight() / 25);
-
-	testSetSizeLabel.setBounds(setTestSizeArea.removeFromTop(setTestSizeArea.getHeight() / 1.5f));
-	testSetSizeSlider.setBounds(setTestSizeArea);
+	auto loadTestSetArea = testControlsBoundsLeft.removeFromTop(testControlsBoundsLeft.getHeight() / 1.5f);
+	loadTestSetArea.reduce(loadTestSetArea.getWidth() / 8, 0);
+	testSetStatusLabel.setBounds(loadTestSetArea.removeFromTop(loadTestSetArea.getHeight() / 2));
+	loadTestSetButton.setBounds(loadTestSetArea);
 
 	auto testButtonArea = testControlBoundsRight.removeFromTop(testControlBoundsRight.getHeight() / 1.5f);
 	testButtonArea.reduce(testButtonArea.getWidth() / 8, 0);
@@ -117,11 +118,37 @@ void TestClassifierComponent::resized()
 //===============================================================================
 void TestClassifierComponent::buttonClicked(Button * button)
 {
-}
+	auto id = button->getComponentID();
 
-//===============================================================================
-void TestClassifierComponent::sliderValueChanged(Slider * slider)
-{
+	if (id == loadTestSetButtonID)
+	{
+		auto success = loadTestSet();
+
+		if (success)
+			testSetStatusLabel.setText("Test set status: Ready", NotificationType::dontSendNotification);
+		else
+			testSetStatusLabel.setText("Test set status: Not Available", NotificationType::dontSendNotification);
+	}
+	else if (id == runTestButtonID)
+	{
+		auto ready = processor.getClassifier().getClassifierReady();
+
+		if (ready)
+		{
+			std::vector<std::pair<unsigned int, unsigned int>> testResults;
+
+			auto accuracy = processor.getClassifier().test(testResults);
+			auto accuracyString = String::formatted("%.2f", accuracy) + "%";
+			accuracyLabel.setText(accuracyString, NotificationType::dontSendNotification);
+
+			populateResultsTable(testResults);
+		}
+		else
+		{
+			auto icon = AlertWindow::AlertIconType::WarningIcon;
+			AlertWindow::showMessageBox(icon, "Error Running Test", "The classifier has not been trained. Train before testing", "Close", this);
+		}
+	}
 }
 
 //===============================================================================
@@ -155,6 +182,46 @@ void TestClassifierComponent::paintCell (Graphics& g, int rowNumber, int columnI
 
 	g.setColour (Colours::black.withAlpha (0.2f));
 	g.fillRect (width - 1, 0, 1, height);
+}
+
+//===============================================================================
+bool TestClassifierComponent::loadTestSet()
+{
+	auto success = false;
+	auto path = File::getSpecialLocation(File::SpecialLocationType::userApplicationDataDirectory).getFullPathName()
+																								  + "\\" 
+																								  + processor.getName()
+																								  + "\\TestSets";
+	
+	File directory(path.toStdString());
+
+	if (!directory.exists())
+		directory.createDirectory();
+
+	FileChooser browser("Load Test Data Set", directory, "*.csv");
+	auto fileSelected = browser.browseForFileToOpen();
+
+	if (fileSelected)
+	{
+		auto fileChosen = browser.getResult();
+		auto filePath = fileChosen.getFullPathName();
+
+		std::string errorString;
+		success = processor.getClassifier().loadTestSet(filePath.toStdString(), errorString);
+
+		if (!success)
+		{
+			auto icon = AlertWindow::AlertIconType::WarningIcon;
+			AlertWindow::showMessageBox(icon, "Error Loading Test Set", errorString, "Close", this);
+		}
+	}
+
+	return success;
+}
+
+//===============================================================================
+void TestClassifierComponent::populateResultsTable(std::vector<std::pair<unsigned int, unsigned int>>& results)
+{
 }
 
 //===============================================================================

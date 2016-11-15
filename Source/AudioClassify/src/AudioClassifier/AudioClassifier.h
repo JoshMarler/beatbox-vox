@@ -80,7 +80,7 @@ public:
     //return bool for successful or not in training. 
     void train();
 	
-	float test(unsigned testInstancesPerSound, std::pair<unsigned int, unsigned int>* outputResults);
+	float test(std::vector<std::pair<unsigned int, unsigned int>>& outputResults);
 
 	/** Saves the current training data set being used by the model/classifier. 
 	 * This can be loaded again on the next application load so that training sets do not have
@@ -214,7 +214,7 @@ private:
     arma::Row<size_t> trainingLabels;
 
 	arma::Mat<T> testData;
-	arma::Mat<size_t> testLabels;
+	arma::Row<size_t> testLabels;
     
     //Holds the the feature values/vector for the current instance/block.
     arma::Col<T> currentInstanceVector;
