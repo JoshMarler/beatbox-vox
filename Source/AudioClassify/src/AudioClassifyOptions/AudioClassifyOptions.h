@@ -37,6 +37,12 @@ struct AudioClassifyOptions
         //complexSpectralDifference,
         highFrequencyContent
     };
+
+	enum class DataSetType: int
+	{
+		trainingSet,
+		testSet
+	};
 };
 
 

@@ -16,6 +16,7 @@ String RecordTrainingSetComponent::instanceSizeSliderID("instance_size_sld");
 String RecordTrainingSetComponent::instanceSizeButtonID("instance_size_btn");
 String RecordTrainingSetComponent::recordButtonID("record_btn");
 String RecordTrainingSetComponent::trainButtonID("train_btn");
+String RecordTrainingSetComponent::recordTypeCmbID("record_type_cmb");
 
 //===============================================================================
 RecordTrainingSetComponent::RecordTrainingSetComponent(BeatboxVoxAudioProcessor& p)
@@ -171,7 +172,20 @@ void RecordTrainingSetComponent::timerCallback()
 	 //Update individual sounds ready labels
 	 for (auto i = 0; i < numSounds; i++)
 	 {
-		 auto soundReady = processor.getClassifier().checkTrainingSoundReady(i);
+		 auto soundReady = false;
+
+		 switch (currentDataSetType)
+		 {
+			 case AudioClassifyOptions::DataSetType::trainingSet:
+				 soundReady = processor.getClassifier().checkTrainingSoundReady(i);
+				 break;
+			 case AudioClassifyOptions::DataSetType::testSet:
+				 soundReady = processor.getClassifier().checkTestSoundReady(i);
+				 break;
+			 default:
+				 break;
+		 }
+
 		 auto label = soundStatusLabels[i];
 		 String soundName;
 
@@ -209,18 +223,42 @@ void RecordTrainingSetComponent::buttonClicked(Button * button)
 	else if (id == instanceSizeButtonID)
 	{
 		auto numInstances = static_cast<int>(instanceSizeSlider.getValue());
-		processor.getClassifier().setNumTrainingInstances(numInstances);
+		
+		switch (currentDataSetType)
+		{
+			case AudioClassifyOptions::DataSetType::trainingSet:
+				processor.getClassifier().setNumTrainingInstances(numInstances);
+				break;
+			case AudioClassifyOptions::DataSetType::testSet:
+				processor.getClassifier().setNumTestInstances(numInstances);
+				break;
+			default:
+				break;
+		}
+		
 		setNeedsUpdate(false);
 	}
 	else if(id == recordButtonID)
 	{
 		if (button->getToggleState())
 		{
-			processor.getClassifier().recordTrainingData(currentTrainingSound);
-			auto label = soundStatusLabels[currentTrainingSound];
+			
+			switch (currentDataSetType)
+			{
+				case AudioClassifyOptions::DataSetType::trainingSet:
+					processor.getClassifier().recordTrainingData(currentRecordingSound);
+					break;
+				case AudioClassifyOptions::DataSetType::testSet:
+					processor.getClassifier().recordTestData(currentRecordingSound);
+					break;
+				default:
+					break;
+			}
+			
+			auto label = soundStatusLabels[currentRecordingSound];
 			String soundName;
 
-			switch (currentTrainingSound)
+			switch (currentRecordingSound)
 			{
 				case BeatboxVoxAudioProcessor::soundLabel::KickDrum :
 						soundName = "Kick";
@@ -234,7 +272,7 @@ void RecordTrainingSetComponent::buttonClicked(Button * button)
 				default: break;
 			}
 
-			label->setText( soundName + " - Recording training set", juce::NotificationType::dontSendNotification);
+			label->setText( soundName + " - Recording instances", juce::NotificationType::dontSendNotification);
 		}	
 	}
 	else if (id == trainButtonID)
@@ -246,7 +284,7 @@ void RecordTrainingSetComponent::buttonClicked(Button * button)
 	{
 		if (button->getToggleState())
         {
-            currentTrainingSound = soundButtons.indexOf(button);
+            currentRecordingSound = soundButtons.indexOf(button);
         }		
 	}
 }
@@ -259,7 +297,20 @@ void RecordTrainingSetComponent::sliderValueChanged(Slider * slider)
 
 	if (id == instanceSizeSliderID)
 	{
-		auto currentVal = processor.getClassifier().getNumTrainingInstances();
+		auto currentVal = 0;
+
+		switch (currentDataSetType)
+		{
+		case AudioClassifyOptions::DataSetType::trainingSet:
+			currentVal = processor.getClassifier().getNumTrainingInstances();
+			break;
+		case AudioClassifyOptions::DataSetType::testSet:
+			currentVal = processor.getClassifier().getNumTestInstances();
+			break;
+		default:
+			break;
+		}
+
 		auto newVal = static_cast<int>(slider->getValue());
 
 		if (newVal != currentVal)
@@ -269,8 +320,28 @@ void RecordTrainingSetComponent::sliderValueChanged(Slider * slider)
 	}
 }
 
-void RecordTrainingSetComponent::comboBoxChanged(ComboBox * comboBOxThatHasChanged)
+void RecordTrainingSetComponent::comboBoxChanged(ComboBox * comboBoxThatHasChanged)
 {
+	auto id = comboBoxThatHasChanged->getComponentID();
+
+	if (id == recordTypeCmbID)
+	{
+		auto dataSet = comboBoxThatHasChanged->getSelectedId() - 1;
+
+		switch (dataSet)
+		{
+			case static_cast<int>(AudioClassifyOptions::DataSetType::trainingSet) :
+				currentDataSetType = AudioClassifyOptions::DataSetType::trainingSet;
+				break;
+
+			case static_cast<int>(AudioClassifyOptions::DataSetType::testSet) :
+				currentDataSetType = AudioClassifyOptions::DataSetType::testSet;
+				break;
+
+			default:
+				break;
+		}
+	}
 }
 
 //===============================================================================
@@ -364,8 +435,8 @@ void RecordTrainingSetComponent::setNeedsUpdate(bool needsUpdate)
 void RecordTrainingSetComponent::setupRecordTypeCmb()
 {
 	//Use AudioClassifyOptions enum in combobox selection
-	recordTypeCmb.addItem("Record Training Instances", 1);
-	recordTypeCmb.addItem("Record Test Instances", 2);
+	recordTypeCmb.addItem("Record Training Instances", static_cast<int>(AudioClassifyOptions::DataSetType::trainingSet) + 1);
+	recordTypeCmb.addItem("Record Test Instances", static_cast<int>(AudioClassifyOptions::DataSetType::testSet) + 1);
 
 	recordTypeCmb.addListener(this);
 
@@ -375,5 +446,8 @@ void RecordTrainingSetComponent::setupRecordTypeCmb()
 	recordTypeCmb.setColour(ComboBox::arrowColourId, Colours::greenyellow);
 
 	recordTypeCmb.setSelectedId(1);
+
+	currentDataSetType = AudioClassifyOptions::DataSetType::trainingSet;
+
 	addAndMakeVisible(recordTypeCmb);
 }

@@ -42,6 +42,7 @@ public:
 	static String instanceSizeButtonID;
 	static String recordButtonID;
 	static String trainButtonID;
+	static String recordTypeCmbID;
 
 private:
 
@@ -51,8 +52,9 @@ private:
 
 	int soundButtonsGroupID = 1234;
 
-    //JWM - A little dirty maybe but works for now at prototype stage
-    int currentTrainingSound = -1;
+    int currentRecordingSound = -1;
+
+	AudioClassifyOptions::DataSetType currentDataSetType;
 
 	Label headingLabel;
 	Label numInstancesLabel;

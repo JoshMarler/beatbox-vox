@@ -529,7 +529,6 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer, const int numSampl
 		else
 		{
 			//JWM - Implement buffer slice processing again here 
-
 			gistFeatures.processAudioFrame(buffer, bufferSize);
 			processCurrentInstance();
 
