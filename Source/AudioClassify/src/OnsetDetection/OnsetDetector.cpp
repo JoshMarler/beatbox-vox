@@ -9,7 +9,7 @@
 */
 
 #include "OnsetDetector.h"
-#include "../../MathHelpers/MathHelpers.h"
+#include "../MathHelpers/MathHelpers.h"
 //==============================================================================
 
 template<typename T>

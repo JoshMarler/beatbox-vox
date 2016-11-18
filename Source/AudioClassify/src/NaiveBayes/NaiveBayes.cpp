@@ -4,7 +4,6 @@
 #include <limits>
 
 //=======================================================================================================
-
 template<typename T>
 NaiveBayes<T>::NaiveBayes(const size_t initNumClasses, const size_t initNumFeatures)
 	: sqrtTwoPi(std::sqrt(2 * arma::datum::pi)),
