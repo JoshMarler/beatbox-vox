@@ -148,13 +148,15 @@ void RecordTrainingSetComponent::resized()
 //===============================================================================
 void RecordTrainingSetComponent::timerCallback()
 {
-	 auto isTraining = processor.getClassifier().isTraining();
+	 auto isRecording = processor.getClassifier().isRecording();
      auto trainingSetReady = processor.getClassifier().checkTrainingSetReady();
      auto classifierReady = processor.getClassifier().getClassifierReady();
 	 auto numSounds = processor.getClassifier().getNumSounds();
 
      if (trainingSetReady)
          trainButton.setEnabled(true);
+	 else 
+		 trainButton.setEnabled(false);
 
      if (trainButton.getToggleState())
      {
@@ -165,13 +167,14 @@ void RecordTrainingSetComponent::timerCallback()
      //JWM - A little sketchy way of doing things maybe but works for prototype stage. 
      if (recordButton.getToggleState())
      {
-        if (isTraining == false)
+        if (isRecording == false)
            recordButton.setToggleState(false, NotificationType::dontSendNotification);
      }
 
 	 //Update individual sounds ready labels
 	 for (auto i = 0; i < numSounds; i++)
 	 {
+		 auto currentSoundRecording = processor.getClassifier().getCurrentSoundRecording();
 		 auto soundReady = false;
 
 		 switch (currentDataSetType)
@@ -207,6 +210,11 @@ void RecordTrainingSetComponent::timerCallback()
 		 {
 			 label->setColour(Label::textColourId, Colours::greenyellow);
 			 label->setText(soundName + " Ready", juce::NotificationType::dontSendNotification);
+		 }
+		 else if (soundReady != currentSoundRecording)
+		 {
+			label->setText(soundName + " - Not ready", juce::NotificationType::dontSendNotification);
+			label->setColour(Label::textColourId, Colours::greenyellow.withAlpha(static_cast<uint8>(0x4a)));
 		 }
 	 }
 }

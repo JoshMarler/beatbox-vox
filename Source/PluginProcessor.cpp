@@ -20,7 +20,6 @@ String BeatboxVoxAudioProcessor::paramOSDMsBetweenOnsets("osd_msbetween");
 BeatboxVoxAudioProcessor::BeatboxVoxAudioProcessor()
 	: processorState(*this, nullptr),
 	  classifier(480, 48000, 3, 10)
-
 {
 	usingOSDTestSound.store(false);
 
@@ -165,8 +164,7 @@ void BeatboxVoxAudioProcessor::initialiseSynth()
 	/** JWM - Quick and dirty sample drum synth for prototype
 	 *  In future versions will ideally allow user to select sample to use and
 	 *  also manage sample rate changes effect on loaded samples. 
-	*/
-
+	 */
 	WavAudioFormat wavFormat;
 	BigInteger kickNoteRange;
 	BigInteger snareNoteRange;
@@ -278,7 +276,7 @@ void BeatboxVoxAudioProcessor::processBlock(AudioSampleBuffer& buffer, MidiBuffe
 	//This is used for configuring the onset detector settings from the GUI
 	if (classifier.noteOnsetDetected())
 	{
-		//NOTE: Potentially add a flag to onset detected in an fifo or something for visual response on onset.
+		//NOTE: Later potentially add a flag to onset detected in an fifo or something for visual response on onset.
 		if (usingOSDTestSound.load())
 		{
 			triggerOSDTestSound(midiMessages);
@@ -306,7 +304,7 @@ void BeatboxVoxAudioProcessor::processBlock(AudioSampleBuffer& buffer, MidiBuffe
 	}
 
 
-	//Now classification complete clear the input buffer/signal - we only want synth output.
+	//Now classification complete clear the input buffer/signal. We only want synth output.
 	buffer.clear();
 
 	if (usingOSDTestSound.load())

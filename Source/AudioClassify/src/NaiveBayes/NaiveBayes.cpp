@@ -31,17 +31,17 @@ void NaiveBayes<T>::Train(const arma::Mat<T>& trainingData, const arma::Row<size
 	featureMeans.zeros();
 	featureVariances.zeros();
 
-	//Mean sum - sum feature values for each class label instance
+	//Mean sum. Sum the feature values for each class label instance
 	for (size_t j = 0; j < trainingData.n_cols; ++j)
 	{
 		const auto label = classLabels[j];
 
-		//increment num occurences of current class in priorProbs set.
+		//Increment num occurences of current class in priorProbs set.
 		++priorProbs[label];
 		featureMeans.col(label) += trainingData.col(j);
 	}
 
-	//Normalise mean sums - divide class feature sums by number of class occurences.
+	//Normalise mean sums. Divide class feature sums by number of class occurences.
 	for (size_t i = 0; i < priorProbs.n_elem; ++i)
 	{
 		//Check if probability of each class != 0 due to no instance of class in training set.
@@ -55,8 +55,10 @@ void NaiveBayes<T>::Train(const arma::Mat<T>& trainingData, const arma::Row<size
 	{
 		const auto label = classLabels[j];
 
-		//Should be real-time safe with arma::square not malloc / dynamic allocating
-		//due to use of expression templates.
+		/**
+		 * Should be real-time safe with arma::square not malloc / dynamic allocating
+		 *  due to use of expression templates.
+		 */
 		featureVariances.col(label) += arma::square(trainingData.col(j) - featureMeans.col(label));
 	}
 
@@ -112,7 +114,7 @@ size_t NaiveBayes<T>::Classify(const arma::Col<T>& instance)
 		 *  log(exp(value)) == value so the original calculation below has been
 		 *  altered when calculating normal/Gaussian distribution exponents. 
 		 *  
-		 *  Previous Calculation:
+		 *  Non log based Calculation:
 		 *		
 		 *		exponents = arma::exp(-(arma::square(diffs))) / (2 * featureVariances.col(j));
 		 *		
@@ -129,7 +131,7 @@ size_t NaiveBayes<T>::Classify(const arma::Col<T>& instance)
 	}
 
 
-    //Class val is the label with the max prob value - classes 0 - numClasses hence index used. 
+    //Class val is the label with the max prob value (Classes range 0 - numClasses hence index_max() used);
 	classVal = testProbs.index_max();
 
 	return classVal;

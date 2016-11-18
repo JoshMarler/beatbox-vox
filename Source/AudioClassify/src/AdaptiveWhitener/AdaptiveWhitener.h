@@ -31,21 +31,24 @@ public:
 	
 	void process(const T* inputFrame, T* outputFrame);
 
+	/** Sets the amount of time it take for the whitener to forget the previous peak values for 
+	 * the recently processed spectral bins.  
+	 *
+	 * @param newDecayTime The decay time in 
+	 */
 	void setPeakMemoryDecayRate(const unsigned int newDecayTime);
 
 private:
 
-	//The size of the current fft frame
 	unsigned int sampleRate;
 	std::size_t fftFrameSize;
-
 
 	//The decay rate for the peak bin values in seconds.
 	unsigned int decayRate;
 	float noiseFloor;
 	T memoryRateCoeff;
 
-	//The array of peak magnitude values for each of the fft/spectral bins
+	//The array of peak magnitude values for each of the FFT/spectral bins
 	std::unique_ptr<T[]> peakValues;
 
 	void updateMemoryDecayCoeff();

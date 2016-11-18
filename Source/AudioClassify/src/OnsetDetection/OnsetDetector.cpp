@@ -40,7 +40,6 @@ OnsetDetector<T>::OnsetDetector(int initFrameSize, unsigned int initSampleRate)
     std::fill(previousValues.get(), (previousValues.get() + numPreviousValues), static_cast<T>(0.0));   
     std::fill(previousValuesCopy.get(), (previousValuesCopy.get() + numPreviousValues), static_cast<T>(0.0));   
 
-
     setCurrentFrameSize(initFrameSize);
 	setSampleRate(initSampleRate);
 }

@@ -62,9 +62,12 @@ public:
     void setStateInformation (const void* data, int sizeInBytes) override;
 
     //==============================================================================
+    void parameterChanged(const String& paramID, float newValue) override;
     
+    //==============================================================================
     AudioProcessorValueTreeState& getValueTreeState();
 
+    //==============================================================================
 
     /** Sets a flag to indicate whether a test sound should be triggered for 
      * each onset detected.This is used as a reference point / listening test when
@@ -72,14 +75,17 @@ public:
      * @param useTestSound flag to turn the OnsetDetector test sound on/off
      */
     void setUsingOSDTestSound(bool useTestSound);
-    
-    //Setup the audio processor parameters
-    void setupParameters();
-    void parameterChanged(const String& paramID, float newValue) override;
-    
+
+    //==============================================================================
     //Initialise the synth object
     void initialiseSynth();
 
+    //==============================================================================
+    //Returns reference to plugins AudioClassifier for GUI to set classification settings.
+    //JWM - NOTE should eventually change to accept templated precision. 
+    AudioClassifier<float>& getClassifier();
+
+    //==============================================================================
     enum soundLabel
     {
         KickDrum = 0, 
@@ -87,42 +93,59 @@ public:
         HiHat
     };
 
+    //==============================================================================
     //Parameter ID strings
     static String paramOSDMeanCoeff;
     static String paramOSDMedianCoeff;
     static String paramOSDNoiseRatio;
     static String paramOSDMsBetweenOnsets;
 
-    //Returns reference to plugins AudioClassifier for GUI to set classification settings.
-    //JWM - NOTE will need to change to accept templated precision. 
-    AudioClassifier<float>& getClassifier();
 
 private:
     //==============================================================================
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BeatboxVoxAudioProcessor);
 	
+    //==============================================================================
     const int kickNoteNumber = 12;
     const int snareNoteNumber = 43;
 	const int hihatNoteNumber = 50;
 	const int noiseNoteNumber = 54;
     const int osdTestSoundNoteNumber = 57;
 
+	//Flag to indicate whether to trigger the onset detector test sound for setting sensitivity by ear.
     std::atomic_bool usingOSDTestSound;
 
+    //==============================================================================
+	/**
+	 * A map of callbacks to be used for parameter changes. Associates
+	 * a param ID with a function callback.
+	 */
+    std::map<String, std::function<void(float)>> paramCallbacks;
+
+    //==============================================================================
     Synthesiser drumSynth;
     Synthesiser osdTestSynth;
 
+    //==============================================================================
     AudioProcessorValueTreeState processorState;
     //UndoManager processorUndoManager;
-    std::map<String, std::function<void(float)>> paramCallbacks;
 
+    //==============================================================================
     AudioClassifier<float> classifier;
 
+    //==============================================================================
+
+    //Setup the audio processor parameters
+    void setupParameters();
+
+	/**
+	 * Quick and dirty midi note generation functions to respond to classification. 
+	 * NOTE: Would change in future for more fully featured/production version. 
+	 */
     void triggerKickDrum(MidiBuffer& midiMessages) const;
     void triggerSnareDrum(MidiBuffer& midiMessages) const;
 	void triggerHiHat(MidiBuffer& midiMessages) const;
 	void triggerNoise(MidiBuffer& midiMessages) const;
-    
     void triggerOSDTestSound(MidiBuffer& midiMessages) const;
 };
 

@@ -280,9 +280,16 @@ size_t AudioClassifier<T>::getNumSounds() const
 
 //==============================================================================
 template<typename T>
-int AudioClassifier<T>::getCurrentTrainingSound() const
+int AudioClassifier<T>::getCurrentSoundRecording() const
 {
-    return currentTrainingSound.load();
+	if (recordingTrainingData.load())
+		return currentTrainingSoundRecording.load();
+
+	if (recordingTestData.load())
+		return currentTestSoundRecording.load();
+
+	//Not recording any sound currently
+	return -1;
 }
 
 //==============================================================================
@@ -399,11 +406,14 @@ template<typename T>
 void AudioClassifier<T>::recordTrainingData(int sound)
 {
 	//Cannot record test set and training set data at same time. Should be seperate instances.
-	currentTestSound.store(-1);
+	currentTestSoundRecording.store(-1);
 	recordingTestData.store(false);
+	classifierReady.store(false);
 
-    currentTrainingSound.store(sound);
-    trainingCount = (sound * numTrainingInstances);
+    currentTrainingSoundRecording.store(sound);
+	trainingSoundsReady[currentTrainingSoundRecording.load()] = false; //Training sound no longer ready till re-recorded.
+
+    trainingCount = (currentTrainingSoundRecording.load() * numTrainingInstances);
     recordingTrainingData.store(true);
 }
 
@@ -412,11 +422,16 @@ template<typename T>
 void AudioClassifier<T>::recordTestData(int testSound)
 {
 	//Cannot record test set and training set data at same time. Should be seperate instances.
-	currentTrainingSound.store(-1);
+	currentTrainingSoundRecording.store(-1);
 	recordingTrainingData.store(false);
 
-	currentTestSound.store(testSound);
-	testCount = (testSound * numTestInstances);
+	//Classifier state is no longer "ready" if we are recording new instances for a sound/class
+	classifierReady.store(false);
+
+	currentTestSoundRecording.store(testSound);
+	testSoundsReady[currentTestSoundRecording.load()] = false; //Test sound no longer ready till re-recorded.
+
+	testCount = (currentTestSoundRecording.load() * numTestInstances);
 	recordingTestData.store(true);
 }
 
@@ -427,14 +442,13 @@ void AudioClassifier<T>::train()
     //If all sound samples collected for training set train model.
     if (checkTrainingSetReady())
     {
-		//JWM - may change this later and not train all models at once.
         nbc.Train(trainingData, trainingLabels); 
 		knn.train(trainingData, trainingLabels);
 
         classifierReady.store(true);    
     }
 
-    //JWM - NOTE: Potentially return boolean and return false if checkTrainingSetReady() returns false.
+    //JWM - Potentially return boolean and return false if checkTrainingSetReady() returns false.
 }
 
 //==============================================================================
@@ -483,9 +497,14 @@ bool AudioClassifier<T>::getClassifierReady() const
 
 //==============================================================================
 template<typename T>
-bool AudioClassifier<T>::isTraining() const
+bool AudioClassifier<T>::isRecording() const
 {
-    return recordingTrainingData.load();
+	if (recordingTrainingData.load())
+		return true;
+	else if (recordingTestData.load())
+		return true;
+	else
+		return false;
 }
 
 //==============================================================================
@@ -586,14 +605,14 @@ void AudioClassifier<T>::processCurrentInstance()
     }
 	
     //If currently training update the training set with new instance 
-	if (currentTrainingSound.load() != -1 && recordingTrainingData.load())
+	if (currentTrainingSoundRecording.load() != -1 && recordingTrainingData.load())
 	{
 		if (numDelayedBuffers == 0)
 			addToTrainingSet(currentInstanceVector);
 		else if (delayedProcessedCount == numDelayedBuffers)
 			addToTrainingSet(currentInstanceVector);
 	}
-	else if (currentTestSound.load() != -1 && recordingTestData.load())
+	else if (currentTestSoundRecording.load() != -1 && recordingTestData.load())
 	{
 		if (numDelayedBuffers == 0)
 			addToTestSet(currentInstanceVector);
@@ -608,7 +627,7 @@ void AudioClassifier<T>::addToTrainingSet(const arma::Col<T>& newInstance)
 {
 	classifierReady.store(false);
 
-	auto sound = currentTrainingSound.load();
+	auto sound = currentTrainingSoundRecording.load();
 
 	if (trainingCount < (numTrainingInstances * (sound + 1)))
 	{
@@ -622,7 +641,7 @@ void AudioClassifier<T>::addToTrainingSet(const arma::Col<T>& newInstance)
 		//Set sound ready state to true for current training sound.
 		trainingSoundsReady[sound] = true;
 		recordingTrainingData.store(false);
-		currentTrainingSound.store(-1);
+		currentTrainingSoundRecording.store(-1);
 	}
 }
 
@@ -630,7 +649,7 @@ void AudioClassifier<T>::addToTrainingSet(const arma::Col<T>& newInstance)
 template<typename T>
 void AudioClassifier<T>::addToTestSet(const arma::Col<T>& newInstance)
 {
-	auto sound = currentTestSound.load();
+	auto sound = currentTestSoundRecording.load();
 
 	if (testCount < numTestInstances * (sound + 1))
 	{
@@ -643,7 +662,7 @@ void AudioClassifier<T>::addToTestSet(const arma::Col<T>& newInstance)
 	{
 		testSoundsReady[sound] = true;
 		recordingTestData.store(false);
-		currentTestSound.store(-1);
+		currentTestSoundRecording.store(-1);
 	}
 }
 
@@ -651,7 +670,7 @@ void AudioClassifier<T>::addToTestSet(const arma::Col<T>& newInstance)
 template<typename T>
 void AudioClassifier<T>::resetClassifierState()
 {
-	currentTrainingSound.store(-1);
+	currentTrainingSoundRecording.store(-1);
 	recordingTrainingData.store(false);
 	trainingCount = 0;
     classifierReady.store(false);
@@ -664,7 +683,7 @@ void AudioClassifier<T>::resetClassifierState()
 template<typename T>
 void AudioClassifier<T>::resetTestState()
 {
-	currentTestSound.store(-1);
+	currentTestSoundRecording.store(-1);
 	recordingTestData.store(false);
 	testCount = 0; 
 
@@ -704,7 +723,7 @@ int AudioClassifier<T>::classify()
 			case AudioClassifyOptions::ClassifierType::naiveBayes:
 				sound = nbc.Classify(currentInstanceVector);
 				break;
-			default: break; // sound returned -1 (invalid label - valid labels = 0 to numSounds)
+			default: break; // Sound returned -1 (Invalid label. Valid labels are 0 to numSounds)
 	    }
     }
 

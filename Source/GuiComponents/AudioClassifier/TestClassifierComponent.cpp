@@ -11,6 +11,7 @@
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "TestClassifierComponent.h"
 
+//==============================================================================
 String TestClassifierComponent::runTestButtonID("run_test_btn");
 String TestClassifierComponent::loadTestSetButtonID("load_test_set_btn");
 

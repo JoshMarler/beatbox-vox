@@ -19,7 +19,7 @@
 #include "../../Gist/src/onset-detection-functions/OnsetDetectionFunction.h"
 #include "../AdaptiveWhitener/AdaptiveWhitener.h"
 
-//name defines for clock and duration types
+//Type defines for clock and duration types
 using ClockType = std::chrono::steady_clock;
 using Ms = std::chrono::milliseconds;
 

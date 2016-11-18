@@ -28,24 +28,29 @@
 #include "../NaiveBayes/NaiveBayes.h"
 #include "../NearestNeighbour/NearestNeighbour.h"
 
+//==============================================================================
 template<typename T>
 class AudioClassifier
 {
 
 public:
 
+	//==============================================================================
     AudioClassifier(int initBufferSize, T initSampleRate, int initNumSounds, int initNumInstances);
-
     ~AudioClassifier();
 
+	//==============================================================================
     int getCurrentBufferSize() const;
     T getCurrentSampleRate() const;
 
     void setCurrentBufferSize (int newBufferSize);
     void setCurrentSampleRate (T newSampleRate);
     
-    int getCurrentTrainingSound() const;
+	//==============================================================================
+    int getCurrentSoundRecording() const;
     
+
+	//==============================================================================
     //Onset detector functions
     void setOSDMeanCoeff(T newMeanCoeff);
     void setOSDMedianCoeff(T newMedianCoeff);
@@ -58,6 +63,7 @@ public:
 	bool getOSDUsingLocalMaximum();
 	void setOSDUseLocalMaximum(bool use);
 
+	//==============================================================================
 	void setNumBuffersDelayed(unsigned int newNumDelayed);
 	int getNumBuffersDelayed() const;
 
@@ -75,9 +81,6 @@ public:
 	
 	void recordTestData(int testSound);
 
-    //NOTE - May change this after prototype so that the model is trained incrementally for each sound
-    //to avoid calling train with unfinished training data set. Alternativley may have this function
-    //return bool for successful or not in training. 
     void train();
 	
 	float test(std::vector<std::pair<unsigned int, unsigned int>>& outputResults);
@@ -125,7 +128,7 @@ public:
 
     bool getClassifierReady() const;
     
-    bool isTraining() const;
+    bool isRecording() const;
 
     void processAudioBuffer (const T* buffer, const int numSamples);
 
@@ -144,11 +147,15 @@ public:
 
 private:
 
-//==============================================================================
-
+	//==============================================================================
     int bufferSize = 0;
 	int delayedBufferSize = 0;
 
+	//==============================================================================
+	int numDelayedBuffers = 0;
+	unsigned int delayedProcessedCount = 0;
+
+	//==============================================================================
     int trainingSetSize = 0;
 	int testSetSize = 0;
 	int numTrainingInstances = 0;
@@ -156,16 +163,17 @@ private:
     int trainingCount = 0;
 	int testCount = 0;
 
+	//==============================================================================
     int numSounds = 0; 
 	unsigned int numFeatures = 0;
 	
-	int numDelayedBuffers = 0;
-	unsigned int delayedProcessedCount = 0;
-    
+	//==============================================================================
 	bool hasOnset = false;
 
-    T sampleRate;
+	//==============================================================================
+	T sampleRate = static_cast<T>(0.0);
 
+	//==============================================================================
     //Values to indicate which features currently being used by model.
 	std::atomic_bool usingRMS {true};
 	std::atomic_bool usingPeakEnergy {true};
@@ -177,27 +185,31 @@ private:
     std::atomic_bool usingSpecKurtosis {true};
     std::atomic_bool usingMfcc {true};
 
+	//==============================================================================
 	std::atomic_bool useDelayedEval {false};
 
+	//==============================================================================
 	std::atomic<AudioClassifyOptions::ClassifierType> currentClassfierType;
 
-    //This value indicates the current sound being trained declared atomic as may be set by a GUI thread / user control.
-    std::atomic_int currentTrainingSound;
-	
-	std::atomic_int currentTestSound;
+	//==============================================================================
+	/* Classifier current state variables */
 
-    //Inidicates if the model has been trained with full training set and classifier is ready, declared atomic as may be set by a GUI thread / user control.
+    //Indicates the current sound being recorded/trained.
+    std::atomic_int currentTrainingSoundRecording;
+	std::atomic_int currentTestSoundRecording;
+
+	//Classifier is ready to use true/false.
     std::atomic_bool classifierReady;
 
+	//Indicates whether currently recording test/training data.
     std::atomic_bool recordingTrainingData;
-
 	std::atomic_bool recordingTestData;
 
     //Holds states for each sound in model to confirm whether sound's training set has been recorded.
     std::vector<bool> trainingSoundsReady;
-
 	std::vector<bool> testSoundsReady;
     
+	//==============================================================================
     //Array/Buffer to hold mag spectrum.
     std::unique_ptr<T[]> magSpectrumOSD;
 	
@@ -207,6 +219,7 @@ private:
     //Array/Buffer to hold the mel frequency cepstral coefficients.
     std::unique_ptr<T[]> mfccs;
 
+	//==============================================================================
     //Holds the training data set.
     arma::Mat<T> trainingData;
 
@@ -218,14 +231,15 @@ private:
     
     //Holds the the feature values/vector for the current instance/block.
     arma::Col<T> currentInstanceVector;
-    
+   
+	//==============================================================================
     Gist<T> gistFeatures;
 	Gist<T> gistFeaturesOSD;
     OnsetDetector<T> osDetector;
     NaiveBayes<T> nbc;
 	NearestNeighbour<T> knn;
-//==============================================================================
 
+	//==============================================================================
     void processCurrentInstance();
 
 	void addToTrainingSet(const arma::Col<T>& newInstance);
@@ -236,9 +250,10 @@ private:
 	void configTrainingSetMatrix();
 	void configTestSetMatrix();
 
-
+	//Calculates the size required for the feature rows based on features being used
     unsigned int calcFeatureVecSize() const;
 
+	//==============================================================================
 };
 
 

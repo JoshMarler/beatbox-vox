@@ -43,12 +43,10 @@ SelectClassifierComponent::SelectClassifierComponent(BeatboxVoxAudioProcessor& p
 	setupClassifierCmbBox();
 
 	saveTrainingDataButton.setComponentID(saveTrainingDataButtonID);
-	saveTrainingDataButton.setClickingTogglesState (true);
     saveTrainingDataButton.addListener(this);
     addAndMakeVisible(saveTrainingDataButton);
     
 	loadTrainingDataButton.setComponentID(loadTrainingDateButtonID);
-	loadTrainingDataButton.setClickingTogglesState (true);
     loadTrainingDataButton.addListener(this);
 	addAndMakeVisible(loadTrainingDataButton);
 

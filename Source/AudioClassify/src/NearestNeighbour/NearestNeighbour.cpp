@@ -51,7 +51,7 @@ int NearestNeighbour<T>::classify(arma::Col<T>& instance)
 	//Normalise instance values to 0 - 1 for distance calculation
 	PreProcessing::normalise(instance);
 
-	//Reset the counts for class occurrences in the k nearest neighbours
+	//Reset the counts for class occurrences in the k nearest neighbours collection
 	std::fill(neighbourClassCounts.get(), neighbourClassCounts.get() + numClasses, 0);
 
 	for (std::size_t i = 0; i < trainingSet.n_cols; ++i)
@@ -110,7 +110,7 @@ void NearestNeighbour<T>::setNumFeatures(const unsigned int newNumFeatures)
 
 //=======================================================================================================
 /* JWM - NOTE: May not be neccessary to use references here as requires the training data's life time 
- * to match this objects. The train method should be being called from the message thread in theory so making 
+ * to match this objects. The train method should be being called from the message/GUI thread in theory so making 
  * a copy at this point may not be an issue. This will need to be taken into consideration at library stage in particular. 
 */
 template<typename T>
