@@ -181,6 +181,7 @@ void TestClassifierComponent::paintCell (Graphics& g, int rowNumber, int columnI
 		g.drawText (text, 2, 0, width - 4, height, Justification::centredLeft, true);
 	}*/
 
+
 	g.setColour (Colours::black.withAlpha (0.2f));
 	g.fillRect (width - 1, 0, 1, height);
 }
