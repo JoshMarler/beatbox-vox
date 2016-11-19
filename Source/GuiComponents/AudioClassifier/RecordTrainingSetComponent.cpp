@@ -235,10 +235,10 @@ void RecordTrainingSetComponent::buttonClicked(Button * button)
 		switch (currentDataSetType)
 		{
 			case AudioClassifyOptions::DataSetType::trainingSet:
-				processor.getClassifier().setNumTrainingInstances(numInstances);
+				processor.getClassifier().setTrainingInstancesPerSound(numInstances);
 				break;
 			case AudioClassifyOptions::DataSetType::testSet:
-				processor.getClassifier().setNumTestInstances(numInstances);
+				processor.getClassifier().setTestInstancesPerSound(numInstances);
 				break;
 			default:
 				break;
@@ -310,10 +310,10 @@ void RecordTrainingSetComponent::sliderValueChanged(Slider * slider)
 		switch (currentDataSetType)
 		{
 		case AudioClassifyOptions::DataSetType::trainingSet:
-			currentVal = processor.getClassifier().getNumTrainingInstances();
+			currentVal = processor.getClassifier().getTrainingInstancesPerSound();
 			break;
 		case AudioClassifyOptions::DataSetType::testSet:
-			currentVal = processor.getClassifier().getNumTestInstances();
+			currentVal = processor.getClassifier().getTestInstancesPerSound();
 			break;
 		default:
 			break;

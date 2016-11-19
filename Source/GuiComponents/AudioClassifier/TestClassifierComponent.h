@@ -22,8 +22,8 @@
 /*
 */
 class TestClassifierComponent    : public Component,
-								   ButtonListener,
-								   TableListBoxModel
+								   public TableListBoxModel, 
+								   ButtonListener
 {
 public:
 	explicit TestClassifierComponent(BeatboxVoxAudioProcessor& p);
@@ -46,7 +46,9 @@ public:
 
 private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(TestClassifierComponent)
-	
+
+	std::vector<std::pair<int, int>> currentTestResults;
+
 	BeatboxVoxAudioProcessor& processor;
 
 	//NOTE - Ideally change this at a later point to take look and feel from parent of the owning dialog. 
@@ -62,7 +64,6 @@ private:
 
 	TableListBox table;
 
-	unsigned int numTestResults = 0;
 	bool loadTestSet();
 	void populateResultsTable(std::vector<std::pair<unsigned int, unsigned int>>& results);
 

@@ -114,11 +114,14 @@ public:
 	 * The model/classifier will need to be re-trained and a fresh training set collected.
 	 * @param newNumInstances the number of instance to be recorded per sound for the training set.
 	 */
-    void setNumTrainingInstances(int newNumInstances);
-	int getNumTrainingInstances() const;
+    void setTrainingInstancesPerSound(int newNumInstances);
+	int getTrainingInstancesPerSound() const;
 
-	void setNumTestInstances(int newNumInstances);
-	int getNumTestInstances() const;
+	void setTestInstancesPerSound(int newNumInstances);
+	int getTestInstancesPerSound() const;
+
+	int getTrainingSetSize() const;
+	int getTestSetSize() const;
 
     bool checkTrainingSetReady() const;
 	bool checkTrainingSoundReady(const unsigned sound) const;

@@ -57,6 +57,12 @@ TestClassifierComponent::TestClassifierComponent(BeatboxVoxAudioProcessor& p)
 	accuracyLabel.setColour(Label::textColourId, Colours::greenyellow);
 	addAndMakeVisible(accuracyLabel);
 
+
+	auto numTestResults = processor.getClassifier().getTestSetSize();
+	
+	//Set current test results to uninitialized state
+	currentTestResults.resize(numTestResults, std::make_pair(-1, -1));
+
 	//Set up test results table
 	table.setColour(ListBox::ColourIds::outlineColourId, Colours::greenyellow);
 	table.setColour(ListBox::ColourIds::backgroundColourId, Colours::black);
@@ -155,34 +161,62 @@ void TestClassifierComponent::buttonClicked(Button * button)
 //===============================================================================
 int TestClassifierComponent::getNumRows()
 {
-	return numTestResults;
+	return processor.getClassifier().getTestSetSize();
 }
 
 //===============================================================================
 void TestClassifierComponent::paintRowBackground (Graphics& g, int rowNumber, int /*width*/, int /*height*/, bool rowIsSelected)
 {
-	if (rowIsSelected)
-		g.fillAll (Colours::lightblue);
-	else if (rowNumber % 2)
-		g.fillAll (Colour (0xffeeeeee));
+	g.fillAll(Colour(0xffeeeeee));
 }
 
 //===============================================================================
 void TestClassifierComponent::paintCell (Graphics& g, int rowNumber, int columnId,
 				int width, int height, bool /*rowIsSelected*/)
 {
+	auto valOne = std::get<0>(currentTestResults[rowNumber]);
+	auto valTwo = std::get<1>(currentTestResults[rowNumber]);
+	auto ready = false;
+	String actualName = "";
+	String predictedName = "";
+
+	if (valOne != -1 && valTwo != -1)
+	{
+		ready = true;
+		actualName = processor.getSoundName(static_cast<BeatboxVoxAudioProcessor::soundLabel>(valOne));
+		predictedName = processor.getSoundName(static_cast<BeatboxVoxAudioProcessor::soundLabel>(valTwo));
+	}
+
 	g.setColour (Colours::black);
 	g.setFont (Font("Cracked", 14.0f, Font::plain));
 
-	/*if (const XmlElement* rowElement = dataList->getChildElement (rowNumber))
+	String text;
+	switch (columnId)
 	{
-		const String text (rowElement->getStringAttribute (getAttributeNameForColumnId (columnId)));
+		case 1:
+			if (ready)
+				text = String::formatted("%d", rowNumber + 1);
+			else
+				text = "n/a";
+			break;
+		case 2:
+			if (ready)
+				text = actualName;
+			else
+				text = "n/a";
+			break;
+		case 3:
+			if (ready)
+				text = predictedName;
+			else
+				text = "n/a";
+			break;
+		default: break;
+	}
 
-		g.drawText (text, 2, 0, width - 4, height, Justification::centredLeft, true);
-	}*/
+	g.drawText (text, 2, 0, width - 4, height, Justification::centredLeft, true);
 
-
-	g.setColour (Colours::black.withAlpha (0.2f));
+	g.setColour (Colours::black.withAlpha(0.2f));
 	g.fillRect (width - 1, 0, 1, height);
 }
 
@@ -224,6 +258,9 @@ bool TestClassifierComponent::loadTestSet()
 //===============================================================================
 void TestClassifierComponent::populateResultsTable(std::vector<std::pair<unsigned int, unsigned int>>& results)
 {
+	std::copy(results.begin(), results.end(), currentTestResults.begin());
+	table.updateContent();
+	table.repaint();
 }
 
 //===============================================================================

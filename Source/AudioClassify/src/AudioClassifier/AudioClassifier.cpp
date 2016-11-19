@@ -26,7 +26,7 @@ AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int in
 
 	trainingSetSize = numSounds * numTrainingInstances;
 
-	//Set initial num test instance per sound to 5
+	//Set initial num test instance per sound to 10
 	numTestInstances = 10;
 	testSetSize = numSounds * numTestInstances;
 
@@ -453,12 +453,12 @@ void AudioClassifier<T>::train()
 
 //==============================================================================
 template<typename T>
-void AudioClassifier<T>::setNumTrainingInstances(int newNumInstances)
+void AudioClassifier<T>::setTrainingInstancesPerSound(int newNumInstances)
 {
     numTrainingInstances = newNumInstances;
 	trainingSetSize = (numTrainingInstances * numSounds);
 
-	knn.setNumTrainingInstances(numTrainingInstances);
+	knn.setTrainingInstancesPerClass(numTrainingInstances);
 
     //Resize/configure trainingSet matrix
 	configTrainingSetMatrix();
@@ -466,14 +466,14 @@ void AudioClassifier<T>::setNumTrainingInstances(int newNumInstances)
 
 //==============================================================================
 template<typename T>
-int AudioClassifier<T>::getNumTrainingInstances() const
+int AudioClassifier<T>::getTrainingInstancesPerSound() const
 {
 	 return numTrainingInstances;
 }
 
 //==============================================================================
 template<typename T>
-void AudioClassifier<T>::setNumTestInstances(int newNumInstances)
+void AudioClassifier<T>::setTestInstancesPerSound(int newNumInstances)
 {
 	numTestInstances = newNumInstances;
 	testSetSize = (numTestInstances * numSounds);
@@ -483,9 +483,21 @@ void AudioClassifier<T>::setNumTestInstances(int newNumInstances)
 
 //==============================================================================
 template<typename T>
-int AudioClassifier<T>::getNumTestInstances() const
+int AudioClassifier<T>::getTestInstancesPerSound() const
 {
 	return numTestInstances;
+}
+
+template<typename T>
+int AudioClassifier<T>::getTrainingSetSize() const
+{
+	return trainingSetSize;
+}
+
+template<typename T>
+int AudioClassifier<T>::getTestSetSize() const
+{
+	return testSetSize;
 }
 
 //==============================================================================

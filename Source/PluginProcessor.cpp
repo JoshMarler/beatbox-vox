@@ -321,6 +321,28 @@ AudioClassifier<float>& BeatboxVoxAudioProcessor::getClassifier()
 	return classifier;
 }
 
+String BeatboxVoxAudioProcessor::getSoundName(soundLabel val)
+{
+	String name = "";
+
+	switch (val)
+	{
+		case KickDrum :
+			name = "Kick";
+			break;
+		case SnareDrum :
+			name = "Snare";
+			break;
+		case HiHat :
+			name = "HiHat";
+			break;
+		default :
+			break;
+	}
+
+	return name;
+}
+
 
 //==============================================================================
 bool BeatboxVoxAudioProcessor::hasEditor() const

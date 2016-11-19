@@ -85,6 +85,7 @@ public:
     //JWM - NOTE should eventually change to accept templated precision. 
     AudioClassifier<float>& getClassifier();
 
+
     //==============================================================================
     enum soundLabel
     {
@@ -93,6 +94,7 @@ public:
         HiHat
     };
 
+	static String getSoundName(soundLabel val);
     //==============================================================================
     //Parameter ID strings
     static String paramOSDMeanCoeff;
