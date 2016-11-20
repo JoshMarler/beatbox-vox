@@ -15,12 +15,15 @@
 //==============================================================================
 template<typename T>
 AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int initNumSounds, int initNumInstances)
-	: gistFeatures((initBufferSize), static_cast<int>(initSampleRate)), //JWM - Eventually initialise with slice size?
-	  gistFeaturesOSD(initBufferSize, initSampleRate),
-	  osDetector((initBufferSize / 2), initSampleRate),
+	: gistFeatures(initBufferSize, static_cast<int>(initSampleRate)), //JWM - Eventually initialise with slice size?
+	  gistFeaturesStft(initBufferSize, static_cast<int>(initSampleRate)),
+	  osDetector(initBufferSize / 2, initSampleRate),
 	  nbc(initNumSounds, 21),
 	  knn(21, initNumSounds, initNumInstances)
 {
+	bufferSize = initBufferSize;
+	sampleRate = initSampleRate;
+
 	numTrainingInstances = initNumInstances;
     numSounds = initNumSounds;
 
@@ -34,9 +37,6 @@ AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int in
 
 	currentClassfierType.store(AudioClassifyOptions::ClassifierType::naiveBayes);
 
-    setCurrentSampleRate(initSampleRate);
-    setCurrentBufferSize(initBufferSize);
-
     auto numCoefficients = gistFeatures.getMFCCNumCoefficients();
     mfccs.reset(new T[numCoefficients]);
 
@@ -46,6 +46,9 @@ AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int in
 
 	configTrainingSetMatrix();
 	configTestSetMatrix();
+
+	//JWM - Quick test
+	setNumSTFTFrames(4);
 }
 
 //==============================================================================
@@ -73,25 +76,15 @@ T AudioClassifier<T>::getCurrentSampleRate() const
 template<typename T>
 void AudioClassifier<T>::setCurrentBufferSize (int newBufferSize)
 {
-
 	bufferSize = newBufferSize;
 	
-	gistFeaturesOSD.setAudioFrameSize(bufferSize);
-
 	magSpectrumOSD.reset(new T[bufferSize / 2]);    
 	std::fill(magSpectrumOSD.get(), (magSpectrumOSD.get() + (bufferSize / 2)), static_cast<T>(0.0));
 
-
-	//JWM - will eventually replace the below with audio buffer slicing - 
-	// audioBufferSize == bufferSliceSize rather than delayed buffer size
-
-	//const auto delayedBufferSize = bufferSize * (numDelayedBuffers + 1);
-
-	//audioBuffer.reset(new T[delayedBufferSize]);
-	//std::fill(audioBuffer.get(), (audioBuffer.get() + delayedBufferSize), static_cast<T>(0.0));
-
 	gistFeatures.setAudioFrameSize(bufferSize);
 
+	//Update STFT frame size relative to new bufferSize.
+	setupStft();
 
 	//If changing num delayed buffers current training set no longer valid so reset and require re-train.
 	resetClassifierState();
@@ -103,7 +96,7 @@ void AudioClassifier<T>::setCurrentSampleRate (T newSampleRate)
 {
     sampleRate = newSampleRate;
     gistFeatures.setSamplingFrequency(static_cast<int>(sampleRate));
-	gistFeaturesOSD.setSamplingFrequency(static_cast<int>(sampleRate));
+	gistFeaturesStft.setSamplingFrequency(static_cast<int>(sampleRate));
 	osDetector.setSampleRate(sampleRate);
 }
 
@@ -368,11 +361,8 @@ void AudioClassifier<T>::setNumBuffersDelayed(unsigned int newNumDelayed)
 {
 	numDelayedBuffers = newNumDelayed;
 	
-	auto featureSize = calcFeatureVecSize();
-	numFeatures = featureSize * (numDelayedBuffers + 1);
-
-	knn.setNumFeatures(numFeatures);
-	nbc.setNumFeatures(numFeatures);
+	//Total num features depends on numDelayedBuffers
+	updateFeatures();
 
 	//Re-configure training set matrix and reset model state as new feature/attribute rows required
 	configTrainingSetMatrix();
@@ -384,6 +374,19 @@ template<typename T>
 int AudioClassifier<T>::getNumBuffersDelayed() const
 {
 	return numDelayedBuffers;
+}
+
+//==============================================================================
+template<typename T>
+void AudioClassifier<T>::setNumSTFTFrames(const unsigned int newNumSTFTFrames)
+{
+	numStftFrames = newNumSTFTFrames;
+	setupStft();
+
+	updateFeatures();
+
+	configTrainingSetMatrix();
+	configTestSetMatrix();
 }
 
 //==============================================================================
@@ -488,12 +491,14 @@ int AudioClassifier<T>::getTestInstancesPerSound() const
 	return numTestInstances;
 }
 
+//==============================================================================
 template<typename T>
 int AudioClassifier<T>::getTrainingSetSize() const
 {
 	return trainingSetSize;
 }
 
+//==============================================================================
 template<typename T>
 int AudioClassifier<T>::getTestSetSize() const
 {
@@ -535,45 +540,63 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer, const int numSampl
     /**     return; */
     /** } */
 	
-	
 	if (delayedProcessedCount == 0)
 	{
-		gistFeaturesOSD.processAudioFrame(buffer, bufferSize);
-		gistFeaturesOSD.getMagnitudeSpectrum(magSpectrumOSD.get());
-		
+		gistFeatures.processAudioFrame(buffer, bufferSize);
+		gistFeatures.getMagnitudeSpectrum(magSpectrumOSD.get());
 		hasOnset = osDetector.checkForOnset(magSpectrumOSD.get(), bufferSize / 2);
 	}
 
 	if (hasOnset)
 	{
-		if (numDelayedBuffers != 0 && delayedProcessedCount < numDelayedBuffers)
-		{
-			//JWM - soon replace with buffer slicing - gistFeatures will have buffer size equal to slice size
-			//auto writeIndex = delayedProcessedCount * bufferSize;
-			//std::copy(buffer, buffer + bufferSize, audioBuffer.get() + writeIndex);
-			
-			gistFeatures.processAudioFrame(buffer, bufferSize);
-			processCurrentInstance();
-
-			++delayedProcessedCount;
-		}
+		if (numStftFrames > 0)
+			processSTFTFrame(buffer);
 		else
 		{
-			//JWM - Implement buffer slice processing again here 
 			gistFeatures.processAudioFrame(buffer, bufferSize);
 			processCurrentInstance();
-
-			//Reset state until next detected onset
-			delayedProcessedCount = 0;
 		}
-				
+
+		if (numDelayedBuffers != 0 && delayedProcessedCount < numDelayedBuffers)
+			++delayedProcessedCount;
+		else
+			delayedProcessedCount = 0;
 	}
 
 }
 
+//==============================================================================
 template<typename T>
-void AudioClassifier<T>::processSTFTFrame(const T * inputBuffer)
+void AudioClassifier<T>::setupStft()
 {
+	if (numStftFrames != 0)
+	{
+		stftFrameSize = bufferSize / numStftFrames;
+		gistFeaturesStft.setAudioFrameSize(stftFrameSize);
+	}
+}
+
+//==============================================================================
+template<typename T>
+void AudioClassifier<T>::processSTFTFrame(const T* inputBuffer)
+{
+	
+	while (stftProcessedCount < numStftFrames)
+	{
+		//Later allow use of hopSize/overlap ?
+		auto readPosition = stftFrameSize * stftProcessedCount;
+		auto* readPtr = inputBuffer + readPosition;
+			
+		//Gist windows the signal internally prior to the FFT so fine for STFT
+		gistFeaturesStft.processAudioFrame(readPtr, stftFrameSize);
+
+		processCurrentInstance();
+
+		++stftProcessedCount;
+	}
+
+	//Reset state for next instance/onset
+	stftProcessedCount = 0;
 }
 
 //==============================================================================
@@ -581,10 +604,13 @@ template<typename T>
 void AudioClassifier<T>::processCurrentInstance()
 {
 	auto pos = 0;
+	auto instanceReady = false;
 
-	if (delayedProcessedCount != 0)
-		pos = delayedProcessedCount * (numFeatures / (numDelayedBuffers + 1));
-	
+	if (numStftFrames != 0)
+		pos = (stftProcessedCount + (delayedProcessedCount * numStftFrames)) * calcFeatureVecSize();
+	else
+		pos = delayedProcessedCount * calcFeatureVecSize();
+
 
 	if (usingRMS.load())
 		currentInstanceVector[pos++] = gistFeatures.rootMeanSquare();
@@ -621,21 +647,23 @@ void AudioClassifier<T>::processCurrentInstance()
          } 
     }
 	
-    //If currently training update the training set with new instance 
-	if (currentTrainingSoundRecording.load() != -1 && recordingTrainingData.load())
+	
+	if (pos == numFeatures - 1)
+		instanceReady = true;
+
+
+	if (instanceReady)
 	{
-		if (numDelayedBuffers == 0)
+		if (currentTrainingSoundRecording.load() != -1 && recordingTrainingData.load())
+		{
 			addToTrainingSet(currentInstanceVector);
-		else if (delayedProcessedCount == numDelayedBuffers)
-			addToTrainingSet(currentInstanceVector);
-	}
-	else if (currentTestSoundRecording.load() != -1 && recordingTestData.load())
-	{
-		if (numDelayedBuffers == 0)
+		}
+		else if (currentTestSoundRecording.load() != -1 && recordingTestData.load())
+		{
 			addToTestSet(currentInstanceVector);
-		else if (delayedProcessedCount == numDelayedBuffers)
-			addToTestSet(currentInstanceVector);
+		}
 	}
+
 }
 
 //==============================================================================
@@ -823,7 +851,6 @@ void AudioClassifier<T>::configTrainingSetMatrix()
 
 	currentInstanceVector.set_size(numFeatures);
 	currentInstanceVector.zeros();
-
 }
 
 //==============================================================================
@@ -881,6 +908,21 @@ unsigned int AudioClassifier<T>::calcFeatureVecSize() const
     }
 
     return size;
+}
+
+//==============================================================================
+template<typename T>
+void AudioClassifier<T>::updateFeatures()
+{
+	auto featureSize = calcFeatureVecSize();
+
+	if (numStftFrames > 0)
+		numFeatures = featureSize * (numStftFrames * (numDelayedBuffers + 1));
+	else
+		numFeatures = featureSize * (numDelayedBuffers + 1);
+
+	knn.setNumFeatures(numFeatures);
+	nbc.setNumFeatures(numFeatures);
 }
 
 //==============================================================================

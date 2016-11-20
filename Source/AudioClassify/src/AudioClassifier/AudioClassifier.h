@@ -67,6 +67,8 @@ public:
 	void setNumBuffersDelayed(unsigned int newNumDelayed);
 	int getNumBuffersDelayed() const;
 
+	void setNumSTFTFrames(const unsigned int newNumSTFTFrames);
+
 	/** This method sets the classifier type/learning algorithm to be used.
 	 * @param classifierType the classifier type to be used i.e. AudioClassifyOptions::ClassifierType::knn
 	 */
@@ -153,11 +155,13 @@ private:
 	//==============================================================================
     int bufferSize = 0;
 	int delayedBufferSize = 0;
+	int stftFrameSize = 0;
 
 	//==============================================================================
 	int numDelayedBuffers = 0;
 	unsigned int delayedProcessedCount = 0;
-
+	unsigned int numStftFrames = 0;
+	unsigned int stftProcessedCount = 0;
 
 	//==============================================================================
     int trainingSetSize = 0;
@@ -238,12 +242,13 @@ private:
    
 	//==============================================================================
     Gist<T> gistFeatures;
-	Gist<T> gistFeaturesOSD;
+	Gist<T> gistFeaturesStft;
     OnsetDetector<T> osDetector;
     NaiveBayes<T> nbc;
 	NearestNeighbour<T> knn;
 
 	//==============================================================================
+	void setupStft();
 	void processSTFTFrame(const T* inputBuffer);
     void processCurrentInstance();
 
@@ -257,6 +262,7 @@ private:
 
 	//Calculates the size required for the feature rows based on features being used
     unsigned int calcFeatureVecSize() const;
+	void updateFeatures();
 
 	//==============================================================================
 };
