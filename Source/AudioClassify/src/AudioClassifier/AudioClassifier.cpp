@@ -571,6 +571,11 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer, const int numSampl
 
 }
 
+template<typename T>
+void AudioClassifier<T>::processSTFTFrame(const T * inputBuffer)
+{
+}
+
 //==============================================================================
 template<typename T>
 void AudioClassifier<T>::processCurrentInstance()

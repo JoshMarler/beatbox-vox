@@ -158,6 +158,7 @@ private:
 	int numDelayedBuffers = 0;
 	unsigned int delayedProcessedCount = 0;
 
+
 	//==============================================================================
     int trainingSetSize = 0;
 	int testSetSize = 0;
@@ -243,6 +244,7 @@ private:
 	NearestNeighbour<T> knn;
 
 	//==============================================================================
+	void processSTFTFrame(const T* inputBuffer);
     void processCurrentInstance();
 
 	void addToTrainingSet(const arma::Col<T>& newInstance);
