@@ -46,9 +46,6 @@ AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int in
 
 	configTrainingSetMatrix();
 	configTestSetMatrix();
-
-	//JWM - Quick test
-	setNumSTFTFrames(4);
 }
 
 //==============================================================================
@@ -173,7 +170,7 @@ bool AudioClassifier<T>::loadTrainingSet(const std::string & fileName, std::stri
 		}
 
 		//Set all sounds as ready so model can be trained.
-		for (auto v : trainingSoundsReady)
+		for (auto& v : trainingSoundsReady)
 		{
 			v = true;
 		}
@@ -254,7 +251,7 @@ bool AudioClassifier<T>::loadTestSet(const std::string& fileName, std::string & 
 		}
 
 		//Set all sounds as ready so model can be tested.
-		for (auto v : testSoundsReady)
+		for (auto& v : testSoundsReady)
 		{
 			v = true;
 		}
@@ -648,20 +645,16 @@ void AudioClassifier<T>::processCurrentInstance()
     }
 	
 	
-	if (pos == numFeatures - 1)
+	if (pos == numFeatures)
 		instanceReady = true;
 
 
 	if (instanceReady)
 	{
 		if (currentTrainingSoundRecording.load() != -1 && recordingTrainingData.load())
-		{
 			addToTrainingSet(currentInstanceVector);
-		}
 		else if (currentTestSoundRecording.load() != -1 && recordingTestData.load())
-		{
 			addToTestSet(currentInstanceVector);
-		}
 	}
 
 }
@@ -720,7 +713,7 @@ void AudioClassifier<T>::resetClassifierState()
 	trainingCount = 0;
     classifierReady.store(false);
 
-	for (auto v : trainingSoundsReady)
+	for (auto& v : trainingSoundsReady)
 		  v = false;
 }
 
@@ -732,7 +725,7 @@ void AudioClassifier<T>::resetTestState()
 	recordingTestData.store(false);
 	testCount = 0; 
 
-	for (auto v : testSoundsReady)
+	for (auto& v : testSoundsReady)
 		  v = false;
 }
 
