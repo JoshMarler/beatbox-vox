@@ -26,7 +26,7 @@ AdaptiveWhitener<T>::AdaptiveWhitener(const std::size_t initFrameSize, const uns
 
 //==============================================================================
 template<typename T>
-AdaptiveWhitener<typename T>::~AdaptiveWhitener()
+AdaptiveWhitener<T>::~AdaptiveWhitener()
 {
 }
 

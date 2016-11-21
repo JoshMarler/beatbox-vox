@@ -18,7 +18,7 @@
 
 #include "RecordTrainingSetComponent.h"
 #include "SelectClassifierComponent.h"
-#include "DelayedEvaluationComponent.h"
+#include "BufferHandlingComponent.h"
 #include "FeaturesComponent.h"
 
 #include "../../PluginProcessor.h"
@@ -48,7 +48,7 @@ private:
 	//Core child components
 	std::unique_ptr<RecordTrainingSetComponent> recordTrainingSetComponent;
 	std::unique_ptr<SelectClassifierComponent> selectClassifierComponent;
-	std::unique_ptr<DelayedEvaluationComponent> delayedEvaluationComponent;
+	std::unique_ptr<BufferHandlingComponent> bufferHandlingComponent;
 	std::unique_ptr<FeaturesComponent> featuresComponent;
 
 };

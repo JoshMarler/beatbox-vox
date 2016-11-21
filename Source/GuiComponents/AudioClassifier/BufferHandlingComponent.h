@@ -1,15 +1,15 @@
 /*
   ==============================================================================
 
-    DelayedEvaluationComponent.h
+    BUFFERHANDLINGCOMPONENT.h
     Created: 28 Oct 2016 9:00:48pm
     Author:  Joshua Marler
 
   ==============================================================================
 */
 
-#ifndef DELAYEDEVALUATIONCOMPONENT_H_INCLUDED
-#define DELAYEDEVALUATIONCOMPONENT_H_INCLUDED
+#ifndef BUFFERHANDLINGCOMPONENT_H_INCLUDED
+#define BUFFERHANDLINGCOMPONENT_H_INCLUDED
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "../../PluginProcessor.h"
@@ -19,13 +19,13 @@
 /**
  *
  */
-class DelayedEvaluationComponent : public Component,
+class BufferHandlingComponent : public Component,
 								   ButtonListener,
 								   SliderListener
 {
 public:
-	explicit DelayedEvaluationComponent(BeatboxVoxAudioProcessor& p);
-    ~DelayedEvaluationComponent();
+	explicit BufferHandlingComponent(BeatboxVoxAudioProcessor& p);
+    ~BufferHandlingComponent();
 
     void paint (Graphics&) override;
     void resized() override;
@@ -38,34 +38,41 @@ public:
 	static String activateButtonID;
 	static String bufferDelaySliderID;
 	static String bufferDelayUpdateButtonID;
-	static String useEarlyAttackButtonID;
+	static String stftNumFramesSliderID;
+	static String stftFramesUpdateButtonID;
 
 private:
-	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DelayedEvaluationComponent)
+	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(BufferHandlingComponent)
 
     BeatboxVoxAudioProcessor& processor;
 	
 	//heading section controls
 	Label headingLabel;
+
 	ToggleButton activateButton;
 
+	//Delayed evaluation controls
 	Label numSamplesUsedLbl;
 	Label numSamplesUsedVal;
 
 	Label numBuffersUsedLbl;
 	Label numBuffersUsedVal;
 
-	Label earlyAttackLbl;
-	ToggleButton useEarlyAttackButton;
-
 	Label bufferDelayLabel;
 	Slider bufferDelaySlider;
 	TextButton bufferDelayUpdateButton;
 
-	void setActive(bool active);
-	void setUseEarlyAttack(bool use);
-	void setNeedsUpdate(bool needsUpdate);
+	//STFT Controls
+	Label stftNumFramesLabel;
+	Slider stftNumFramesSlider;
+	TextButton stftFramesUpdateButton;
+
+	Label stftFrameSizeLbl;
+	Label stftFrameSizeVal;
+
+	void setActive(bool active) const;
+	static void setNeedsUpdate(bool needsUpdate, Button& button);
 };
 
 
-#endif  // DELAYEDEVALUATIONCOMPONENT_H_INCLUDED
+#endif  // BUFFERHANDLINGCOMPONENT_H_INCLUDED

@@ -18,12 +18,12 @@ AudioClassifierComponent::AudioClassifierComponent(BeatboxVoxAudioProcessor& p)
 	recordTrainingSetComponent = std::make_unique<RecordTrainingSetComponent>(processor);
 	selectClassifierComponent = std::make_unique<SelectClassifierComponent>(processor);
 	featuresComponent = std::make_unique<FeaturesComponent>(processor);
-	delayedEvaluationComponent = std::make_unique<DelayedEvaluationComponent>(processor);
+	bufferHandlingComponent = std::make_unique<BufferHandlingComponent>(processor);
 
 	addAndMakeVisible(recordTrainingSetComponent.get());
 	addAndMakeVisible(selectClassifierComponent.get());
 	addAndMakeVisible(featuresComponent.get());
-	addAndMakeVisible(delayedEvaluationComponent.get());
+	addAndMakeVisible(bufferHandlingComponent.get());
 }
 
 
@@ -62,7 +62,7 @@ void AudioClassifierComponent::resized()
 
 	auto boundsBottom = bounds;
 	boundsBottom.reduce(boundsBottom.getWidth() / 100, boundsBottom.getHeight() / 50);
-	delayedEvaluationComponent->setBounds(boundsBottom);
+	bufferHandlingComponent->setBounds(boundsBottom);
 }
 
 //===============================================================================

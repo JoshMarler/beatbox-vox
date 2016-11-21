@@ -24,10 +24,10 @@
                 file="Source/GuiComponents/AudioClassifier/AudioClassifierComponent.cpp"/>
           <FILE id="EgwUNu" name="AudioClassifierComponent.h" compile="0" resource="0"
                 file="Source/GuiComponents/AudioClassifier/AudioClassifierComponent.h"/>
-          <FILE id="Y0xzNm" name="DelayedEvaluationComponent.cpp" compile="1"
-                resource="0" file="Source/GuiComponents/AudioClassifier/DelayedEvaluationComponent.cpp"/>
-          <FILE id="fkz33T" name="DelayedEvaluationComponent.h" compile="0" resource="0"
-                file="Source/GuiComponents/AudioClassifier/DelayedEvaluationComponent.h"/>
+          <FILE id="Y0xzNm" name="BufferHandlingComponent.cpp" compile="1" resource="0"
+                file="Source/GuiComponents/AudioClassifier/BufferHandlingComponent.cpp"/>
+          <FILE id="fkz33T" name="BufferHandlingComponent.h" compile="0" resource="0"
+                file="Source/GuiComponents/AudioClassifier/BufferHandlingComponent.h"/>
           <FILE id="Y9UGex" name="FeaturesComponent.cpp" compile="1" resource="0"
                 file="Source/GuiComponents/AudioClassifier/FeaturesComponent.cpp"/>
           <FILE id="bG0sV5" name="FeaturesComponent.h" compile="0" resource="0"

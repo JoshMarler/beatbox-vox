@@ -68,6 +68,7 @@ public:
 	int getNumBuffersDelayed() const;
 
 	void setNumSTFTFrames(const unsigned int newNumSTFTFrames);
+	int getNumSTFTFrames() const;
 
 	/** This method sets the classifier type/learning algorithm to be used.
 	 * @param classifierType the classifier type to be used i.e. AudioClassifyOptions::ClassifierType::knn

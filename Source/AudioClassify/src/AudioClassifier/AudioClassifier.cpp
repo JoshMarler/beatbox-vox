@@ -388,6 +388,13 @@ void AudioClassifier<T>::setNumSTFTFrames(const unsigned int newNumSTFTFrames)
 
 //==============================================================================
 template<typename T>
+int AudioClassifier<T>::getNumSTFTFrames() const
+{
+	return numStftFrames;
+}
+
+//==============================================================================
+template<typename T>
 void AudioClassifier<T>::setClassifierType(AudioClassifyOptions::ClassifierType classifierType)
 {
 	currentClassfierType.store(classifierType);

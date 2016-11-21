@@ -1,7 +1,7 @@
 /*
   ==============================================================================
 
-    DelayedEvaluationComponent.cpp
+    BufferHandlingComponent.cpp
     Created: 28 Oct 2016 9:00:48pm
     Author:  Joshua Marler
 
@@ -9,16 +9,17 @@
 */
 
 #include "../JuceLibraryCode/JuceHeader.h"
-#include "DelayedEvaluationComponent.h"
+#include "BufferHandlingComponent.h"
 
 //==============================================================================
-String DelayedEvaluationComponent::headingLabelID("heading_lbl");
-String DelayedEvaluationComponent::activateButtonID("activate_btn");
-String DelayedEvaluationComponent::bufferDelaySliderID("bufferDelay_sld");
-String DelayedEvaluationComponent::bufferDelayUpdateButtonID("buffer_delay_update_btn");
-String DelayedEvaluationComponent::useEarlyAttackButtonID("useEarlyAttack_btn");
+String BufferHandlingComponent::headingLabelID("heading_lbl");
+String BufferHandlingComponent::activateButtonID("activate_btn");
+String BufferHandlingComponent::bufferDelaySliderID("bufferDelay_sld");
+String BufferHandlingComponent::bufferDelayUpdateButtonID("buffer_delay_update_btn");
+String BufferHandlingComponent::stftNumFramesSliderID("stft_num_frames_sld");
+String BufferHandlingComponent::stftFramesUpdateButtonID("stft_frames_update_btn");
 //==============================================================================
-DelayedEvaluationComponent::DelayedEvaluationComponent(BeatboxVoxAudioProcessor& p)
+BufferHandlingComponent::BufferHandlingComponent(BeatboxVoxAudioProcessor& p)
 	: processor(p)
 {
 	activateButton.setComponentID(activateButtonID);
@@ -26,7 +27,7 @@ DelayedEvaluationComponent::DelayedEvaluationComponent(BeatboxVoxAudioProcessor&
 	addAndMakeVisible(activateButton);
 
 	headingLabel.setComponentID(headingLabelID);
-	headingLabel.setText("Delayed Evaluation", NotificationType::dontSendNotification);
+	headingLabel.setText("Buffer Handling", NotificationType::dontSendNotification);
 	headingLabel.setFont(Font("Cracked", 14.0f, Font::plain));
 	headingLabel.setColour(Label::textColourId, Colours::greenyellow);
 	addAndMakeVisible(headingLabel);
@@ -76,23 +77,50 @@ DelayedEvaluationComponent::DelayedEvaluationComponent(BeatboxVoxAudioProcessor&
 	numBuffersUsedVal.setColour(Label::textColourId, Colours::greenyellow);
 	addAndMakeVisible(numBuffersUsedVal);
 
+	stftNumFramesLabel.setText("Num STFT Frames Per Buffer", NotificationType::dontSendNotification);
+	stftNumFramesLabel.setFont(Font("Cracked", 14.0f, Font::plain));
+	stftNumFramesLabel.setColour(Label::textColourId, Colours::greenyellow);
+	addAndMakeVisible(stftNumFramesLabel);
 
-	earlyAttackLbl.setText("Trigger early attack sound", NotificationType::dontSendNotification);
-	earlyAttackLbl.setFont(Font("Cracked", 14.0f, Font::plain));
-	earlyAttackLbl.setColour(Label::textColourId, Colours::greenyellow);
-	addAndMakeVisible(earlyAttackLbl);
+	stftNumFramesSlider.setComponentID(stftNumFramesSliderID);
+	stftNumFramesSlider.setSliderStyle(Slider::IncDecButtons);
+	stftNumFramesSlider.setRange(0.0, 16.0, 1.0);
+	stftNumFramesSlider.setIncDecButtonsMode(Slider::incDecButtonsDraggable_Horizontal);
+	stftNumFramesSlider.setTextBoxStyle(Slider::TextBoxRight, true, 90, 20);
+	stftNumFramesSlider.setColour(Slider::textBoxBackgroundColourId, Colours::black);
+	stftNumFramesSlider.setColour(Slider::textBoxTextColourId, Colours::greenyellow);
+	stftNumFramesSlider.setColour(Slider::textBoxOutlineColourId, Colours::black);
+	stftNumFramesSlider.addListener(this);
+	addAndMakeVisible(stftNumFramesSlider);
+
+
+	stftFrameSizeLbl.setText("STFT Frame Size: ", NotificationType::dontSendNotification);
+	stftFrameSizeLbl.setFont(Font("Cracked", 14.0f, Font::plain));
+	stftFrameSizeLbl.setColour(Label::textColourId, Colours::greenyellow);
+	addAndMakeVisible(stftFrameSizeLbl);
+
+	stftFrameSizeVal.setText("", NotificationType::dontSendNotification);
+	stftFrameSizeVal.setFont(Font("Cracked", 14.0f, Font::plain));
+	stftFrameSizeVal.setColour(Label::textColourId, Colours::greenyellow);
+	addAndMakeVisible(stftFrameSizeVal);
+
+	stftFramesUpdateButton.setComponentID(stftFramesUpdateButtonID);
+	stftFramesUpdateButton.setButtonText("Update");
+	stftFramesUpdateButton.addListener(this);
+	addAndMakeVisible(stftFramesUpdateButton);
+
 
 	activateButton.setToggleState(false, NotificationType::sendNotification);
 	setActive(false);
 }
 
 //==============================================================================
-DelayedEvaluationComponent::~DelayedEvaluationComponent()
+BufferHandlingComponent::~BufferHandlingComponent()
 {
 }
 
 //==============================================================================
-void DelayedEvaluationComponent::paint (Graphics& g)
+void BufferHandlingComponent::paint (Graphics& g)
 {
 	g.setColour(Colours::black.withAlpha(static_cast<uint8>(0xdc)));
 
@@ -101,7 +129,7 @@ void DelayedEvaluationComponent::paint (Graphics& g)
 }
 
 //==============================================================================
-void DelayedEvaluationComponent::resized()
+void BufferHandlingComponent::resized()
 {
 	auto bounds = getLocalBounds();
 
@@ -114,6 +142,9 @@ void DelayedEvaluationComponent::resized()
 
 	auto leftCenter = bounds.removeFromLeft(bounds.getWidth() / 2);
 	auto rightCenter = bounds;
+
+	leftCenter.reduce(leftCenter.getWidth() / 30, 0);
+	rightCenter.reduce(rightCenter.getWidth() / 30, 0);
 	
 	//Set buffer delay component bounds
 	auto setDelayArea = leftCenter.removeFromTop(leftCenter.getHeight() / 1.75f);
@@ -135,16 +166,28 @@ void DelayedEvaluationComponent::resized()
 	numSamplesUsedLbl.setBounds(samplesDelayLblArea.removeFromLeft(samplesDelayLblArea.getWidth() / 2));
 	numSamplesUsedVal.setBounds(samplesDelayLblArea);
 
-	auto enableAttackArea = rightCenter.removeFromTop(rightCenter.getHeight() / 1.5f);
 
-	enableAttackArea.reduce(0, enableAttackArea.getHeight() / 8);
+	//Set stft component bounds
+	auto stftArea = rightCenter;
 
-	earlyAttackLbl.setBounds(enableAttackArea.removeFromTop(enableAttackArea.getHeight() / 3));
+	auto setNumFramesArea = rightCenter.removeFromTop(rightCenter.getHeight() / 1.75f);
+	setNumFramesArea.reduce(0, setNumFramesArea.getHeight() / 10);
 
+	auto setNumFramesSliderArea = setNumFramesArea.removeFromLeft(setNumFramesArea.getWidth() / 2);
+	stftNumFramesLabel.setBounds(setNumFramesSliderArea.removeFromTop(setNumFramesSliderArea.getHeight() / 2));
+	stftNumFramesSlider.setBounds(setNumFramesSliderArea.removeFromTop(setNumFramesSliderArea.getHeight() / 1.5f));
+
+	auto setNumFramesButtonArea = setNumFramesArea;
+	setNumFramesButtonArea.reduce(setNumFramesArea.getWidth() / 5, setNumFramesArea.getHeight() / 9);
+	stftFramesUpdateButton.setBounds(setNumFramesButtonArea.removeFromBottom(setNumFramesButtonArea.getHeight() / 1.5f));
+
+	auto stftFrameSizeLblArea = rightCenter.removeFromTop(rightCenter.getHeight() / 2);
+	stftFrameSizeLbl.setBounds(stftFrameSizeLblArea.removeFromLeft(stftFrameSizeLblArea.getWidth() / 2));
+	stftFrameSizeVal.setBounds(stftFrameSizeLblArea);
 }
 
 //==============================================================================
-void DelayedEvaluationComponent::buttonClicked(Button * button)
+void BufferHandlingComponent::buttonClicked(Button * button)
 {
 	const auto id = button->getComponentID();
 
@@ -156,33 +199,42 @@ void DelayedEvaluationComponent::buttonClicked(Button * button)
 	{
 		//Update num buffers delay	
 		processor.getClassifier().setNumBuffersDelayed(static_cast<unsigned int>(bufferDelaySlider.getValue()));
-		setNeedsUpdate(false);
 	}
-	else if (id == useEarlyAttackButtonID)
+	else if (id == stftFramesUpdateButtonID)
 	{
-		setUseEarlyAttack(button->getToggleState());
+		processor.getClassifier().setNumSTFTFrames(static_cast<unsigned int>(stftNumFramesSlider.getValue()));
 	}
+
+	setNeedsUpdate(false, *button);
 }
 
 //==============================================================================
-void DelayedEvaluationComponent::sliderValueChanged(Slider * slider)
+void BufferHandlingComponent::sliderValueChanged(Slider * slider)
 {
 	const auto id = slider->getComponentID();
+	auto currentVal = 0;
+	auto newVal = static_cast<int>(slider->getValue());
+	Button* buttonToUpdate = nullptr;
 
 	if (id == bufferDelaySliderID)
 	{
-		auto currentVal = processor.getClassifier().getNumBuffersDelayed();
-		auto newVal = static_cast<int>(slider->getValue());
-
-		if (newVal != currentVal)
-			setNeedsUpdate(true);
-		else
-			setNeedsUpdate(false);
+		currentVal = processor.getClassifier().getNumBuffersDelayed();
+		buttonToUpdate = &bufferDelayUpdateButton;
 	}
+	else if (id == stftNumFramesSliderID)
+	{
+		currentVal = processor.getClassifier().getNumSTFTFrames();
+		buttonToUpdate = &stftFramesUpdateButton;
+	}
+
+	if (newVal != currentVal)
+		setNeedsUpdate(true, *buttonToUpdate);
+	else
+		setNeedsUpdate(false, *buttonToUpdate);
 }
 
 //==============================================================================
-void DelayedEvaluationComponent::setActive(bool active)
+void BufferHandlingComponent::setActive(bool active) const
 {
 	/** The below could be improved upon. This logic would need to be 
 	 *  duplicated for all child components to be switched on / off for active states.
@@ -212,22 +264,17 @@ void DelayedEvaluationComponent::setActive(bool active)
 }
 
 //==============================================================================
-void DelayedEvaluationComponent::setUseEarlyAttack(bool use)
-{
-}
-
-//==============================================================================
-void DelayedEvaluationComponent::setNeedsUpdate(bool needsUpdate)
+void BufferHandlingComponent::setNeedsUpdate(bool needsUpdate, Button& button)
 {
 	if (needsUpdate)
 	{
-		bufferDelayUpdateButton.setColour(TextButton::buttonColourId, Colours::greenyellow);
-		bufferDelayUpdateButton.setColour(TextButton::textColourOffId, Colours::black);
+		button.setColour(TextButton::buttonColourId, Colours::greenyellow);
+		button.setColour(TextButton::textColourOffId, Colours::black);
 	}
 	else
 	{
-		bufferDelayUpdateButton.setColour(TextButton::buttonColourId, Colours::black);
-		bufferDelayUpdateButton.setColour(TextButton::textColourOffId, Colours::greenyellow);
+		button.setColour(TextButton::buttonColourId, Colours::black);
+		button.setColour(TextButton::textColourOffId, Colours::greenyellow);
 	}
 
 }
