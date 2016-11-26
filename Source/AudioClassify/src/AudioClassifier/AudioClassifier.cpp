@@ -715,10 +715,10 @@ void AudioClassifier<T>::addToTestSet(const arma::Col<T>& newInstance)
 template<typename T>
 void AudioClassifier<T>::resetClassifierState()
 {
+    classifierReady.store(false);
 	currentTrainingSoundRecording.store(-1);
 	recordingTrainingData.store(false);
 	trainingCount = 0;
-    classifierReady.store(false);
 
 	for (auto& v : trainingSoundsReady)
 		  v = false;

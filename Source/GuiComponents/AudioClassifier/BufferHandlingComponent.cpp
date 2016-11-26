@@ -192,18 +192,11 @@ void BufferHandlingComponent::buttonClicked(Button * button)
 	const auto id = button->getComponentID();
 
 	if (id == activateButtonID)
-	{
 		setActive(button->getToggleState());
-	}
 	else if (id == bufferDelayUpdateButtonID)
-	{
-		//Update num buffers delay	
 		processor.getClassifier().setNumBuffersDelayed(static_cast<unsigned int>(bufferDelaySlider.getValue()));
-	}
 	else if (id == stftFramesUpdateButtonID)
-	{
 		processor.getClassifier().setNumSTFTFrames(static_cast<unsigned int>(stftNumFramesSlider.getValue()));
-	}
 
 	setNeedsUpdate(false, *button);
 }

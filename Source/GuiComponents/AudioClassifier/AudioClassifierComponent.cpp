@@ -66,10 +66,4 @@ void AudioClassifierComponent::resized()
 }
 
 //===============================================================================
-void AudioClassifierComponent::buttonClicked(Button* button)
-{
-
-}
-
-//===============================================================================
 

@@ -23,8 +23,7 @@
 
 #include "../../PluginProcessor.h"
 
-class AudioClassifierComponent : public Component,
-                                 ButtonListener
+class AudioClassifierComponent : public Component
 {
 
 public:
@@ -34,8 +33,6 @@ public:
 
     void paint(Graphics&) override;
     void resized() override;
-
-    void buttonClicked(Button* button) override;
     
 	//ComponentID Strings
 	static String saveTrainingDataButtonID;
