@@ -83,7 +83,7 @@ void AudioClassifier<T>::setCurrentBufferSize (int newBufferSize)
 	//Update STFT frame size relative to new bufferSize.
 	setupStft();
 
-	//If changing num delayed buffers current training set no longer valid so reset and require re-train.
+	//If changing num buffers current training set no longer valid so reset and require re-train.
 	resetClassifierState();
 }
 
@@ -522,10 +522,10 @@ bool AudioClassifier<T>::isRecording() const
 {
 	if (recordingTrainingData.load())
 		return true;
-	else if (recordingTestData.load())
+	if (recordingTestData.load())
 		return true;
-	else
-		return false;
+
+	return false;
 }
 
 //==============================================================================
@@ -780,6 +780,7 @@ template<typename T>
 bool AudioClassifier<T>::checkTrainingSetReady() const
 {
     auto readyCount = 0;
+	auto ready = false;
 
     for (auto v : trainingSoundsReady)
     {
@@ -788,17 +789,16 @@ bool AudioClassifier<T>::checkTrainingSetReady() const
     }
 
     if (readyCount == numSounds)
-        return true;
-    else
-        return false;
+        ready = true;
+
+	return ready;
 }
 
 //==============================================================================
 template <typename T>
 bool AudioClassifier<T>::checkTrainingSoundReady (const unsigned sound) const
 {
-	auto ready = trainingSoundsReady[sound];
-	return ready;
+	return trainingSoundsReady[sound];
 }
 
 //==============================================================================
@@ -806,6 +806,7 @@ template<typename T>
 bool AudioClassifier<T>::checkTestSetReady() const
 {
     auto readyCount = 0;
+	auto ready = false;
 
     for (auto v : testSoundsReady)
     {
@@ -814,9 +815,9 @@ bool AudioClassifier<T>::checkTestSetReady() const
     }
 
     if (readyCount == numSounds)
-        return true;
-    else
-        return false;
+        ready = true;
+
+	return ready;
 }
 
 //==============================================================================
@@ -843,11 +844,9 @@ void AudioClassifier<T>::configTrainingSetMatrix()
 
 	trainingLabels.set_size(trainingSetSize);
 
+	//Consider making trainingLabel <int> rather than unsigned to init with -1 label vals
 	for (auto i = 0; i < trainingLabels.n_elem; ++i)
-	{
-		//Consider making trainingLabel <int> rather than unsigned to init with -1 label vals
-		trainingLabels[i] = 0;
-	}
+		 trainingLabels[i] = 0;
 
 	currentInstanceVector.set_size(numFeatures);
 	currentInstanceVector.zeros();
@@ -866,9 +865,7 @@ void AudioClassifier<T>::configTestSetMatrix()
 	testLabels.set_size(testSetSize);
 
 	for (auto i = 0; i < testLabels.n_elem; ++i)
-	{
-		testLabels[i] = 0;
-	}
+		 testLabels[i] = 0;
 }
 
 //==============================================================================
@@ -937,6 +934,7 @@ float AudioClassifier<T>::test(std::vector<std::pair<unsigned int, unsigned int>
 
 	for (auto i = 0; i < testSetSize; ++i)
 	{
+		//JWM - Hopefully replace with AudioDataSet.data.col(i) where AudioDataSet testSet is the member variable
 		arma::Col<T> testInstance = testData.col(i);
 		auto actual = testLabels[i];
 		auto predicted = -1;

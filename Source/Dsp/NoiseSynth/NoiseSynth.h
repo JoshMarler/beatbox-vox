@@ -59,7 +59,7 @@ public:
                     int /*currentPitchWheelPosition*/) override
     {
         level = velocity;
-        tailOff = 0.0;
+        tailOff = 0.0f;
     }
 
     void stopNote (float /*velocity*/, bool allowTailOff) override
@@ -69,13 +69,13 @@ public:
             // start a tail-off by setting this flag. The render callback will pick up on
             // this and do a fade out, calling clearCurrentNote() when it's finished.
 
-            if (tailOff == 0.0) // we only need to begin a tail-off if it's not already doing so - the
-                tailOff = 1.0;
+            if (tailOff == 0.0f) // we only need to begin a tail-off if it's not already doing so - the
+                tailOff = 1.0f;
         }
         else
         {
             // we're being told to stop playing immediately, so reset everything..
-			level = 0.0;
+			level = 0.0f;
             clearCurrentNote();
         }
     }
@@ -98,16 +98,16 @@ public:
                 {
 					const float currentSample = (random.nextFloat() * 0.25f - 0.125f) * level;
 
-                    for (int i = outputBuffer.getNumChannels(); --i >= 0;)
+                    for (auto i = outputBuffer.getNumChannels(); --i >= 0;)
                         outputBuffer.addSample (i, startSample, currentSample);
 
                     ++startSample;
 
-                    tailOff *= 0.99;
+                    tailOff *= 0.99f;
 
-                    if (tailOff <= 0.005)
+                    if (tailOff <= 0.005f)
                     {
-						level = 0.0;
+						level = 0.0f;
 
                         // tells the synth that this voice has stopped
                         clearCurrentNote();
@@ -121,7 +121,7 @@ public:
                 {
 					const float currentSample = (random.nextFloat() * 0.25f - 0.125f) * level;
 
-                    for (int i = outputBuffer.getNumChannels(); --i >= 0;)
+                    for (auto i = outputBuffer.getNumChannels(); --i >= 0;)
                         outputBuffer.addSample (i, startSample, currentSample);
 
                     ++startSample;

@@ -181,7 +181,7 @@ private:
 
 	//==============================================================================
 	T sampleRate = static_cast<T>(0.0);
-
+	
 	//==============================================================================
     //Values to indicate which features currently being used by model.
 	std::atomic_bool usingRMS {true};
@@ -221,9 +221,6 @@ private:
 	//==============================================================================
     //Array/Buffer to hold mag spectrum.
     std::unique_ptr<T[]> magSpectrumOSD;
-	
-	//Array/Buffer to hold the current audio buffer - used for delayed evaluation so size will be (bufferSize * (numDelayed + 1))
-	std::unique_ptr<T[]> audioBuffer;
 
     //Array/Buffer to hold the mel frequency cepstral coefficients.
     std::unique_ptr<T[]> mfccs;

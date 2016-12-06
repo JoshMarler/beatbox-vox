@@ -5,7 +5,7 @@
               buildVST="0" buildVST3="1" buildAU="0" buildAUv3="0" buildRTAS="0"
               buildAAX="0" pluginName="BeatboxVox" pluginDesc="BeatboxVox"
               pluginManufacturer="RudeAudio" pluginManufacturerCode="RUDE"
-              pluginCode="Bvox" pluginChannelConfigs="1, 1" pluginIsSynth="0"
+              pluginCode="Bvox" pluginChannelConfigs="1, 2" pluginIsSynth="0"
               pluginWantsMidiIn="0" pluginProducesMidiOut="0" pluginIsMidiEffectPlugin="0"
               pluginEditorRequiresKeys="0" pluginAUExportPrefix="BeatboxVoxAU"
               pluginRTASCategory="" aaxIdentifier="com.yourcompany.BeatboxVox"
@@ -463,6 +463,12 @@
           <GROUP id="{308BF56F-A3EC-C862-9513-11AD94328803}" name="AudioClassifyOptions">
             <FILE id="yEDtds" name="AudioClassifyOptions.h" compile="1" resource="0"
                   file="Source/AudioClassify/src/AudioClassifyOptions/AudioClassifyOptions.h"/>
+          </GROUP>
+          <GROUP id="{513E22ED-AD69-7994-135B-AEDE688F8BA1}" name="FeatureExtractor">
+            <FILE id="s47Q6R" name="FeatureExtractor.cpp" compile="1" resource="0"
+                  file="Source/AudioClassify/src/FeatureExtractor/FeatureExtractor.cpp"/>
+            <FILE id="yWHVkf" name="FeatureExtractor.h" compile="0" resource="0"
+                  file="Source/AudioClassify/src/FeatureExtractor/FeatureExtractor.h"/>
           </GROUP>
           <GROUP id="{6A139278-7EB2-2A75-5AA1-685C3CA1EF2B}" name="MathHelpers">
             <FILE id="TTayRY" name="MathHelpers.h" compile="0" resource="0" file="Source/AudioClassify/src/MathHelpers/MathHelpers.h"/>
