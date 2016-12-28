@@ -118,7 +118,7 @@ size_t NaiveBayes<T>::Classify(const arma::Col<T>& instance)
 		 *		exponents = arma::exp(-(arma::square(diffs))) / (2 * featureVariances.col(j));
 		 *		
 		 *	We can use 2 * featureVariances in the calculation below rather than squaring the standard 
-		 *	deviation/stdDev values as per notation of distribution in the literatue - square(sqrt(value)) == value.
+		 *	deviation/stdDev values as per notation of guassian distribution in the literature - square(sqrt(value)) == value.
 		 */ 
 		exponents = arma::log(1 / arma::square(diffs)) - arma::log(2 * featureVariances.col(j));
 
