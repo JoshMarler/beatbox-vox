@@ -26,7 +26,7 @@ struct AudioClassifyOptions
 
     enum class AudioFeature: int 
     {
-        spectralCentroid,
+        spectralCentroid = 0,
         spectralCrest, 
         spectralFlatness, 
         spectralRolloff, 

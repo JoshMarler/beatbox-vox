@@ -28,6 +28,8 @@
 #include "../NaiveBayes/NaiveBayes.h"
 #include "../NearestNeighbour/NearestNeighbour.h"
 
+#include "../AudioDataSet/AudioDataSet.h"
+
 //==============================================================================
 template<typename T>
 class AudioClassifier
@@ -245,6 +247,8 @@ private:
     NaiveBayes<T> nbc;
 	NearestNeighbour<T> knn;
 
+	//==============================================================================
+	AudioDataSet<T> trainingSet;
 	//==============================================================================
 	void setupStft();
 	void processSTFTFrame(const T* inputBuffer);

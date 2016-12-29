@@ -19,7 +19,8 @@ AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int in
 	  gistFeaturesStft(initBufferSize, static_cast<int>(initSampleRate)),
 	  osDetector(initBufferSize / 2, initSampleRate),
 	  nbc(initNumSounds, 21),
-	  knn(21, initNumSounds, initNumInstances)
+	  knn(21, initNumSounds, initNumInstances),
+	  trainingSet(initNumSounds, initNumInstances, 21, initBufferSize)
 {
 	bufferSize = initBufferSize;
 	sampleRate = initSampleRate;

@@ -464,6 +464,11 @@
             <FILE id="yEDtds" name="AudioClassifyOptions.h" compile="1" resource="0"
                   file="Source/AudioClassify/src/AudioClassifyOptions/AudioClassifyOptions.h"/>
           </GROUP>
+          <GROUP id="{BC942293-7B95-DDC8-3106-61C309DDE951}" name="AudioDataSet">
+            <FILE id="LRzyVn" name="AudioDataSet.cpp" compile="1" resource="0"
+                  file="Source/AudioClassify/src/AudioDataSet/AudioDataSet.cpp"/>
+            <FILE id="wgJ2zr" name="AudioDataSet.h" compile="0" resource="0" file="Source/AudioClassify/src/AudioDataSet/AudioDataSet.h"/>
+          </GROUP>
           <GROUP id="{513E22ED-AD69-7994-135B-AEDE688F8BA1}" name="FeatureExtractor">
             <FILE id="s47Q6R" name="FeatureExtractor.cpp" compile="1" resource="0"
                   file="Source/AudioClassify/src/FeatureExtractor/FeatureExtractor.cpp"/>

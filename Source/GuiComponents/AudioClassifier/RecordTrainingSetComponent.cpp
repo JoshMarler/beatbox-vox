@@ -164,7 +164,6 @@ void RecordTrainingSetComponent::timerCallback()
             trainButton.setToggleState(false, NotificationType::dontSendNotification);
      }
          
-     //JWM - A little sketchy way of doing things maybe but works for prototype stage. 
      if (recordButton.getToggleState())
      {
         if (isRecording == false)
@@ -401,7 +400,7 @@ void RecordTrainingSetComponent::setActive(bool active)
 {
 	/** The below could be improved upon. This logic would need to be 
 	 *  duplicated for all child components to be switched on / off for active states.
-	 *  Would be better so subclass Component with another class which acts as an activatable 
+	 *  Would be better to subclass Component with another class which acts as an activatable 
 	 *  child component and has an activation header/component with an on/off toggle button and title. 
 	 *  
 	 *	Worth looking into whether this sould be done with composition or inheritance.  
