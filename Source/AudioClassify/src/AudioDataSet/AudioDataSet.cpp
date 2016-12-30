@@ -13,18 +13,14 @@
 
 //==============================================================================
 template<typename T>
-AudioDataSet<T>::AudioDataSet(unsigned int initNumSounds, unsigned int initInstancePerSound, unsigned int initNumFeatures,
-	unsigned int initBufferSize, unsigned int initSTFTFramesPerBuffer, unsigned int initNumDelayedBuffers)
+AudioDataSet<T>::AudioDataSet(unsigned int initNumSounds, unsigned int initInstancePerSound, unsigned int initBufferSize,
+	unsigned int initSTFTFramesPerBuffer, unsigned int initNumDelayedBuffers)
 	: bufferSize(initBufferSize),
 	  numSounds(initNumSounds), 
-	  instancesPerSound(initInstancePerSound),
-	  numFeatures(initNumFeatures)
+	  instancesPerSound(initInstancePerSound)
 {
-	if (initSTFTFramesPerBuffer != 1)
-		stftFramesPerBuffer = initSTFTFramesPerBuffer;
-
-	if (initNumDelayedBuffers != 0)
-		numDelayedBuffers = initNumDelayedBuffers;
+	stftFramesPerBuffer = initSTFTFramesPerBuffer;
+	numDelayedBuffers = initNumDelayedBuffers;
 
 	initialise();
 }
@@ -52,9 +48,7 @@ void AudioDataSet<T>::addInstance(const arma::Col<T>& instance, unsigned int sou
 		++instanceCount;
 	}
 	else
-	{
-		
-	}
+		soundsReady[soundLabel] = true;
 	
 }
 
@@ -62,9 +56,9 @@ void AudioDataSet<T>::addInstance(const arma::Col<T>& instance, unsigned int sou
 template<typename T>
 bool AudioDataSet<T>::usingFeature(unsigned int stftFrameNumber, AudioClassifyOptions::AudioFeature feature)
 {
-	for (auto i = 0; i < numFeatures; ++i)
+	for (auto featureFramePair : featuresUsed)
 	{
-		if (featureFrameLabels[i] == stftFrameNumber && featureLabels[i] == static_cast<unsigned int>(feature))
+		if (featureFramePair.first == stftFrameNumber && featureFramePair.second == feature)
 			return true;
 	}
 
@@ -86,20 +80,7 @@ const arma::Row<unsigned int>& AudioDataSet<T>::getSoundLabels() const
 }
 
 //==============================================================================
-template<typename T>
-const arma::Col<unsigned int>& AudioDataSet<T>::getFeatureFrameLabels() const
-{
-	return featureFrameLabels;
-}
-
-//==============================================================================
-template<typename T>
-const arma::Col<unsigned int>& AudioDataSet<T>::getFeatureLabels() const
-{
-	return featureLabels;
-}
-
-//==============================================================================
+//JWM - NOTE: Potentially change to return bool for success and take in output data set ? 
 template<typename T>
 AudioDataSet<T> AudioDataSet<T>::load(const std::string & absoluteFilePath, std::string & errorString)
 {
@@ -117,26 +98,35 @@ AudioDataSet<T> AudioDataSet<T>::load(const std::string & absoluteFilePath, std:
 
 	int numSounds = vt.getProperty("NumSounds");
 	int instancesPerSound = vt.getProperty("InstancesPerSound");
-	int numFeatures = vt.getProperty("NumFeatures");
 	int bufferSize = vt.getProperty("BufferSize");
+	int stftFramesPerBuffer = vt.getProperty("STFTFramesPerBuffer");
+	int numDelayedBuffers = vt.getProperty("NumDelayedBuffers");
 
+
+	AudioDataSet<T> dataSet(numSounds, instancesPerSound, bufferSize, stftFramesPerBuffer, numDelayedBuffers);
+
+	auto featuresUsed = vt.getChildWithName("FeaturesUsed");
+
+	//Going to reset features used
+	dataSet.featuresUsed.resize(0);
+
+	for(auto i = 0; i < featuresUsed.getNumChildren(); ++i)
+	{
+		auto featureFramePair = featuresUsed.getChild(i);
+		auto frame = int(featureFramePair.getProperty("Frame"));
+		auto feature = static_cast<AudioClassifyOptions::AudioFeature>(int(featureFramePair.getProperty("Feature")));
+
+		dataSet.featuresUsed.push_back(std::make_pair(frame, feature));
+	}
+	
 	auto dataBlock = vt.getProperty("Data").getBinaryData();
+	arma::Mat<T> data(static_cast<T*>(dataBlock->getData()), dataSet.featuresUsed.size(), numSounds * instancesPerSound);
+
 	auto soundLabelsBlock = vt.getProperty("SoundLabels").getBinaryData();
-	auto featureFrameLabelsBlock = vt.getProperty("FeatureFrameLabels").getBinaryData();
-	auto featureLabelsBlock = vt.getProperty("FeatureLabels").getBinaryData();
-
-	AudioDataSet<T> dataSet(numSounds, instancesPerSound, numFeatures, bufferSize);
-
-	arma::Mat<T> data(static_cast<T*>(dataBlock->getData()), numFeatures, numSounds * instancesPerSound);
-	arma::Row<unsigned int> labels(static_cast<unsigned int*>(soundLabelsBlock->getData()), soundLabelsBlock->getSize());
-
-	arma::Col<unsigned int> featureFrameLabels(static_cast<unsigned int*>(featureFrameLabelsBlock->getData()), featureFrameLabelsBlock->getSize());
-	arma::Col<unsigned int> featureLabels(static_cast<unsigned int*>(featureLabelsBlock->getData()), featureLabelsBlock->getSize());
+	arma::Row<unsigned int> soundLabels(static_cast<unsigned int*>(soundLabelsBlock->getData()), soundLabelsBlock->getSize());
 
 	dataSet.setData(data);
-	dataSet.setSoundLabels(labels);
-	dataSet.setFeatureFrameLabels(featureFrameLabels);
-	dataSet.setFeatureLabels(featureLabels);
+	dataSet.setSoundLabels(soundLabels);
 
 	return dataSet;
 }
@@ -154,6 +144,8 @@ void AudioDataSet<T>::save(AudioDataSet<T>& dataSet, const std::string & absolut
 	vt.setProperty("InstancesPerSound", var(static_cast<int>(dataSet.getInstancesPerSound())), nullptr);
 	vt.setProperty("NumFeatures", var(static_cast<int>(dataSet.getNumFeatures())), nullptr);
 	vt.setProperty("BufferSize", var(static_cast<int>(dataSet.getBufferSize())), nullptr);
+	vt.setProperty("STFTFramesPerBuffer", var(static_cast<int>(dataSet.getSTFTFramesPerBuffer())), nullptr);
+	vt.setProperty("NumDelayedBuffers", var(static_cast<int>(dataSet.getNumDelayedBuffers())), nullptr);
 
 	auto dataBlockSize = static_cast<size_t>(dataSet.getData().size() * sizeof(T));
 	MemoryBlock dataMb(dataSet.getData().mem, dataBlockSize);
@@ -163,13 +155,19 @@ void AudioDataSet<T>::save(AudioDataSet<T>& dataSet, const std::string & absolut
 	MemoryBlock soundLabelsMb(dataSet.getSoundLabels().mem, soundLabelsBlockSize);
 	vt.setProperty("SoundLabels", var(soundLabelsMb), nullptr);
 
-	auto featureFrameLabelsBlockSize = static_cast<size_t>(dataSet.getNumFeatures() * sizeof(unsigned int));
-	MemoryBlock featureFrameLabelsMb(dataSet.getFeatureFrameLabels().mem, featureFrameLabelsBlockSize);
-	vt.setProperty("FeatureFrameLabels", var(featureFrameLabelsMb), nullptr);
 
-	auto featureLabelsBlockSize = static_cast<size_t>(dataSet.getNumFeatures() * sizeof(unsigned int));
-	MemoryBlock featureLabelsMb(dataSet.getFeatureLabels().mem, featureLabelsBlockSize);
-	vt.setProperty("FeatureLabels", var(featureLabelsMb), nullptr);
+	ValueTree featuresUsedTree("FeaturesUsed");
+	
+	for (auto featureFramePair : dataSet.featuresUsed)
+	{
+		ValueTree pair("FeatureFramePair");
+		pair.setProperty("Frame", var(static_cast<int>(featureFramePair.first)), nullptr);
+		pair.setProperty("Feature", var(static_cast<int>(featureFramePair.second)), nullptr);
+
+		featuresUsedTree.addChild(pair, -1, nullptr);
+	}
+
+	vt.addChild(featuresUsedTree, -1, nullptr);
 
 
 	FileOutputStream os(file);
@@ -237,7 +235,7 @@ unsigned int AudioDataSet<T>::getInstancesPerSound() const
 template<typename T>
 unsigned int AudioDataSet<T>::getNumFeatures() const
 {
-	return numFeatures;
+	return featuresUsed.size();
 }
 
 //==============================================================================
@@ -288,31 +286,27 @@ void AudioDataSet<T>::setSoundLabels(arma::Row<unsigned int>& newLabels)
 
 //==============================================================================
 template<typename T>
-void AudioDataSet<T>::setFeatureFrameLabels(arma::Col<unsigned int>& newFeatureFrameLabels)
-{
-	featureFrameLabels = newFeatureFrameLabels;
-}
-
-//==============================================================================
-template<typename T>
-void AudioDataSet<T>::setFeatureLabels(arma::Col<unsigned int>& newFeatureLabels)
-{
-	featureLabels = newFeatureLabels;
-}
-
-//==============================================================================
-template<typename T>
 void AudioDataSet<T>::initialise()
 {
 	auto totalInstances = numSounds * instancesPerSound;
+	auto totalFrames = stftFramesPerBuffer * (numDelayedBuffers + 1);
 
 	soundLabels.set_size(totalInstances);
-
-	featureLabels.set_size(numFeatures);
-	featureFrameLabels.set_size(numFeatures);
-
-	//Initialise sound ready states
 	soundsReady.resize(numSounds, false);
+
+	for (auto i = 0; i < totalFrames; ++i)
+	{
+		for (auto j = 0; j < AudioClassifyOptions::totalNumAudioFeatures; ++j)
+		{
+			auto frame = i + 1;
+			auto feature = static_cast<AudioClassifyOptions::AudioFeature>(j);
+			featuresUsed.push_back(std::make_pair(frame, feature));
+		}
+	}
+
+	data.set_size(featuresUsed.size(), totalInstances);
+	data.fill(static_cast<T>(0.0));
+
 }
 
 //==============================================================================

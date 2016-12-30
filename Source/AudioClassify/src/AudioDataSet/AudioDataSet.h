@@ -16,17 +16,19 @@
 #endif
 
 #include <armadillo.h>
-#include "../../../../JuceLibraryCode/JuceHeader.h"
+#include "../JuceLibraryCode/JuceHeader.h"
 
-#include "../AudioClassifyOptions/AudioClassifyOptions.h"
+#include "./AudioClassifyOptions.h"
+
+using FeatureFramePair = std::pair<unsigned int, AudioClassifyOptions::AudioFeature>;
 
 template<typename T>
 class AudioDataSet
 {
 public:
 
-	AudioDataSet(unsigned int initNumSounds, unsigned int initInstancePerSound, unsigned int initNumFeatures, 
-		unsigned int initBufferSize, unsigned int initSTFTFramesPerBuffer = 1, unsigned int initNumDelayedBuffers = 0);
+	AudioDataSet(unsigned int initNumSounds, unsigned int initInstancePerSound, unsigned int initBufferSize,
+		unsigned int initSTFTFramesPerBuffer = 1, unsigned int initNumDelayedBuffers = 0);
 
 	~AudioDataSet();
 
@@ -37,8 +39,6 @@ public:
 
 	const arma::Mat<T>& getData();
 	const arma::Row<unsigned int>& getSoundLabels() const;
-	const arma::Col<unsigned int>& getFeatureFrameLabels() const;
-	const arma::Col<unsigned int>& getFeatureLabels() const;
 
 	static AudioDataSet<T> load(const std::string& absoluteFilePath, std::string& errorString);
 	static void save(AudioDataSet<T>& dataSet, const std::string& absoluteFilePath, std::string& errorString);
@@ -71,20 +71,16 @@ private:
 
 	unsigned int numSounds;
 	unsigned int instancesPerSound;
-	unsigned int numFeatures;
 
 	std::vector<bool> soundsReady;
 
 	arma::Mat<T> data;
 	arma::Row<unsigned int> soundLabels;
 
-	arma::Col<unsigned int> featureLabels;
-	arma::Col<unsigned int> featureFrameLabels;
+	std::vector<FeatureFramePair> featuresUsed;
 
 	void setData(arma::Mat<T>& newData);
 	void setSoundLabels(arma::Row<unsigned int>& newLabels);
-	void setFeatureFrameLabels(arma::Col<unsigned int>& newFeatureFrameLabels);
-	void setFeatureLabels(arma::Col<unsigned int>& newFeatureLabels);
 
 	void initialise();
 };

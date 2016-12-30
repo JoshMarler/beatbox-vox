@@ -17,7 +17,8 @@
  */
 struct AudioClassifyOptions
 {
-    
+	static const int totalNumAudioFeatures = 21;
+
     enum class ClassifierType: int
     {
         naiveBayes,
@@ -26,12 +27,28 @@ struct AudioClassifyOptions
 
     enum class AudioFeature: int 
     {
-        spectralCentroid = 0,
+		rms = 0,
+		peakEnergy,
+		zeroCrossingRate,
+        spectralCentroid,
         spectralCrest, 
         spectralFlatness, 
         spectralRolloff, 
         spectralKurtois,
-        mfcc
+        mfcc_1,
+		mfcc_2,
+		mfcc_3,
+		mfcc_4,
+		mfcc_5,
+		mfcc_6,
+		mfcc_7,
+		mfcc_8,
+		mfcc_9,
+		mfcc_10,
+		mfcc_11,
+		mfcc_12,
+		mfcc_13
+
     };
 
     enum class ODFType: int

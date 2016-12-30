@@ -770,6 +770,7 @@ int AudioClassifier<T>::classify()
 				sound = nbc.Classify(currentInstanceVector);
 				break;
 			default: break; // Sound returned -1 (Invalid label. Valid labels are 0 to numSounds)
+	dataSet.featuresUsed.push_back(std::make_pair())
 	    }
     }
 
@@ -841,6 +842,7 @@ void AudioClassifier<T>::configTrainingSetMatrix()
 	resetClassifierState();
 
 	trainingData.set_size(numFeatures, trainingSetSize);
+	dataSet.featuresUsed.push_back(std::make_pair())
 	trainingData.zeros();
 
 	trainingLabels.set_size(trainingSetSize);
