@@ -52,11 +52,11 @@ public:
 	int getBufferSize() const;
 
 	int getSTFTFramesPerBuffer() const;
+
 	int getNumDelayedBuffers() const;
 
 	int getNumSounds() const;
 
-	void setInstancesPerSound(int newInstancesPerSound);
 	int getInstancesPerSound() const;
 
 	int getNumFeatures() const;
@@ -64,15 +64,13 @@ public:
 	int getTotalNumInstances() const;
 	int getTotalNumSTFTFrames() const;
 
-	void reset();
-	bool isReady();
+	bool isReady() const;
 	
 	bool checkSoundReady(const unsigned int sound) const;
 
 
 private:
 
-	bool ready = false;
 	int instanceCount = 0;
 
 	int bufferSize;

@@ -77,7 +77,7 @@ void NaiveBayes<T>::Train(const arma::Mat<T>& trainingData, const arma::Row<size
 	 *  Replace 0.0 variances with minimal floating point value.
 	 */
 	
-	for (std::size_t i = 0; i < featureVariances.n_elem; ++i)
+	for (size_t i = 0; i < featureVariances.n_elem; ++i)
 	{
 		if (featureVariances[i] == 0.0)
 			featureVariances[i] = std::numeric_limits<T>::min();

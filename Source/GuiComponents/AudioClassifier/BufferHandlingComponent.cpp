@@ -84,7 +84,7 @@ BufferHandlingComponent::BufferHandlingComponent(BeatboxVoxAudioProcessor& p)
 
 	stftNumFramesSlider.setComponentID(stftNumFramesSliderID);
 	stftNumFramesSlider.setSliderStyle(Slider::IncDecButtons);
-	stftNumFramesSlider.setRange(0.0, 16.0, 1.0);
+	stftNumFramesSlider.setRange(1.0, 16.0, 1.0);
 	stftNumFramesSlider.setIncDecButtonsMode(Slider::incDecButtonsDraggable_Horizontal);
 	stftNumFramesSlider.setTextBoxStyle(Slider::TextBoxRight, true, 90, 20);
 	stftNumFramesSlider.setColour(Slider::textBoxBackgroundColourId, Colours::black);
@@ -196,7 +196,7 @@ void BufferHandlingComponent::buttonClicked(Button * button)
 	else if (id == bufferDelayUpdateButtonID)
 		processor.getClassifier().setNumBuffersDelayed(static_cast<unsigned int>(bufferDelaySlider.getValue()));
 	else if (id == stftFramesUpdateButtonID)
-		processor.getClassifier().setNumSTFTFrames(static_cast<unsigned int>(stftNumFramesSlider.getValue()));
+		processor.getClassifier().setSTFTFramesPerBuffer(static_cast<unsigned int>(stftNumFramesSlider.getValue()));
 
 	setNeedsUpdate(false, *button);
 }
@@ -216,7 +216,7 @@ void BufferHandlingComponent::sliderValueChanged(Slider * slider)
 	}
 	else if (id == stftNumFramesSliderID)
 	{
-		currentVal = processor.getClassifier().getNumSTFTFrames();
+		currentVal = processor.getClassifier().getSTFTFramesPerBuffer();
 		buttonToUpdate = &stftFramesUpdateButton;
 	}
 

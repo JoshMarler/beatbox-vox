@@ -70,8 +70,8 @@ public:
 	void setNumBuffersDelayed(unsigned int newNumDelayed);
 	int getNumBuffersDelayed() const;
 
-	void setNumSTFTFrames(const unsigned int newNumSTFTFrames);
-	int getNumSTFTFrames() const;
+	void setSTFTFramesPerBuffer(const unsigned int newNumSTFTFrames);
+	int getSTFTFramesPerBuffer() const;
 
 	/** This method sets the classifier type/learning algorithm to be used.
 	 * @param classifierType the classifier type to be used i.e. AudioClassifyOptions::ClassifierType::knn
@@ -118,11 +118,10 @@ public:
 	void setInstancesPerSound(int newNumInstances, AudioClassifyOptions::DataSetType dataSetType);
 	int getInstancesPerSound(AudioClassifyOptions::DataSetType dataSetType);
 
-	int getTrainingSetSize() const;
-	int getTestSetSize() const;
+	int getDataSetSize(AudioClassifyOptions::DataSetType dataSetType) const;
 
 	bool checkDataSetReady(AudioClassifyOptions::DataSetType dataSetType) const;
-	bool checkSoundReady(int sound, AudioClassifyOptions::DataSetType dataSetType);
+	bool checkSoundReady(int sound, AudioClassifyOptions::DataSetType dataSetType) const;
 
     bool getClassifierReady() const;
     
@@ -153,20 +152,15 @@ private:
 	//==============================================================================
 	int numDelayedBuffers = 0;
 	unsigned int delayedProcessedCount = 0;
-	unsigned int numStftFrames = 0;
+	unsigned int stftFramesPerBuffer = 1;
 	unsigned int stftProcessedCount = 0;
 
 	//==============================================================================
-    int trainingSetSize = 0;
-	int testSetSize = 0;
-	int numTrainingInstances = 0;
-	int numTestInstances = 0;
-    int trainingCount = 0;
-	int testCount = 0;
+	int trainingInstancesPerSound = 0;
+	int testInstancesPerSound = 0;
 
 	//==============================================================================
     int numSounds = 0; 
-	unsigned int numFeatures = 0;
 	
 	//==============================================================================
 	bool hasOnset = false;
@@ -175,29 +169,12 @@ private:
 	T sampleRate = static_cast<T>(0.0);
 	
 	//==============================================================================
-    //Values to indicate which features currently being used by model.
-	std::atomic_bool usingRMS {true};
-	std::atomic_bool usingPeakEnergy {true};
-	std::atomic_bool usingZeroCrossingRate {true};
-    std::atomic_bool usingSpecCentroid {true};
-    std::atomic_bool usingSpecCrest {true};
-    std::atomic_bool usingSpecFlatness {true};
-    std::atomic_bool usingSpecRolloff {true};
-    std::atomic_bool usingSpecKurtosis {true};
-    std::atomic_bool usingMfcc {true};
-
-	//==============================================================================
-	std::atomic_bool useDelayedEval {false};
-
-	//==============================================================================
 	std::atomic<AudioClassifyOptions::ClassifierType> currentClassfierType;
 
 	//==============================================================================
 	/* Classifier current state variables */
 
     //Indicates the current sound being recorded.
-    std::atomic_int currentTrainingSoundRecording;
-	std::atomic_int currentTestSoundRecording;
 	std::atomic_int currentSoundRecording;
 
 	//Classifier is ready to use true/false.
@@ -206,24 +183,12 @@ private:
 	//Indicates whether currently recording test/training data.
     std::atomic_bool recordingTrainingData;
 	std::atomic_bool recordingTestData;
-
-    //Holds states for each sound in model to confirm whether sound's training set has been recorded.
-    std::vector<bool> trainingSoundsReady;
-	std::vector<bool> testSoundsReady;
-    
 	//==============================================================================
+
     //Array/Buffer to hold mag spectrum used for onset detection.
     std::unique_ptr<T[]> magSpectrumOSD;
 
 	//==============================================================================
-    //Holds the training data set.
-    arma::Mat<T> trainingData;
-
-    //Holds the trainingData matrix's corresponding label values for labelled training data.
-    arma::Row<size_t> trainingLabels;
-
-	arma::Mat<T> testData;
-	arma::Row<size_t> testLabels;
     
     //Holds the the feature values/vector for the current instance/block.
     arma::Col<T> currentInstanceVector;
@@ -236,24 +201,26 @@ private:
 	NearestNeighbour<T> knn;
 
 	//==============================================================================
-	AudioDataSet<T> trainingSet;
-	AudioDataSet<T> trainingSetReduced;
+	/**
+	 * NOTE: Eventually need to change to atomic shared pointers which 
+	 * can be swapped and garbage collected to avoid torn object states when refering to
+	 * data sets on the callback / processBlock thread. Will need to swap atomically when 
+	 * dataset parameters change. 
+	 */
+	std::unique_ptr<AudioDataSet<T>> trainingSet;
+	std::unique_ptr<AudioDataSet<T>> trainingSetReduced;
 
-	AudioDataSet<T> testSet;
-	AudioDataSet<T> testSetReduced;
+	std::unique_ptr<AudioDataSet<T>> testSet;
+	std::unique_ptr<AudioDataSet<T>> testSetReduced;
+
 	//==============================================================================
 	void setupStft();
 	void processSTFTFrame(const T* inputBuffer);
     void processCurrentInstance();
 
 	void resetClassifierState();
-	void resetTestState();
-	void configTrainingSetMatrix();
-	void configTestSetMatrix();
 
-	//Calculates the size required for the feature rows based on features being used
-    unsigned int calcFeatureVecSize() const;
-	void updateFeatures();
+	void configureDataSets();
 
 	//==============================================================================
 };

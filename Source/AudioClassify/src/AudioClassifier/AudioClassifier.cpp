@@ -9,44 +9,33 @@
 */
 
 #include "AudioClassifier.h"
-#include <fstream>
 #include <cmath>
 #include "../FeatureExtractor/FeatureExtractor.h"
 
 //==============================================================================
 template<typename T>
-AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int initNumSounds, int initNumInstances)
+AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int initNumSounds, int initNumTrainingInstances)
 	: gistOSD(initBufferSize, static_cast<int>(initSampleRate)), //JWM - Eventually initialise with slice size?
 	  osDetector(initBufferSize / 2, initSampleRate),
 	  featureExtractor(initBufferSize, static_cast<int>(initSampleRate)),
 	  nbc(initNumSounds, 21),
-	  knn(21, initNumSounds, initNumInstances),
-	  trainingSet(initNumSounds, initNumInstances, initBufferSize),
-	  testSet(initNumSounds, 10, initBufferSize)
+	  knn(21, initNumSounds, initNumTrainingInstances),
+	  trainingSet(std::make_unique<AudioDataSet<T>>(initNumSounds, initNumTrainingInstances, initBufferSize)),
+	  testSet(std::make_unique<AudioDataSet<T>>(initNumSounds, 10, initBufferSize))
 
 {
 	bufferSize = initBufferSize;
 	sampleRate = initSampleRate;
 
-	numTrainingInstances = initNumInstances;
-    numSounds = initNumSounds;
-
-	trainingSetSize = numSounds * numTrainingInstances;
+	numSounds = initNumSounds;
+	trainingInstancesPerSound = initNumTrainingInstances;
 
 	//Set initial num test instance per sound to 10
-	numTestInstances = 10;
-	testSetSize = numSounds * numTestInstances;
-
-	numFeatures = calcFeatureVecSize();
+	testInstancesPerSound = 10;
 
 	currentClassfierType.store(AudioClassifyOptions::ClassifierType::naiveBayes);
 
-    //Set initial sound ready states to false in training set.  
-    trainingSoundsReady.resize(numSounds, false);
-	testSoundsReady.resize(numSounds, false);
-
-	configTrainingSetMatrix();
-	configTestSetMatrix();
+	//JWM - Do we need to add configureDataSets here ? 
 }
 
 //==============================================================================
@@ -75,17 +64,17 @@ template<typename T>
 void AudioClassifier<T>::setCurrentBufferSize (int newBufferSize)
 {
 	bufferSize = newBufferSize;
+
+	configureDataSets();
 	
+	//Update STFT frame size relative to new bufferSize.
+	setupStft();
+
 	magSpectrumOSD.reset(new T[bufferSize / 2]);    
 	std::fill(magSpectrumOSD.get(), (magSpectrumOSD.get() + (bufferSize / 2)), static_cast<T>(0.0));
 
 	gistOSD.setAudioFrameSize(bufferSize);
 
-	//Update STFT frame size relative to new bufferSize.
-	setupStft();
-
-	//If changing num buffers current training set no longer valid so reset and require re-train.
-	resetClassifierState();
 }
 
 //==============================================================================
@@ -94,7 +83,7 @@ void AudioClassifier<T>::setCurrentSampleRate (T newSampleRate)
 {
     sampleRate = newSampleRate;
     gistOSD.setSamplingFrequency(static_cast<int>(sampleRate));
-	gistFeaturesStft.setSamplingFrequency(static_cast<int>(sampleRate));
+	featureExtractor.setSampleRate(static_cast<int>(sampleRate));
 	osDetector.setSampleRate(sampleRate);
 }
 
@@ -103,10 +92,10 @@ template<typename T>
 bool AudioClassifier<T>::saveDataSet(const std::string & fileName, AudioClassifyOptions::DataSetType dataSetType, std::string & errorString)
 {
 	if (dataSetType == AudioClassifyOptions::DataSetType::trainingSet)
-		return trainingSet.save(fileName, errorString);
+		return trainingSet->save(fileName, errorString);
 	
 	if (dataSetType == AudioClassifyOptions::DataSetType::testSet)
-		return testSet.save(fileName, errorString);
+		return testSet->save(fileName, errorString);
 
 	//Invalid dataSetType
 	errorString = "Error saving: Invalid DataSetType";
@@ -117,12 +106,50 @@ bool AudioClassifier<T>::saveDataSet(const std::string & fileName, AudioClassify
 template<typename T>
 bool AudioClassifier<T>::loadDataSet(const std::string & fileName, AudioClassifyOptions::DataSetType dataSetType, std::string & errorString)
 {
+	resetClassifierState();
 
 	if (dataSetType == AudioClassifyOptions::DataSetType::trainingSet)
-		return trainingSet.load(fileName, errorString);
+	{
+		auto success = trainingSet->load(fileName, errorString);
+
+		if (success)
+		{
+			//JWM - Check buffer sizes match?
+			stftFramesPerBuffer = trainingSet->getSTFTFramesPerBuffer();
+			numDelayedBuffers = trainingSet->getNumDelayedBuffers();
+			numSounds = trainingSet->getNumSounds();
+			trainingInstancesPerSound = trainingSet->getInstancesPerSound();
+
+			setupStft();
+
+			//Some duplication here that might be good to remove in future.
+			trainingSetReduced.reset(nullptr);
+			testSetReduced.reset(nullptr);
+
+			currentInstanceVector.set_size(trainingSet->getNumFeatures());
+
+			knn.setNumFeatures(trainingSet->getNumFeatures());
+			nbc.setNumFeatures(trainingSet->getNumFeatures());
+		}
+
+		return success;
+	}
 	
+	//JWM - Need to add checks to confirm test set has same structure as trainingSet
+	//Could add a checkStructuresMatch or something ?
 	if (dataSetType == AudioClassifyOptions::DataSetType::testSet)
-		return testSet.load(fileName, errorString);
+	{
+		//Also check buffer size same?	
+		auto success = testSet->load(fileName, errorString);
+
+		if (success)
+		{
+			testInstancesPerSound = testSet->getInstancesPerSound();
+			testSetReduced.reset(nullptr);
+		}
+
+		return success;
+	}
 
 	//Invalid dataSetType
 	errorString = "Error saving: Invalid DataSetType";
@@ -222,13 +249,8 @@ template<typename T>
 void AudioClassifier<T>::setNumBuffersDelayed(unsigned int newNumDelayed)
 {
 	numDelayedBuffers = newNumDelayed;
-	
-	//Total num features depends on numDelayedBuffers
-	updateFeatures();
 
-	//Re-configure training set matrix and reset model state as new feature/attribute rows required
-	configTrainingSetMatrix();
-	configTestSetMatrix();
+	configureDataSets();
 }
 
 //==============================================================================
@@ -240,22 +262,19 @@ int AudioClassifier<T>::getNumBuffersDelayed() const
 
 //==============================================================================
 template<typename T>
-void AudioClassifier<T>::setNumSTFTFrames(const unsigned int newNumSTFTFrames)
+void AudioClassifier<T>::setSTFTFramesPerBuffer(const unsigned int newNumSTFTFrames)
 {
-	numStftFrames = newNumSTFTFrames;
+	stftFramesPerBuffer = newNumSTFTFrames;
 	setupStft();
 
-	updateFeatures();
-
-	configTrainingSetMatrix();
-	configTestSetMatrix();
+	configureDataSets();
 }
 
 //==============================================================================
 template<typename T>
-int AudioClassifier<T>::getNumSTFTFrames() const
+int AudioClassifier<T>::getSTFTFramesPerBuffer() const
 {
-	return numStftFrames;
+	return stftFramesPerBuffer;
 }
 
 //==============================================================================
@@ -302,10 +321,10 @@ template<typename T>
 void AudioClassifier<T>::train()
 {
     //If all sound samples collected for training set train model.
-    if (checkTrainingSetReady())
+    if (trainingSet->isReady())
     {
-        nbc.Train(trainingData, trainingLabels); 
-		knn.train(trainingData, trainingLabels);
+        nbc.Train(trainingSet->getData(), trainingSet->getSoundLabels()); 
+		knn.train(trainingSet->getData(), trainingSet->getSoundLabels());
 
         classifierReady.store(true);    
     }
@@ -316,16 +335,21 @@ void AudioClassifier<T>::train()
 template<typename T>
 void AudioClassifier<T>::setInstancesPerSound(int newNumInstances, AudioClassifyOptions::DataSetType dataSetType)
 {
+	resetClassifierState();
+
 	if (dataSetType == AudioClassifyOptions::DataSetType::trainingSet)
-		trainingSet.setInstancesPerSound(newNumInstances);
+	{
+		trainingSet.reset(new AudioDataSet<T>(numSounds, trainingInstancesPerSound, bufferSize, stftFramesPerBuffer, numDelayedBuffers));
+		trainingSetReduced.reset(nullptr);
+		knn.setTrainingInstancesPerClass(newNumInstances);
+	}
 
 	if (dataSetType == AudioClassifyOptions::DataSetType::testSet)
-		testSet.setInstancesPerSound(newNumInstances);
+	{
+		testSet.reset(new AudioDataSet<T>(numSounds, trainingInstancesPerSound, bufferSize, stftFramesPerBuffer, numDelayedBuffers));
+		testSetReduced.reset(nullptr);
+	}
 
-	knn.setTrainingInstancesPerClass(newNumInstances);
-
-	//JWM: MAY or may not need to add this to set classifierReady = false
-	resetClassifierState();
 }
 
 //==============================================================================
@@ -333,10 +357,10 @@ template<typename T>
 int AudioClassifier<T>::getInstancesPerSound(AudioClassifyOptions::DataSetType dataSetType)
 {
 	if (dataSetType == AudioClassifyOptions::DataSetType::trainingSet)
-		trainingSet.getInstancesPerSound();
+		trainingSet->getInstancesPerSound();
 
 	if (dataSetType == AudioClassifyOptions::DataSetType::testSet)
-		testSet.getInstancesPerSound();
+		testSet->getInstancesPerSound();
 
 	//Invalid dataSetType
 	return -1;
@@ -344,16 +368,16 @@ int AudioClassifier<T>::getInstancesPerSound(AudioClassifyOptions::DataSetType d
 
 //==============================================================================
 template<typename T>
-int AudioClassifier<T>::getTrainingSetSize() const
+int AudioClassifier<T>::getDataSetSize(AudioClassifyOptions::DataSetType dataSetType) const
 {
-	return trainingSetSize;
-}
+	if (dataSetType == AudioClassifyOptions::DataSetType::trainingSet)
+		return trainingSet->getTotalNumInstances();
 
-//==============================================================================
-template<typename T>
-int AudioClassifier<T>::getTestSetSize() const
-{
-	return testSetSize;
+	if (dataSetType == AudioClassifyOptions::DataSetType::testSet)
+		return testSet->getTotalNumInstances();
+
+	//Invalid dataSetType
+	return -1;
 }
 
 //==============================================================================
@@ -400,13 +424,30 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer, const int numSampl
 
 	if (hasOnset)
 	{
-		if (numStftFrames > 0)
-			processSTFTFrame(buffer);
-		else
+		////Change to greater than 1 ?
+		//if (numStftFrames > 0)
+		//	processSTFTFrame(buffer);
+		//else
+		//{
+		//	featureExtractor.processFrame(buffer, bufferSize);
+		//	processCurrentInstance();
+		//}
+
+		while (stftProcessedCount < stftFramesPerBuffer)
 		{
-			featureExtractor.processFrame(buffer, bufferSize);
+			//Later allow use of hopSize/overlap ?
+			auto readPosition = stftFrameSize * stftProcessedCount;
+			auto* readPtr = buffer + readPosition;
+				
+			featureExtractor.processFrame(readPtr, stftFrameSize);
+
 			processCurrentInstance();
+
+			++stftProcessedCount;
 		}
+
+		//Reset for next instance/onset
+		stftProcessedCount = 0;
 
 		if (numDelayedBuffers != 0 && delayedProcessedCount < numDelayedBuffers)
 			++delayedProcessedCount;
@@ -420,11 +461,8 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer, const int numSampl
 template<typename T>
 void AudioClassifier<T>::setupStft()
 {
-	if (numStftFrames != 0)
-	{
-		stftFrameSize = bufferSize / numStftFrames;
-		featureExtractor.setAudioFrameSize(stftFrameSize);
-	}
+		stftFrameSize = bufferSize / stftFramesPerBuffer;
+		featureExtractor.setFrameSize(stftFrameSize);
 }
 
 //==============================================================================
@@ -432,7 +470,7 @@ template<typename T>
 void AudioClassifier<T>::processSTFTFrame(const T* inputBuffer)
 {
 	
-	while (stftProcessedCount < numStftFrames)
+	while (stftProcessedCount < stftFramesPerBuffer)
 	{
 		//Later allow use of hopSize/overlap ?
 		auto readPosition = stftFrameSize * stftProcessedCount;
@@ -458,29 +496,28 @@ void AudioClassifier<T>::processCurrentInstance()
 	auto frameNumber = stftProcessedCount + 1;
 
 	//Features used by trainingSet and testSet should always match.
-	if (numStftFrames != 0)
-		featuresProcessed = (stftProcessedCount + (delayedProcessedCount * numStftFrames)) * trainingSet.getNumFeatures();
+	if (stftFramesPerBuffer != 0)
+		featuresProcessed = (stftProcessedCount + (delayedProcessedCount * stftFramesPerBuffer)) * trainingSet->getNumFeatures();
 	else
-		featuresProcessed = delayedProcessedCount * trainingSet.getNumFeatures();
+		featuresProcessed = delayedProcessedCount * trainingSet->getNumFeatures();
 
 
 	for (auto i = 0; i < AudioClassifyOptions::totalNumAudioFeatures; ++i)
 	{
 		auto feature = static_cast<AudioClassifyOptions::AudioFeature>(i);
-		if (trainingSet.usingFeature(frameNumber, feature))
+		if (trainingSet->usingFeature(frameNumber, feature))
 		{
-			auto featureVal = featureExtractor.getFeature(feature, frameNumber);
-			auto featureIndex = trainingSet.getFeatureIndex(frameNumber, feature);
+			auto featureVal = featureExtractor.getFeature(feature);
+			auto featureIndex = trainingSet->getFeatureIndex(frameNumber, feature);
 
 			currentInstanceVector[featureIndex] = featureVal;
 
-			//Replaces pos
 			++featuresProcessed;
 		}
 	}
 
 
-	if (featuresProcessed == trainingSet.getNumFeatures())
+	if (featuresProcessed == trainingSet->getNumFeatures())
 		instanceReady = true;
 
 
@@ -488,23 +525,24 @@ void AudioClassifier<T>::processCurrentInstance()
 	{
 		if (recordingTrainingData.load())
 		{
-			if (trainingSet.checkSoundReady(currentSoundRecording.load()))
+			if (trainingSet->checkSoundReady(currentSoundRecording.load()))
 			{
 				recordingTrainingData.store(false);
 				currentSoundRecording.store(-1);
 			}
 			else
-				trainingSet.addInstance(currentInstanceVector);
+				trainingSet->addInstance(currentInstanceVector, currentSoundRecording.load());
 		}
-		else if (recordingTestData.load())
+
+		if (recordingTestData.load())
 		{
-			if (testSet.checkSoundReady(currentSoundRecording.load()))
+			if (testSet->checkSoundReady(currentSoundRecording.load()))
 			{
 				recordingTestData.store(false);
 				currentSoundRecording.store(-1);
 			}
 			else
-				testSet.addInstance();
+				testSet->addInstance(currentInstanceVector, currentSoundRecording.load());
 		}
 	}
 
@@ -515,27 +553,13 @@ template<typename T>
 void AudioClassifier<T>::resetClassifierState()
 {
     classifierReady.store(false);
-	currentTrainingSoundRecording.store(-1);
+	currentSoundRecording.store(-1);
 	recordingTrainingData.store(false);
-	trainingCount = 0;
-
-	for (auto& v : trainingSoundsReady)
-		  v = false;
-}
-
-//==============================================================================
-template<typename T>
-void AudioClassifier<T>::resetTestState()
-{
-	currentTestSoundRecording.store(-1);
 	recordingTestData.store(false);
-	testCount = 0; 
-
-	for (auto& v : testSoundsReady)
-		  v = false;
 }
 
 //==============================================================================
+
 template<typename T>
 bool AudioClassifier<T>::noteOnsetDetected() const
 {
@@ -579,120 +603,69 @@ template<typename T>
 bool AudioClassifier<T>::checkDataSetReady(AudioClassifyOptions::DataSetType dataSetType) const
 {
 	if (dataSetType == AudioClassifyOptions::DataSetType::trainingSet)
-		return trainingSet.isReady();
+		return trainingSet->isReady();
 
 	if (dataSetType == AudioClassifyOptions::DataSetType::testSet)
-		return testSet.isReady();
+		return testSet->isReady();
 
 	return false;
 }
 
 //==============================================================================
 template<typename T>
-bool AudioClassifier<T>::checkSoundReady(int sound, AudioClassifyOptions::DataSetType dataSetType)
+bool AudioClassifier<T>::checkSoundReady(int sound, AudioClassifyOptions::DataSetType dataSetType) const
 {
 	if (dataSetType == AudioClassifyOptions::DataSetType::trainingSet)
-		return trainingSet.checkSoundReady(sound);
+		return trainingSet->checkSoundReady(sound);
 
 	if (dataSetType == AudioClassifyOptions::DataSetType::testSet)
-		return testSet.checkSoundReady(sound);
+		return testSet->checkSoundReady(sound);
 
 	return false;
 }
 
 //==============================================================================
-template<typename T>
-void AudioClassifier<T>::configTrainingSetMatrix()
-{
-	/** Currently a naive implementation as just discards the existing
-	 * training set data and requires training set to be re-gathered/populated
-	 * followed by re-train of classifier. 
-	 */
+//template<typename T>
+//void AudioClassifier<T>::configTrainingSetMatrix()
+//{
+//	/** Currently a naive implementation as just discards the existing
+//	 * training set data and requires training set to be re-gathered/populated
+//	 * followed by re-train of classifier. 
+//	 */
+//
+//	//Training set and current instance no longer valid so reset state
+//	resetClassifierState();
+//
+//	trainingData.set_size(numFeatures, trainingSetSize);
+//	trainingData.zeros();
+//
+//	trainingLabels.set_size(trainingSetSize);
+//
+//	//Consider making trainingLabel <int> rather than unsigned to init with -1 label vals
+//	for (auto i = 0; i < trainingLabels.n_elem; ++i)
+//		 trainingLabels[i] = 0;
+//
+//	currentInstanceVector.set_size(numFeatures);
+//	currentInstanceVector.zeros();
+//}
 
-	//Training set and current instance no longer valid so reset state
+//==============================================================================
+template<typename T>
+void AudioClassifier<T>::configureDataSets()
+{
 	resetClassifierState();
 
-	trainingData.set_size(numFeatures, trainingSetSize);
-	trainingData.zeros();
+	trainingSet.reset(new AudioDataSet<T>(numSounds, trainingInstancesPerSound, bufferSize, stftFramesPerBuffer, numDelayedBuffers));
+	testSet.reset(new AudioDataSet<T>(numSounds, trainingInstancesPerSound, bufferSize, stftFramesPerBuffer, numDelayedBuffers));
 
-	trainingLabels.set_size(trainingSetSize);
+	trainingSetReduced.reset(nullptr);
+	testSetReduced.reset(nullptr);
 
-	//Consider making trainingLabel <int> rather than unsigned to init with -1 label vals
-	for (auto i = 0; i < trainingLabels.n_elem; ++i)
-		 trainingLabels[i] = 0;
+	currentInstanceVector.set_size(trainingSet->getNumFeatures());
+	//Also reset reduced data sets
 
-	currentInstanceVector.set_size(numFeatures);
-	currentInstanceVector.zeros();
-}
-
-//==============================================================================
-template<typename T>
-void AudioClassifier<T>::configTestSetMatrix()
-{
-	//Test set no longer valid so reset state
-	resetTestState();
-
-	testData.set_size(numFeatures, testSetSize);
-	testData.zeros();
-
-	testLabels.set_size(testSetSize);
-
-	for (auto i = 0; i < testLabels.n_elem; ++i)
-		 testLabels[i] = 0;
-}
-
-//==============================================================================
-template<typename T>
-unsigned int AudioClassifier<T>::calcFeatureVecSize() const
-{
-    auto size = 0;
-
-	if (usingRMS.load())
-		++size;
-
-	if (usingPeakEnergy.load())
-		++size;
-
-	if (usingZeroCrossingRate.load())
-		++size;
-
-    if (usingSpecCentroid.load())
-        ++size; 
-    
-    if (usingSpecCrest.load())
-        ++size;
-
-    if (usingSpecFlatness.load())
-        ++size;
-
-    if (usingSpecRolloff.load())
-        ++size;
-
-    if (usingSpecKurtosis.load())
-        ++size;
-
-    if (usingMfcc.load())
-    {
-        //JWM - eventually change this to use numMfcc based on user selected AudioClassifyOptions. 
-        size += 13;
-    }
-
-    return size;
-}
-
-//==============================================================================
-template<typename T>
-void AudioClassifier<T>::updateFeatures()
-{
-	auto featureSize = calcFeatureVecSize();
-
-	if (numStftFrames > 0)
-		numFeatures = featureSize * (numStftFrames * (numDelayedBuffers + 1));
-	else
-		numFeatures = featureSize * (numDelayedBuffers + 1);
-
-	knn.setNumFeatures(numFeatures);
-	nbc.setNumFeatures(numFeatures);
+	knn.setNumFeatures(trainingSet->getNumFeatures());
+	nbc.setNumFeatures(trainingSet->getNumFeatures());
 }
 
 //==============================================================================
@@ -700,16 +673,15 @@ template<typename T>
 float AudioClassifier<T>::test(std::vector<std::pair<unsigned int, unsigned int>>& outputResults)
 {
 	//Possibly add an error string input param if test set not ready
-	if (!checkTestSetReady())
+	if (testSet->isReady())
 		return 0.0f;
 
 	unsigned int numCorrect = 0;
 
-	for (auto i = 0; i < testSetSize; ++i)
+	for (auto i = 0; i < testSet->getTotalNumInstances(); ++i)
 	{
-		//JWM - Hopefully replace with AudioDataSet.data.col(i) where AudioDataSet testSet is the member variable
-		arma::Col<T> testInstance = testData.col(i);
-		auto actual = testLabels[i];
+		arma::Col<T> testInstance = testSet->getData().col(i);
+		auto actual = testSet->getSoundLabels()[i];
 		auto predicted = -1;
 		
 	    switch (currentClassfierType.load())
@@ -730,7 +702,7 @@ float AudioClassifier<T>::test(std::vector<std::pair<unsigned int, unsigned int>
 	}
 
 	//Return percentage accuracy
-	auto result = static_cast<float>(numCorrect) / static_cast<float>(testSetSize) * 100.0f;
+	auto result = static_cast<float>(numCorrect) / static_cast<float>(testSet->getTotalNumInstances()) * 100.0f;
 	return result;
 }
 

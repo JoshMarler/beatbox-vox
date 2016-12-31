@@ -19,6 +19,7 @@ AudioDataSet<T>::AudioDataSet()
       numSounds(0),
 	  instancesPerSound(0)
 {
+	initialise();
 }
 
 //==============================================================================
@@ -94,6 +95,12 @@ bool AudioDataSet<T>::load(const std::string & absoluteFilePath, std::string & e
 	setData(dataLoaded);
 	setSoundLabels(soundLabelsLoaded);
 
+	//Assume sounds ready if loaded as required by save
+	for (auto& v : soundsReady)
+	{
+		v = true;
+	}
+
 	return true;
 }
 
@@ -167,13 +174,7 @@ bool AudioDataSet<T>::save(const std::string & absoluteFilePath, std::string & e
 template<typename T>
 AudioDataSet<T> AudioDataSet<T>::getVarianceReducedCopy(int numFeatures)
 {
-	arma::Col<T> variances(data.n_rows);
-
-	for (auto i = 0; i < data.n_rows; ++i)
-	{
-		auto rowVariance = arma::var(data.row(i));
-		variances[i] = rowVariance;
-	}
+	arma::Col<T> variances = arma::var(data, 0, 1);
 
 	arma::uvec sorted = arma::sort_index(variances);
 	
@@ -210,9 +211,9 @@ void AudioDataSet<T>::addInstance(const arma::Col<T>& instance, unsigned int sou
 		return;
 
 	if (instanceCount == 0)
-		instanceCount = soundLabel * totalInstances;
+		instanceCount = soundLabel * instancesPerSound;
 
-	if (instanceCount < totalInstances * (soundLabel + 1))
+	if (instanceCount < instancesPerSound * (soundLabel + 1))
 	{
 		data.col(instanceCount) = instance;
 		soundLabels[instanceCount] = soundLabel;
@@ -299,16 +300,6 @@ int AudioDataSet<T>::getNumSounds() const
 
 //==============================================================================
 template<typename T>
-void AudioDataSet<T>::setInstancesPerSound(int newInstancesPerSound)
-{
-	instancesPerSound = newInstancesPerSound;
-
-	//Reset containers and state
-	initialise();
-}
-
-//==============================================================================
-template<typename T>
 int AudioDataSet<T>::getInstancesPerSound() const
 {
 	return instancesPerSound;
@@ -337,13 +328,7 @@ int AudioDataSet<T>::getTotalNumSTFTFrames() const
 
 //==============================================================================
 template<typename T>
-void AudioDataSet<T>::reset()
-{
-}
-
-//==============================================================================
-template<typename T>
-bool AudioDataSet<T>::isReady()
+bool AudioDataSet<T>::isReady() const
 {
 	auto readyCount = 0;
 	auto ready = false;

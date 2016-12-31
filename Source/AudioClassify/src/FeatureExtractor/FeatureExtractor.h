@@ -24,9 +24,9 @@ public:
 	void setSampleRate(int newSampleRate);
 	void setFrameSize(int newFrameSize);
 
-	void processFrame(T* audioFrame, int frameSize);
+	void processFrame(const T* audioFrame, const int frameSize);
 
-	T getFeature(AudioClassifyOptions::AudioFeature feature) const;
+	T getFeature(AudioClassifyOptions::AudioFeature feature);
 
 private:
     std::unique_ptr<T[]> mfccs;

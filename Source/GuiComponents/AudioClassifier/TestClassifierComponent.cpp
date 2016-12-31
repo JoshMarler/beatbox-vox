@@ -40,7 +40,7 @@ TestClassifierComponent::TestClassifierComponent(BeatboxVoxAudioProcessor& p)
 	loadTestSetButton.addListener(this);
 	addAndMakeVisible(loadTestSetButton);
 
-	auto ready = processor.getClassifier().checkTestSetReady();
+	auto ready = processor.getClassifier().checkDataSetReady(AudioClassifyOptions::DataSetType::testSet);
 
 	if (ready)
 		testSetStatusLabel.setText("Test set status: Ready", NotificationType::dontSendNotification);
@@ -58,7 +58,7 @@ TestClassifierComponent::TestClassifierComponent(BeatboxVoxAudioProcessor& p)
 	addAndMakeVisible(accuracyLabel);
 
 
-	auto numTestResults = processor.getClassifier().getTestSetSize();
+	auto numTestResults = processor.getClassifier().getDataSetSize(AudioClassifyOptions::DataSetType::testSet);
 	
 	//Set current test results to uninitialized state
 	currentTestResults.resize(numTestResults, std::make_pair(-1, -1));
@@ -161,7 +161,7 @@ void TestClassifierComponent::buttonClicked(Button * button)
 //===============================================================================
 int TestClassifierComponent::getNumRows()
 {
-	return processor.getClassifier().getTestSetSize();
+	return processor.getClassifier().getDataSetSize(AudioClassifyOptions::DataSetType::testSet);
 }
 
 //===============================================================================

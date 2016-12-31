@@ -37,23 +37,23 @@ void FeatureExtractor<T>::setSampleRate(int newSampleRate)
 template<typename T>
 void FeatureExtractor<T>::setFrameSize(int newFrameSize)
 {
-	gist.setFrameSize();
+	gist.setAudioFrameSize(newFrameSize);
 }
 
 //==============================================================================
 template<typename T>
-void FeatureExtractor<T>::processFrame(T * audioFrame, int frameSize)
+void FeatureExtractor<T>::processFrame(const T* audioFrame, const int frameSize)
 {
 	//May remove
 	assert(gist.getAudioFrameSize() == frameSize);
-	gist.processFrame(audioFrame, frameSize);
+	gist.processAudioFrame(audioFrame, frameSize);
 
 	gist.melFrequencyCepstralCoefficients(mfccs.get());
 }
 
 //==============================================================================
 template<typename T>
-T FeatureExtractor<T>::getFeature(AudioClassifyOptions::AudioFeature feature) const
+T FeatureExtractor<T>::getFeature(AudioClassifyOptions::AudioFeature feature)
 {
 	T featureValue = static_cast<T>(0.0);
 
