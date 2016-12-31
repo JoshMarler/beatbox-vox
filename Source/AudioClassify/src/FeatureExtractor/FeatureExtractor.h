@@ -12,17 +12,29 @@
 #define FEATUREEXTRACTOR_H_INCLUDED
 
 #include "../../Gist/src/Gist.h";
+#include "../AudioClassifyOptions/AudioClassifyOptions.h";
 
 template<typename T>
 class FeatureExtractor
 {
 public:
-
-	FeatureExtractor();
+	FeatureExtractor(int initBufferSize, int initSampleRate);
 	~FeatureExtractor();
+
+	void setSampleRate(int newSampleRate);
+	void setFrameSize(int newFrameSize);
+
+	void processFrame(T* audioFrame, int frameSize);
+
+	T getFeature(AudioClassifyOptions::AudioFeature feature) const;
+
 private:
+    std::unique_ptr<T[]> mfccs;
+
+	Gist<T> gist;
 };
 
 
 
 #endif  // FEATUREEXTRACTOR_H_INCLUDED
+

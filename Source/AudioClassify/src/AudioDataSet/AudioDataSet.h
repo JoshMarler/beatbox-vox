@@ -16,61 +16,71 @@
 #endif
 
 #include <armadillo.h>
-#include "../JuceLibraryCode/JuceHeader.h"
+#include "JuceHeader.h"
 
-#include "./AudioClassifyOptions.h"
+#include "../AudioClassifyOptions/AudioClassifyOptions.h"
 
-using FeatureFramePair = std::pair<unsigned int, AudioClassifyOptions::AudioFeature>;
+using FeatureFramePair = std::pair<int, AudioClassifyOptions::AudioFeature>;
 
 template<typename T>
 class AudioDataSet
 {
 public:
 
-	AudioDataSet(unsigned int initNumSounds, unsigned int initInstancePerSound, unsigned int initBufferSize,
-		unsigned int initSTFTFramesPerBuffer = 1, unsigned int initNumDelayedBuffers = 0);
+	AudioDataSet();
+
+	AudioDataSet(int initNumSounds, int initInstancePerSound, int initBufferSize,
+		int initSTFTFramesPerBuffer = 1, int initNumDelayedBuffers = 0);
 
 	~AudioDataSet();
+
+	bool load(const std::string& absoluteFilePath, std::string& errorString);
+	bool save(const std::string& absoluteFilePath, std::string& errorString);
+
+	AudioDataSet<T> getVarianceReducedCopy(int numFeatures);
 
 	void addInstance(const arma::Col<T>& instance, unsigned int soundLabel);
 
 	//NOTE: Potentially add setUsingFeature method in future to allow explicit on/off of features. 
-	bool usingFeature(unsigned int stftFrameNumber, AudioClassifyOptions::AudioFeature feature);
+	bool usingFeature(int stftFrameNumber, AudioClassifyOptions::AudioFeature feature);
+	int getFeatureIndex(int stftFrameNumber, AudioClassifyOptions::AudioFeature feature);
 
-	const arma::Mat<T>& getData();
+	const arma::Mat<T>& getData() const;
 	const arma::Row<unsigned int>& getSoundLabels() const;
 
-	static AudioDataSet<T> load(const std::string& absoluteFilePath, std::string& errorString);
-	static void save(AudioDataSet<T>& dataSet, const std::string& absoluteFilePath, std::string& errorString);
 
-	unsigned int getBufferSize() const;
+	int getBufferSize() const;
 
-	unsigned int getSTFTFramesPerBuffer() const;
-	unsigned int getNumDelayedBuffers() const;
+	int getSTFTFramesPerBuffer() const;
+	int getNumDelayedBuffers() const;
 
-	unsigned int getNumSounds() const;
+	int getNumSounds() const;
 
-	void setInstancesPerSound(unsigned int newInstancesPerSound);
-	unsigned int getInstancesPerSound() const;
+	void setInstancesPerSound(int newInstancesPerSound);
+	int getInstancesPerSound() const;
 
-	unsigned int getNumFeatures() const;
+	int getNumFeatures() const;
+
+	int getTotalNumInstances() const;
+	int getTotalNumSTFTFrames() const;
 
 	void reset();
 	bool isReady();
 	
 	bool checkSoundReady(const unsigned int sound) const;
 
+
 private:
 
 	bool ready = false;
-	unsigned int instanceCount = 0;
+	int instanceCount = 0;
 
-	unsigned int bufferSize;
-	unsigned int stftFramesPerBuffer;
-	unsigned int numDelayedBuffers;
+	int bufferSize;
+	int stftFramesPerBuffer;
+	int numDelayedBuffers;
 
-	unsigned int numSounds;
-	unsigned int instancesPerSound;
+	int numSounds;
+	int instancesPerSound;
 
 	std::vector<bool> soundsReady;
 
@@ -79,8 +89,9 @@ private:
 
 	std::vector<FeatureFramePair> featuresUsed;
 
-	void setData(arma::Mat<T>& newData);
-	void setSoundLabels(arma::Row<unsigned int>& newLabels);
+	void setData(const arma::Mat<T>& newData);
+	void setSoundLabels(const arma::Row<unsigned>& newLabels);
+	void setFeaturesUsed(const std::vector<FeatureFramePair>& newFeaturesUsed);
 
 	void initialise();
 };

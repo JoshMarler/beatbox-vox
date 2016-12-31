@@ -25,6 +25,7 @@
 #include "../../Gist/src/Gist.h"
 #include "../AudioClassifyOptions/AudioClassifyOptions.h"
 #include "../OnsetDetection/OnsetDetector.h"
+#include "../FeatureExtractor/FeatureExtractor.h"
 #include "../NaiveBayes/NaiveBayes.h"
 #include "../NearestNeighbour/NearestNeighbour.h"
 
@@ -82,57 +83,46 @@ public:
 	/**
 	 *
 	 */
-    void recordTrainingData(int trainingSound);
-	
-	void recordTestData(int testSound);
+    void setSoundRecording(int trainingSound, AudioClassifyOptions::DataSetType dataSetType);
 
     void train();
 	
 	float test(std::vector<std::pair<unsigned int, unsigned int>>& outputResults);
 
-	/** Saves the current training data set being used by the model/classifier. 
-	 * This can be loaded again on the next application load so that training sets do not have
-	 * to be collected again. 
+	/** Saves the current data set being used by the model/classifier. 
+	 * This can be loaded again on the next application load so that data sets do not have to be re-recorded. 
      * Note: This method should NOT be called from the audio/callback thread as it involves file IO and will block.
-	 * @param fileName the fully qualified file name/path to save the training set matrix to. i.e. C:\\Models\\model.csv 
+	 * @param fileName the fully qualified file name/path to save AudioDataSet to. i.e. C:\\AudioDataSets/Set1.bin
      * @param errorString output parameter which will contain an error message if applicable or default "" blank string.
      * @return true for successful save otherwise false.
 	 */
-	bool saveTrainingSet(const std::string& fileName, std::string& errorString);
+	bool saveDataSet(const std::string& fileName, AudioClassifyOptions::DataSetType dataSetType, std::string& errorString);
 
-	/** Loads the specified training data set according to the file name / path 
-	 * passed in and trains the internal classifier on with the loaded data. 
+	/** Loads the specified data set according to the file name / path passed in. 
      * Note: This method should NOT be called from the audio/callback thread as it involves file IO and will block.
-	 * @param fileName the fully qualified file name/path for the training data set to load. i.e. C:\\Models\\model.csv
+	 * @param fileName the fully qualified file name/path for the data set to load. i.e. C:\\Models\\model.csv
      * @param errorString output parameter which will contain an error message if applicable or default "" blank string.
      * @return true for successful load otherwise false.
 	 */
-	bool loadTrainingSet(const std::string& fileName, std::string& errorString);
+	bool loadDataSet(const std::string& fileName, AudioClassifyOptions::DataSetType dataSetType, std::string& errorString);
 
-	bool saveTestSet(const std::string& fileName, std::string& errorString);
-	bool loadTestSet(const std::string& fileName, std::string& errorString);
 
 	/** @return the number of sounds currently being used in the model. */
 	size_t getNumSounds() const;
     
-	/** Sets the number of instances to be used per sound for the training set. 
-	 * The model/classifier will need to be re-trained and a fresh training set collected.
-	 * @param newNumInstances the number of instance to be recorded per sound for the training set.
+	/** Sets the number of instances to be used per sound for the data set. 
+	 * The model/classifier will need to be re-trained and a fresh training set recorded if dataSetType == trainingSet.
+	 * If dataSetType == testSet the test set will need to be re-recorded	
+	 * @param newNumInstances the number of instance to be recorded per sound for the data set.
 	 */
-    void setTrainingInstancesPerSound(int newNumInstances);
-	int getTrainingInstancesPerSound() const;
-
-	void setTestInstancesPerSound(int newNumInstances);
-	int getTestInstancesPerSound() const;
+	void setInstancesPerSound(int newNumInstances, AudioClassifyOptions::DataSetType dataSetType);
+	int getInstancesPerSound(AudioClassifyOptions::DataSetType dataSetType);
 
 	int getTrainingSetSize() const;
 	int getTestSetSize() const;
 
-    bool checkTrainingSetReady() const;
-	bool checkTrainingSoundReady(const unsigned sound) const;
-
-    bool checkTestSetReady() const;
-	bool checkTestSoundReady(const unsigned sound) const;
+	bool checkDataSetReady(AudioClassifyOptions::DataSetType dataSetType) const;
+	bool checkSoundReady(int sound, AudioClassifyOptions::DataSetType dataSetType);
 
     bool getClassifierReady() const;
     
@@ -205,9 +195,10 @@ private:
 	//==============================================================================
 	/* Classifier current state variables */
 
-    //Indicates the current sound being recorded/trained.
+    //Indicates the current sound being recorded.
     std::atomic_int currentTrainingSoundRecording;
 	std::atomic_int currentTestSoundRecording;
+	std::atomic_int currentSoundRecording;
 
 	//Classifier is ready to use true/false.
     std::atomic_bool classifierReady;
@@ -221,11 +212,8 @@ private:
 	std::vector<bool> testSoundsReady;
     
 	//==============================================================================
-    //Array/Buffer to hold mag spectrum.
+    //Array/Buffer to hold mag spectrum used for onset detection.
     std::unique_ptr<T[]> magSpectrumOSD;
-
-    //Array/Buffer to hold the mel frequency cepstral coefficients.
-    std::unique_ptr<T[]> mfccs;
 
 	//==============================================================================
     //Holds the training data set.
@@ -241,21 +229,22 @@ private:
     arma::Col<T> currentInstanceVector;
    
 	//==============================================================================
-    Gist<T> gistFeatures;
-	Gist<T> gistFeaturesStft;
+    Gist<T> gistOSD;
     OnsetDetector<T> osDetector;
+	FeatureExtractor<T> featureExtractor;
     NaiveBayes<T> nbc;
 	NearestNeighbour<T> knn;
 
 	//==============================================================================
 	AudioDataSet<T> trainingSet;
+	AudioDataSet<T> trainingSetReduced;
+
+	AudioDataSet<T> testSet;
+	AudioDataSet<T> testSetReduced;
 	//==============================================================================
 	void setupStft();
 	void processSTFTFrame(const T* inputBuffer);
     void processCurrentInstance();
-
-	void addToTrainingSet(const arma::Col<T>& newInstance);
-	void addToTestSet(const arma::Col<T>& newInstance);
 
 	void resetClassifierState();
 	void resetTestState();

@@ -149,7 +149,7 @@ void RecordTrainingSetComponent::resized()
 void RecordTrainingSetComponent::timerCallback()
 {
 	 auto isRecording = processor.getClassifier().isRecording();
-     auto trainingSetReady = processor.getClassifier().checkTrainingSetReady();
+     auto trainingSetReady = processor.getClassifier().checkDataSetReady(AudioClassifyOptions::DataSetType::trainingSet);
      auto classifierReady = processor.getClassifier().getClassifierReady();
 	 auto numSounds = processor.getClassifier().getNumSounds();
 
@@ -176,17 +176,7 @@ void RecordTrainingSetComponent::timerCallback()
 		 auto currentSoundRecording = processor.getClassifier().getCurrentSoundRecording();
 		 auto soundReady = false;
 
-		 switch (currentDataSetType)
-		 {
-			 case AudioClassifyOptions::DataSetType::trainingSet:
-				 soundReady = processor.getClassifier().checkTrainingSoundReady(i);
-				 break;
-			 case AudioClassifyOptions::DataSetType::testSet:
-				 soundReady = processor.getClassifier().checkTestSoundReady(i);
-				 break;
-			 default:
-				 break;
-		 }
+		 soundReady = processor.getClassifier().checkSoundReady(i, currentDataSetType);
 
 		 auto label = soundStatusLabels[i];
 		 String soundName;
@@ -230,18 +220,8 @@ void RecordTrainingSetComponent::buttonClicked(Button * button)
 	else if (id == instanceSizeButtonID)
 	{
 		auto numInstances = static_cast<int>(instanceSizeSlider.getValue());
-		
-		switch (currentDataSetType)
-		{
-			case AudioClassifyOptions::DataSetType::trainingSet:
-				processor.getClassifier().setTrainingInstancesPerSound(numInstances);
-				break;
-			case AudioClassifyOptions::DataSetType::testSet:
-				processor.getClassifier().setTestInstancesPerSound(numInstances);
-				break;
-			default:
-				break;
-		}
+
+		processor.getClassifier().setInstancesPerSound(numInstances, currentDataSetType);
 		
 		setNeedsUpdate(false);
 	}
@@ -250,17 +230,7 @@ void RecordTrainingSetComponent::buttonClicked(Button * button)
 		if (button->getToggleState())
 		{
 			
-			switch (currentDataSetType)
-			{
-				case AudioClassifyOptions::DataSetType::trainingSet:
-					processor.getClassifier().recordTrainingData(currentRecordingSound);
-					break;
-				case AudioClassifyOptions::DataSetType::testSet:
-					processor.getClassifier().recordTestData(currentRecordingSound);
-					break;
-				default:
-					break;
-			}
+			processor.getClassifier().setSoundRecording(currentRecordingSound, currentDataSetType);
 			
 			auto label = soundStatusLabels[currentRecordingSound];
 			String soundName;
@@ -304,19 +274,7 @@ void RecordTrainingSetComponent::sliderValueChanged(Slider * slider)
 
 	if (id == instanceSizeSliderID)
 	{
-		auto currentVal = 0;
-
-		switch (currentDataSetType)
-		{
-		case AudioClassifyOptions::DataSetType::trainingSet:
-			currentVal = processor.getClassifier().getTrainingInstancesPerSound();
-			break;
-		case AudioClassifyOptions::DataSetType::testSet:
-			currentVal = processor.getClassifier().getTestInstancesPerSound();
-			break;
-		default:
-			break;
-		}
+		auto currentVal = processor.getClassifier().getInstancesPerSound(currentDataSetType);
 
 		auto newVal = static_cast<int>(slider->getValue());
 

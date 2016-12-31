@@ -234,7 +234,7 @@ bool TestClassifierComponent::loadTestSet()
 	if (!directory.exists())
 		directory.createDirectory();
 
-	FileChooser browser("Load Test Data Set", directory, "*.csv");
+	FileChooser browser("Load Test Data Set", directory, "*.bin");
 	auto fileSelected = browser.browseForFileToOpen();
 
 	if (fileSelected)
@@ -243,7 +243,7 @@ bool TestClassifierComponent::loadTestSet()
 		auto filePath = fileChosen.getFullPathName();
 
 		std::string errorString;
-		success = processor.getClassifier().loadTestSet(filePath.toStdString(), errorString);
+		success = processor.getClassifier().loadDataSet(filePath.toStdString(), AudioClassifyOptions::DataSetType::testSet, errorString);
 
 		if (!success)
 		{

@@ -147,7 +147,7 @@ void SelectClassifierComponent::buttonClicked(Button * button)
 			auto filePath = fileChosen.getFullPathName();
 
 			std::string errorString;
-			processor.getClassifier().loadTrainingSet(filePath.toStdString(), errorString);
+			processor.getClassifier().loadDataSet(filePath.toStdString(), AudioClassifyOptions::DataSetType::trainingSet ,errorString);
 			processor.getClassifier().train();
 		}
 	}
@@ -207,7 +207,7 @@ void SelectClassifierComponent::saveTrainingSet(std::string fileName)
 {
 	std::string errorstring = "";
 
-	auto successful = processor.getClassifier().saveTrainingSet(fileName, errorstring);
+	auto successful = processor.getClassifier().saveDataSet(fileName, AudioClassifyOptions::DataSetType::trainingSet ,errorstring);
 
 	if (!successful)
 	{
@@ -224,7 +224,7 @@ void SelectClassifierComponent::initialiseTrainingDataChooser()
 	if (!directory.exists())
 		directory.createDirectory();
 
-	trainingDataChooser = std::make_unique<FileChooser>("Load Training Data Set", directory, "*.csv");
+	trainingDataChooser = std::make_unique<FileChooser>("Load Training Data Set", directory, "*.bin");
 }
 
 //===============================================================================
@@ -235,6 +235,6 @@ void SelectClassifierComponent::initialiseSaveDataChooser()
 	if (!directory.exists())
 		directory.createDirectory();
 
-	saveDataChooser = std::make_unique<FileChooser>("Save Training Data Set", File(directory.getFullPathName() + "\\untitled.csv"), "*.csv");
+	saveDataChooser = std::make_unique<FileChooser>("Save Training Data Set", File(directory.getFullPathName() + "\\untitled.bin"), "*.bin");
 	
 }
