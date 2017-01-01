@@ -68,7 +68,7 @@ public:
 	 * as the model for calculating distances and K nearest neighbours.
 	 * @param newTrainingSet the training set to be added to the model.
 	 */
-	void train(const arma::Mat<T>& newTrainingSet, const arma::Row<size_t>& newLabels);
+	void train(const arma::Mat<T>& newTrainingSet, const arma::Row<int>& newLabels);
 
 
 private:
@@ -126,7 +126,7 @@ private:
 	std::unique_ptr<size_t[]> neighbourClassCounts;
 
 	arma::Mat<T> trainingSet;
-	arma::Row<size_t> labels;
+	arma::Row<int> labels;
 
 	//Vector of squared differences for use in euclidean distance function
 	arma::Col<T> squaredDistances;

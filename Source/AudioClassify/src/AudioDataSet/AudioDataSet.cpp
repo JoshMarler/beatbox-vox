@@ -90,7 +90,7 @@ bool AudioDataSet<T>::load(const std::string & absoluteFilePath, std::string & e
 	arma::Mat<T> dataLoaded(static_cast<T*>(dataBlock->getData()), featuresUsed.size(), numSounds * instancesPerSound);
 
 	auto soundLabelsBlock = vt.getProperty("SoundLabels").getBinaryData();
-	arma::Row<unsigned int> soundLabelsLoaded(static_cast<unsigned int*>(soundLabelsBlock->getData()), soundLabelsBlock->getSize());
+	arma::Row<int> soundLabelsLoaded(static_cast<int*>(soundLabelsBlock->getData()), soundLabelsBlock->getSize());
 
 	setData(dataLoaded);
 	setSoundLabels(soundLabelsLoaded);
@@ -136,7 +136,7 @@ bool AudioDataSet<T>::save(const std::string & absoluteFilePath, std::string & e
 	MemoryBlock dataMb(data.mem, dataBlockSize);
 	vt.setProperty("Data", var(dataMb), nullptr);
 
-	auto soundLabelsBlockSize = static_cast<size_t>(soundLabels.size() * sizeof(unsigned int));
+	auto soundLabelsBlockSize = static_cast<size_t>(soundLabels.size() * sizeof(int));
 	MemoryBlock soundLabelsMb(soundLabels.mem, soundLabelsBlockSize);
 	vt.setProperty("SoundLabels", var(soundLabelsMb), nullptr);
 
@@ -200,7 +200,7 @@ AudioDataSet<T> AudioDataSet<T>::getVarianceReducedCopy(int numFeatures)
 
 //==============================================================================
 template<typename T>
-void AudioDataSet<T>::addInstance(const arma::Col<T>& instance, unsigned int soundLabel)
+void AudioDataSet<T>::addInstance(const arma::Col<T>& instance, int soundLabel)
 {
 	assert(instance.n_rows == data.n_rows);
 	
@@ -264,7 +264,7 @@ const arma::Mat<T>& AudioDataSet<T>::getData() const
 
 //==============================================================================
 template<typename T>
-const arma::Row<unsigned int>& AudioDataSet<T>::getSoundLabels() const
+const arma::Row<int>& AudioDataSet<T>::getSoundLabels() const
 {
 	return soundLabels;
 }
@@ -347,7 +347,7 @@ bool AudioDataSet<T>::isReady() const
 
 //==============================================================================
 template<typename T>
-bool AudioDataSet<T>::checkSoundReady(const unsigned int sound) const
+bool AudioDataSet<T>::checkSoundReady(const int sound) const
 {
 	return soundsReady[sound];
 }
@@ -362,7 +362,7 @@ void AudioDataSet<T>::setData(const arma::Mat<T>& newData)
 
 //==============================================================================
 template<typename T>
-void AudioDataSet<T>::setSoundLabels(const arma::Row<unsigned>& newLabels)
+void AudioDataSet<T>::setSoundLabels(const arma::Row<int>& newLabels)
 {
 	soundLabels.clear();
 	soundLabels = newLabels;
@@ -383,9 +383,8 @@ void AudioDataSet<T>::initialise()
 	auto totalInstances = numSounds * instancesPerSound;
 	auto totalFrames = stftFramesPerBuffer * (numDelayedBuffers + 1);
 
-	//NOTE: May change sound labels to hold ints so they can be initialised with invalid -1 labels
 	soundLabels.set_size(totalInstances);
-	soundLabels.fill(0);
+	soundLabels.fill(-1);
 
 	soundsReady.resize(numSounds, false);
 

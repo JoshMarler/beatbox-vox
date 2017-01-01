@@ -22,7 +22,7 @@ NaiveBayes<T>::~NaiveBayes()
 //=======================================================================================================
 
 template<typename T>
-void NaiveBayes<T>::Train(const arma::Mat<T>& trainingData, const arma::Row<size_t>& classLabels)
+void NaiveBayes<T>::Train(const arma::Mat<T>& trainingData, const arma::Row<int>& classLabels)
 {
 
 	//Reset prob states
@@ -91,7 +91,7 @@ void NaiveBayes<T>::Train(const arma::Mat<T>& trainingData, const arma::Row<size
 //=======================================================================================================
 
 template<typename T>
-size_t NaiveBayes<T>::Classify(const arma::Col<T>& instance)
+int NaiveBayes<T>::Classify(const arma::Col<T>& instance)
 {
 	auto classVal = -1;
 

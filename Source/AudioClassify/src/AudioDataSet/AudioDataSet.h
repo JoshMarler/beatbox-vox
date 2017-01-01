@@ -39,14 +39,14 @@ public:
 
 	AudioDataSet<T> getVarianceReducedCopy(int numFeatures);
 
-	void addInstance(const arma::Col<T>& instance, unsigned int soundLabel);
+	void addInstance(const arma::Col<T>& instance, int soundLabel);
 
 	//NOTE: Potentially add setUsingFeature method in future to allow explicit on/off of features. 
 	bool usingFeature(int stftFrameNumber, AudioClassifyOptions::AudioFeature feature);
 	int getFeatureIndex(int stftFrameNumber, AudioClassifyOptions::AudioFeature feature);
 
 	const arma::Mat<T>& getData() const;
-	const arma::Row<unsigned int>& getSoundLabels() const;
+	const arma::Row<int>& getSoundLabels() const;
 
 
 	int getBufferSize() const;
@@ -66,7 +66,7 @@ public:
 
 	bool isReady() const;
 	
-	bool checkSoundReady(const unsigned int sound) const;
+	bool checkSoundReady(const int sound) const;
 
 
 private:
@@ -83,12 +83,12 @@ private:
 	std::vector<bool> soundsReady;
 
 	arma::Mat<T> data;
-	arma::Row<unsigned int> soundLabels;
+	arma::Row<int> soundLabels;
 
 	std::vector<FeatureFramePair> featuresUsed;
 
 	void setData(const arma::Mat<T>& newData);
-	void setSoundLabels(const arma::Row<unsigned>& newLabels);
+	void setSoundLabels(const arma::Row<int>& newLabels);
 	void setFeaturesUsed(const std::vector<FeatureFramePair>& newFeaturesUsed);
 
 	void initialise();

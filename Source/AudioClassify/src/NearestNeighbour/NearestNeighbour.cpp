@@ -114,7 +114,7 @@ void NearestNeighbour<T>::setNumFeatures(const unsigned int newNumFeatures)
  * a copy at this point may not be an issue. This will need to be taken into consideration at library stage in particular. 
 */
 template<typename T>
-void NearestNeighbour<T>::train(const arma::Mat<T>& newTrainingSet, const arma::Row<size_t>& newLabels)
+void NearestNeighbour<T>::train(const arma::Mat<T>& newTrainingSet, const arma::Row<int>& newLabels)
 {
 	trainingSet = newTrainingSet;
 	labels = newLabels;

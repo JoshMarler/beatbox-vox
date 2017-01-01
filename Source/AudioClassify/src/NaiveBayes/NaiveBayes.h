@@ -28,13 +28,13 @@ public:
 	NaiveBayes(const size_t numClasses, const size_t initNumFeatures);
 	~NaiveBayes();
 
-	void Train(const arma::Mat<T>& newTrainingData, const arma::Row<size_t>& labels);
+	void Train(const arma::Mat<T>& newTrainingData, const arma::Row<int>& labels);
 
 
 	/** Classifies a single instance and returns the label with the highest probability value.	
 	 * @param instance The instance to be classified (passed as single column/vector)
 	*/
-	size_t Classify(const arma::Col<T>& instance);
+	int Classify(const arma::Col<T>& instance);
 
 	/** Sets the number of features/attributes to be used per training/classifiable instance.
 	 * @param newNumFeatures the new number of features per instance. 
