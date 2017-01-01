@@ -12,7 +12,6 @@
 
 //===============================================================================
 String SelectClassifierComponent::classifierCmbBoxID("classifier_cmb");
-String SelectClassifierComponent::saveTrainingDataButtonID("saveTraining_btn");
 String SelectClassifierComponent::loadTrainingDateButtonID("loadTraining_btn");
 String SelectClassifierComponent::testClassifierButtonID("test_classifier_btn");
 String SelectClassifierComponent::trainClassifierButtonID("train_classifier_btn");
@@ -22,7 +21,6 @@ SelectClassifierComponent::SelectClassifierComponent(BeatboxVoxAudioProcessor& p
 	: processor(p),
 	  classifierCmbBox("ClassifierSelector"),
 	  loadTrainingDataButton("Load Training Data Set"),
-	  saveTrainingDataButton("Save Current Training Data"),
 	  testClassifierButton("Test"),
 	  trainClassifierButton("Train"),
 	  testComponent(std::make_unique<TestClassifierComponent>(processor))
@@ -42,9 +40,6 @@ SelectClassifierComponent::SelectClassifierComponent(BeatboxVoxAudioProcessor& p
 
 	setupClassifierCmbBox();
 
-	saveTrainingDataButton.setComponentID(saveTrainingDataButtonID);
-    saveTrainingDataButton.addListener(this);
-    addAndMakeVisible(saveTrainingDataButton);
     
 	loadTrainingDataButton.setComponentID(loadTrainingDateButtonID);
     loadTrainingDataButton.addListener(this);
@@ -56,12 +51,12 @@ SelectClassifierComponent::SelectClassifierComponent(BeatboxVoxAudioProcessor& p
 
 	trainClassifierButton.setComponentID(trainClassifierButtonID);
 	trainClassifierButton.addListener(this);
+	trainClassifierButton.setEnabled(false);
 	addAndMakeVisible(trainClassifierButton);
 
 	initialiseTrainingDataChooser();
-	initialiseSaveDataChooser();
 
-
+	startTimerHz(20);
 	//setSize(800, 150);
 }
 
@@ -99,15 +94,12 @@ void SelectClassifierComponent::resized()
 	cmbBoxArea.reduce(0, cmbBoxArea.getHeight() / 10);
 	classifierCmbBox.setBounds(cmbBoxArea);
 	
-	auto loadSaveArea = boundsLeft.removeFromBottom(bounds.getHeight() / 2);
+	auto loadArea = boundsLeft.removeFromBottom(bounds.getHeight() / 2);
 	
-	loadSaveArea.reduce(0, loadSaveArea.getHeight() / 10);
+	loadArea.reduce(0, loadArea.getHeight() / 10);
 
-	auto loadTrainingBounds = loadSaveArea.removeFromLeft(bounds.getWidth() / 3);
+	auto loadTrainingBounds = loadArea.removeFromLeft(bounds.getWidth() / 3);
 	loadTrainingDataButton.setBounds(loadTrainingBounds);
-
-	auto saveTrainingBounds = loadSaveArea.removeFromRight(loadSaveArea.getWidth() / 1.5f);
-	saveTrainingDataButton.setBounds(saveTrainingBounds);
 	
 	auto boundsRight = bounds;
 	boundsRight.reduce(boundsRight.getWidth() / 20, 0);
@@ -123,22 +115,38 @@ void SelectClassifierComponent::resized()
 }
 
 //===============================================================================
+void SelectClassifierComponent::timerCallback()
+{
+	auto trainingSetReady = processor.getClassifier().checkDataSetReady(AudioClassifyOptions::DataSetType::trainingSet);
+	auto classifierReady = processor.getClassifier().getClassifierReady();
+
+	if (trainingSetReady)
+	{
+		trainClassifierButton.setEnabled(true);
+
+		if (!classifierReady)
+		{
+			trainClassifierButton.setColour(TextButton::buttonColourId, Colours::greenyellow);
+			trainClassifierButton.setColour(TextButton::textColourOffId, Colours::black);
+			testClassifierButton.setEnabled(false);
+		}
+		else
+		{
+			trainClassifierButton.setColour(TextButton::buttonColourId, Colours::black);
+			trainClassifierButton.setColour(TextButton::textColourOffId, Colours::greenyellow);
+			testClassifierButton.setEnabled(true);
+		}
+	}
+	else
+		trainClassifierButton.setEnabled(false);
+}
+
+//===============================================================================
 void SelectClassifierComponent::buttonClicked(Button * button)
 {
 	const auto buttonID = button->getComponentID();
 
-	if (buttonID == saveTrainingDataButtonID)
-	{
-		auto result = saveDataChooser->browseForFileToSave(false);
-		if (result)
-		{
-			auto fileSaved = saveDataChooser->getResult();
-			auto filePath = fileSaved.getFullPathName();
-			saveTrainingSet(filePath.toStdString());
-		}
-	
-	}
-	else if(buttonID == loadTrainingDateButtonID)
+	if(buttonID == loadTrainingDateButtonID)
 	{
 		auto fileSelected = trainingDataChooser->browseForFileToOpen();
 		if (fileSelected)
@@ -150,6 +158,10 @@ void SelectClassifierComponent::buttonClicked(Button * button)
 			processor.getClassifier().loadDataSet(filePath.toStdString(), AudioClassifyOptions::DataSetType::trainingSet ,errorString);
 			processor.getClassifier().train();
 		}
+	}
+	else if (buttonID == trainClassifierButtonID)
+	{
+		processor.getClassifier().train();
 	}
 	else if (buttonID == testClassifierButtonID)
 	{
@@ -203,20 +215,6 @@ void SelectClassifierComponent::setupClassifierCmbBox()
 }
 
 //===============================================================================
-void SelectClassifierComponent::saveTrainingSet(std::string fileName)
-{
-	std::string errorstring = "";
-
-	auto successful = processor.getClassifier().saveDataSet(fileName, AudioClassifyOptions::DataSetType::trainingSet ,errorstring);
-
-	if (!successful)
-	{
-		auto icon = AlertWindow::AlertIconType::WarningIcon;
-		AlertWindow::showMessageBox(icon, "Error Saving", errorstring, "Close", this);
-	}
-}
-
-//===============================================================================
 void SelectClassifierComponent::initialiseTrainingDataChooser()
 {
 	File directory(trainingSetsDirectory);
@@ -228,13 +226,3 @@ void SelectClassifierComponent::initialiseTrainingDataChooser()
 }
 
 //===============================================================================
-void SelectClassifierComponent::initialiseSaveDataChooser()
-{
-	File directory(trainingSetsDirectory);
-
-	if (!directory.exists())
-		directory.createDirectory();
-
-	saveDataChooser = std::make_unique<FileChooser>("Save Training Data Set", File(directory.getFullPathName() + "\\untitled.bin"), "*.bin");
-	
-}

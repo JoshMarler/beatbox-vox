@@ -276,7 +276,6 @@ void BeatboxVoxAudioProcessor::processBlock(AudioSampleBuffer& buffer, MidiBuffe
 	//This is used for configuring the onset detector settings from the GUI
 	if (classifier.noteOnsetDetected())
 	{
-		//NOTE: Later potentially add a flag to onset detected in an fifo or something for visual response on onset.
 		if (usingOSDTestSound.load())
 		{
 			triggerOSDTestSound(midiMessages);

@@ -27,6 +27,8 @@ AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int in
 	bufferSize = initBufferSize;
 	sampleRate = initSampleRate;
 
+	setupStft();
+
 	numSounds = initNumSounds;
 	trainingInstancesPerSound = initNumTrainingInstances;
 
@@ -129,6 +131,7 @@ bool AudioClassifier<T>::loadDataSet(const std::string & fileName, AudioClassify
 			currentInstanceVector.set_size(trainingSet->getNumFeatures());
 
 			knn.setNumFeatures(trainingSet->getNumFeatures());
+			knn.setTrainingInstancesPerClass(trainingInstancesPerSound);
 			nbc.setNumFeatures(trainingSet->getNumFeatures());
 		}
 
@@ -335,10 +338,11 @@ void AudioClassifier<T>::train()
 template<typename T>
 void AudioClassifier<T>::setInstancesPerSound(int newNumInstances, AudioClassifyOptions::DataSetType dataSetType)
 {
-	resetClassifierState();
 
 	if (dataSetType == AudioClassifyOptions::DataSetType::trainingSet)
 	{
+		resetClassifierState();
+		trainingInstancesPerSound = newNumInstances;
 		trainingSet.reset(new AudioDataSet<T>(numSounds, trainingInstancesPerSound, bufferSize, stftFramesPerBuffer, numDelayedBuffers));
 		trainingSetReduced.reset(nullptr);
 		knn.setTrainingInstancesPerClass(newNumInstances);
@@ -346,7 +350,8 @@ void AudioClassifier<T>::setInstancesPerSound(int newNumInstances, AudioClassify
 
 	if (dataSetType == AudioClassifyOptions::DataSetType::testSet)
 	{
-		testSet.reset(new AudioDataSet<T>(numSounds, trainingInstancesPerSound, bufferSize, stftFramesPerBuffer, numDelayedBuffers));
+		testInstancesPerSound = newNumInstances;
+		testSet.reset(new AudioDataSet<T>(numSounds, testInstancesPerSound, bufferSize, stftFramesPerBuffer, numDelayedBuffers));
 		testSetReduced.reset(nullptr);
 	}
 
@@ -467,39 +472,13 @@ void AudioClassifier<T>::setupStft()
 
 //==============================================================================
 template<typename T>
-void AudioClassifier<T>::processSTFTFrame(const T* inputBuffer)
-{
-	
-	while (stftProcessedCount < stftFramesPerBuffer)
-	{
-		//Later allow use of hopSize/overlap ?
-		auto readPosition = stftFrameSize * stftProcessedCount;
-		auto* readPtr = inputBuffer + readPosition;
-			
-		featureExtractor.processFrame(readPtr, stftFrameSize);
-
-		processCurrentInstance();
-
-		++stftProcessedCount;
-	}
-
-	//Reset state for next instance/onset
-	stftProcessedCount = 0;
-}
-
-//==============================================================================
-template<typename T>
 void AudioClassifier<T>::processCurrentInstance()
 {
-	auto featuresProcessed = 0;
 	auto instanceReady = false;
 	auto frameNumber = stftProcessedCount + 1;
 
 	//Features used by trainingSet and testSet should always match.
-	if (stftFramesPerBuffer != 0)
-		featuresProcessed = (stftProcessedCount + (delayedProcessedCount * stftFramesPerBuffer)) * trainingSet->getNumFeatures();
-	else
-		featuresProcessed = delayedProcessedCount * trainingSet->getNumFeatures();
+	auto featuresProcessed = (stftProcessedCount + (delayedProcessedCount * stftFramesPerBuffer)) * AudioClassifyOptions::totalNumAudioFeatures;
 
 
 	for (auto i = 0; i < AudioClassifyOptions::totalNumAudioFeatures; ++i)
@@ -554,6 +533,8 @@ void AudioClassifier<T>::resetClassifierState()
 {
     classifierReady.store(false);
 	currentSoundRecording.store(-1);
+
+	//May remove these as set when recording instance for sound complete. 
 	recordingTrainingData.store(false);
 	recordingTestData.store(false);
 }
@@ -578,7 +559,7 @@ int AudioClassifier<T>::classify()
 
     auto ready = classifierReady.load();
       
-    if (!ready)
+    if (!ready || isRecording())
         return -1;
    
     if (noteOnsetDetected())
@@ -656,7 +637,7 @@ void AudioClassifier<T>::configureDataSets()
 	resetClassifierState();
 
 	trainingSet.reset(new AudioDataSet<T>(numSounds, trainingInstancesPerSound, bufferSize, stftFramesPerBuffer, numDelayedBuffers));
-	testSet.reset(new AudioDataSet<T>(numSounds, trainingInstancesPerSound, bufferSize, stftFramesPerBuffer, numDelayedBuffers));
+	testSet.reset(new AudioDataSet<T>(numSounds, testInstancesPerSound, bufferSize, stftFramesPerBuffer, numDelayedBuffers));
 
 	trainingSetReduced.reset(nullptr);
 	testSetReduced.reset(nullptr);

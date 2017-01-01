@@ -15,19 +15,31 @@ String RecordTrainingSetComponent::activateButtonID("activate_btn");
 String RecordTrainingSetComponent::instanceSizeSliderID("instance_size_sld");
 String RecordTrainingSetComponent::instanceSizeButtonID("instance_size_btn");
 String RecordTrainingSetComponent::recordButtonID("record_btn");
-String RecordTrainingSetComponent::trainButtonID("train_btn");
+String RecordTrainingSetComponent::saveButtonID("save_btn");
 String RecordTrainingSetComponent::recordTypeCmbID("record_type_cmb");
 
 //===============================================================================
 RecordTrainingSetComponent::RecordTrainingSetComponent(BeatboxVoxAudioProcessor& p)
 	: processor(p)
 {
+	auto trainingPath = File::getSpecialLocation(File::SpecialLocationType::userApplicationDataDirectory).getFullPathName()
+																									  + "\\" 
+																									  + processor.getName()
+																									  + "\\TrainingSets";
+	trainingSetsDirectory = trainingPath.toStdString();
+
+	auto testPath = File::getSpecialLocation(File::SpecialLocationType::userApplicationDataDirectory).getFullPathName()
+																									  + "\\" 
+																									  + processor.getName()
+																									  + "\\TestSets";
+	testSetsDirectory = testPath.toStdString();
+
 	activateButton.setComponentID(activateButtonID);
 	activateButton.addListener(this);
 	addAndMakeVisible(activateButton);
 
 	headingLabel.setComponentID(headingLabelID);
-	headingLabel.setText("Record Training Set", NotificationType::dontSendNotification);
+	headingLabel.setText("Record", NotificationType::dontSendNotification);
 	headingLabel.setFont(Font("Cracked", 14.0f, Font::plain));
 	headingLabel.setColour(Label::textColourId, Colours::greenyellow);
 	addAndMakeVisible(headingLabel);
@@ -65,11 +77,10 @@ RecordTrainingSetComponent::RecordTrainingSetComponent(BeatboxVoxAudioProcessor&
 	recordButton.addListener(this);
 	addAndMakeVisible(recordButton);
 
-	trainButton.setComponentID(trainButtonID);
-	trainButton.setButtonText("Train Classifier");
-	trainButton.setClickingTogglesState (true);
-	trainButton.addListener(this);
-	addAndMakeVisible(trainButton);
+	saveButton.setComponentID(saveButtonID);
+	saveButton.setButtonText("Save Training Set");
+	saveButton.addListener(this);
+	addAndMakeVisible(saveButton);
 
 	setupSoundButtons();
 	setupRecordTypeCmb();
@@ -141,7 +152,7 @@ void RecordTrainingSetComponent::resized()
 	recordButton.setBounds(recordButtonBounds);
 
 	auto trainButtonBounds = btnBottomArea.removeFromRight(btnBottomArea.getWidth() / 2);
-	trainButton.setBounds(trainButtonBounds);	
+	saveButton.setBounds(trainButtonBounds);	
 
 }
 
@@ -149,20 +160,20 @@ void RecordTrainingSetComponent::resized()
 void RecordTrainingSetComponent::timerCallback()
 {
 	 auto isRecording = processor.getClassifier().isRecording();
-     auto trainingSetReady = processor.getClassifier().checkDataSetReady(AudioClassifyOptions::DataSetType::trainingSet);
+     auto dataSetReady = processor.getClassifier().checkDataSetReady(currentDataSetType);
      auto classifierReady = processor.getClassifier().getClassifierReady();
 	 auto numSounds = processor.getClassifier().getNumSounds();
 
-     if (trainingSetReady)
-         trainButton.setEnabled(true);
+     if (dataSetReady)
+         saveButton.setEnabled(true);
 	 else 
-		 trainButton.setEnabled(false);
+		 saveButton.setEnabled(false);
 
-     if (trainButton.getToggleState())
-     {
-        if (classifierReady)
-            trainButton.setToggleState(false, NotificationType::dontSendNotification);
-     }
+     //if (train.getToggleState())
+     //{
+     //   if (classifierReady)
+     //       trainButton.setToggleState(false, NotificationType::dontSendNotification);
+     //}
          
      if (recordButton.getToggleState())
      {
@@ -174,9 +185,7 @@ void RecordTrainingSetComponent::timerCallback()
 	 for (auto i = 0; i < numSounds; i++)
 	 {
 		 auto currentSoundRecording = processor.getClassifier().getCurrentSoundRecording();
-		 auto soundReady = false;
-
-		 soundReady = processor.getClassifier().checkSoundReady(i, currentDataSetType);
+		 auto soundReady = processor.getClassifier().checkSoundReady(i, currentDataSetType);
 
 		 auto label = soundStatusLabels[i];
 		 String soundName;
@@ -200,7 +209,7 @@ void RecordTrainingSetComponent::timerCallback()
 			 label->setColour(Label::textColourId, Colours::greenyellow);
 			 label->setText(soundName + " Ready", juce::NotificationType::dontSendNotification);
 		 }
-		 else if (soundReady != currentSoundRecording)
+		 else if (i != currentSoundRecording)
 		 {
 			label->setText(soundName + " - Not ready", juce::NotificationType::dontSendNotification);
 			label->setColour(Label::textColourId, Colours::greenyellow.withAlpha(static_cast<uint8>(0x4a)));
@@ -252,10 +261,10 @@ void RecordTrainingSetComponent::buttonClicked(Button * button)
 			label->setText( soundName + " - Recording instances", juce::NotificationType::dontSendNotification);
 		}	
 	}
-	else if (id == trainButtonID)
+	else if (id == saveButtonID)
 	{
-		 if (button->getToggleState())
-				processor.getClassifier().train();	
+			saveDataSet();
+				//processor.getClassifier().train();	
 	}
 	else if (button->getRadioGroupId() == soundButtonsGroupID)
 	{
@@ -293,18 +302,60 @@ void RecordTrainingSetComponent::comboBoxChanged(ComboBox * comboBoxThatHasChang
 	{
 		auto dataSet = comboBoxThatHasChanged->getSelectedId() - 1;
 
-		switch (dataSet)
+		currentDataSetType = static_cast<AudioClassifyOptions::DataSetType>(dataSet);
+		
+		if (currentDataSetType == AudioClassifyOptions::DataSetType::trainingSet)
 		{
-			case static_cast<int>(AudioClassifyOptions::DataSetType::trainingSet) :
-				currentDataSetType = AudioClassifyOptions::DataSetType::trainingSet;
-				break;
+			recordButton.setButtonText("Record Training Sound");
+			saveButton.setButtonText("Save Training Set");
+		}
 
-			case static_cast<int>(AudioClassifyOptions::DataSetType::testSet) :
-				currentDataSetType = AudioClassifyOptions::DataSetType::testSet;
-				break;
+		if (currentDataSetType == AudioClassifyOptions::DataSetType::testSet)
+		{
+			recordButton.setButtonText("Record Test Sound");
+			saveButton.setButtonText("Save Test Set");
+		}
 
-			default:
-				break;
+	}
+}
+
+//===============================================================================
+void RecordTrainingSetComponent::saveDataSet()
+{
+	std::unique_ptr<FileChooser> fileChooser;
+
+	if (currentDataSetType == AudioClassifyOptions::DataSetType::trainingSet)
+	{
+		File directory(trainingSetsDirectory);
+
+		if (!directory.exists())
+			directory.createDirectory();
+
+	    fileChooser = std::make_unique<FileChooser> ("Save Training Data Set", File(directory.getFullPathName() + "\\untitled.bin"), "*.bin");
+	}
+
+	if (currentDataSetType == AudioClassifyOptions::DataSetType::testSet)
+	{
+		File directory(testSetsDirectory);
+		
+		if (!directory.exists())
+			directory.createDirectory();
+
+		fileChooser = std::make_unique<FileChooser>("Save Test Data Set", File(directory.getFullPathName() + "\\untitled.bin"), "*.bin");
+	}
+
+	if (fileChooser->browseForFileToSave(false))
+	{
+		std::string errorString = "";
+
+		auto file = fileChooser->getResult();
+		auto fileName = file.getFullPathName().toStdString();
+		auto success = processor.getClassifier().saveDataSet(fileName, currentDataSetType, errorString);
+
+		if (!success)
+		{
+			auto icon = AlertWindow::AlertIconType::WarningIcon;
+			AlertWindow::showMessageBox(icon, "Error Saving", errorString, "Close", this);
 		}
 	}
 }
@@ -414,5 +465,6 @@ void RecordTrainingSetComponent::setupRecordTypeCmb()
 
 	currentDataSetType = AudioClassifyOptions::DataSetType::trainingSet;
 
+	recordTypeCmb.setComponentID(recordTypeCmbID);
 	addAndMakeVisible(recordTypeCmb);
 }

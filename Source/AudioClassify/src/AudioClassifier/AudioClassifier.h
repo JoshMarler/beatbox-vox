@@ -50,10 +50,6 @@ public:
     void setCurrentSampleRate (T newSampleRate);
     
 	//==============================================================================
-    int getCurrentSoundRecording() const;
-    
-
-	//==============================================================================
     //Onset detector functions
     void setOSDMeanCoeff(T newMeanCoeff);
     void setOSDMedianCoeff(T newMedianCoeff);
@@ -84,6 +80,7 @@ public:
 	 *
 	 */
     void setSoundRecording(int trainingSound, AudioClassifyOptions::DataSetType dataSetType);
+    int getCurrentSoundRecording() const;
 
     void train();
 	
@@ -215,7 +212,6 @@ private:
 
 	//==============================================================================
 	void setupStft();
-	void processSTFTFrame(const T* inputBuffer);
     void processCurrentInstance();
 
 	void resetClassifierState();

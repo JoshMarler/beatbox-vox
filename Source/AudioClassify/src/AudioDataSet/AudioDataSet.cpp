@@ -87,10 +87,10 @@ bool AudioDataSet<T>::load(const std::string & absoluteFilePath, std::string & e
 	}
 	
 	auto dataBlock = vt.getProperty("Data").getBinaryData();
-	arma::Mat<T> dataLoaded(static_cast<T*>(dataBlock->getData()), featuresUsed.size(), numSounds * instancesPerSound);
+	arma::Mat<T> dataLoaded(static_cast<T*>(dataBlock->getData()), featuresUsed.size(), getTotalNumInstances());
 
 	auto soundLabelsBlock = vt.getProperty("SoundLabels").getBinaryData();
-	arma::Row<int> soundLabelsLoaded(static_cast<int*>(soundLabelsBlock->getData()), soundLabelsBlock->getSize());
+	arma::Row<int> soundLabelsLoaded(static_cast<int*>(soundLabelsBlock->getData()), getTotalNumInstances());
 
 	setData(dataLoaded);
 	setSoundLabels(soundLabelsLoaded);

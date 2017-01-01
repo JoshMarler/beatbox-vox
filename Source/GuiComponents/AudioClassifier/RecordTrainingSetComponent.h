@@ -41,7 +41,7 @@ public:
 	static String instanceSizeSliderID;
 	static String instanceSizeButtonID;
 	static String recordButtonID;
-	static String trainButtonID;
+	static String saveButtonID;
 	static String recordTypeCmbID;
 
 private:
@@ -64,7 +64,7 @@ private:
 
 	ToggleButton activateButton;
 	TextButton recordButton;
-	TextButton trainButton;
+	TextButton saveButton;
 	
 
 	Slider instanceSizeSlider;
@@ -72,6 +72,11 @@ private:
 
 	OwnedArray<Button> soundButtons;
 	OwnedArray<Label> soundStatusLabels;
+
+	std::string trainingSetsDirectory;
+	std::string testSetsDirectory;
+
+	void saveDataSet();
 
 	void setupSoundButtons();
 	void setActive(bool active);

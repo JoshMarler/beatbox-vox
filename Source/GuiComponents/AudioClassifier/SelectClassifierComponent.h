@@ -16,6 +16,7 @@
 #include "TestClassifierComponent.h"
 
 class SelectClassifierComponent : public Component,
+								  Timer,
 								  ButtonListener,
 								  ComboBoxListener
 {
@@ -26,13 +27,12 @@ public:
 	void paint(Graphics& g) override;
 	void resized() override;
 
+	void timerCallback() override;
 	void buttonClicked(Button* button) override;
-
 	void comboBoxChanged(ComboBox* comboBoxThatHasChanged) override;
 
 	//ComponentID Strings
 	static String classifierCmbBoxID;
-	static String saveTrainingDataButtonID;
 	static String loadTrainingDateButtonID;
 	static String testClassifierButtonID;
 	static String trainClassifierButtonID;
@@ -48,7 +48,6 @@ private:
 	ComboBox classifierCmbBox;
 
 	TextButton loadTrainingDataButton;
-	TextButton saveTrainingDataButton;
 
 	TextButton testClassifierButton;
 	TextButton trainClassifierButton;
@@ -57,11 +56,8 @@ private:
 	
 	//At some point may change saveDataChoser to be a dialog windows with FileNameComponent to force .csv suffix etc.
 	std::unique_ptr<FileChooser> trainingDataChooser;
-	std::unique_ptr<FileChooser> saveDataChooser;
 
-	void saveTrainingSet(std::string fileName);
 	void initialiseTrainingDataChooser();
-	void initialiseSaveDataChooser();
 
 	std::unique_ptr<TestClassifierComponent> testComponent;
 
