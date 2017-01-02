@@ -21,7 +21,10 @@ AudioClassifierComponent::AudioClassifierComponent(BeatboxVoxAudioProcessor& p)
 	bufferHandlingComponent = std::make_unique<BufferHandlingComponent>(processor);
 
 	addAndMakeVisible(recordTrainingSetComponent.get());
+
 	addAndMakeVisible(selectClassifierComponent.get());
+	selectClassifierComponent->addChangeListener(this);
+
 	addAndMakeVisible(featuresComponent.get());
 	addAndMakeVisible(bufferHandlingComponent.get());
 }
@@ -63,6 +66,16 @@ void AudioClassifierComponent::resized()
 	auto boundsBottom = bounds;
 	boundsBottom.reduce(boundsBottom.getWidth() / 100, boundsBottom.getHeight() / 50);
 	bufferHandlingComponent->setBounds(boundsBottom);
+}
+
+//===============================================================================
+void AudioClassifierComponent::changeListenerCallback(ChangeBroadcaster * source)
+{
+	if (source == selectClassifierComponent.get())
+	{
+		recordTrainingSetComponent->handleNewTrainingSetLoaded();
+		bufferHandlingComponent->handleNewTrainingSetLoaded();
+	}
 }
 
 //===============================================================================

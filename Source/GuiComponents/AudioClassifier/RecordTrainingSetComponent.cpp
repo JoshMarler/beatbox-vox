@@ -168,12 +168,6 @@ void RecordTrainingSetComponent::timerCallback()
          saveButton.setEnabled(true);
 	 else 
 		 saveButton.setEnabled(false);
-
-     //if (train.getToggleState())
-     //{
-     //   if (classifierReady)
-     //       trainButton.setToggleState(false, NotificationType::dontSendNotification);
-     //}
          
      if (recordButton.getToggleState())
      {
@@ -262,16 +256,12 @@ void RecordTrainingSetComponent::buttonClicked(Button * button)
 		}	
 	}
 	else if (id == saveButtonID)
-	{
 			saveDataSet();
-				//processor.getClassifier().train();	
-	}
+
 	else if (button->getRadioGroupId() == soundButtonsGroupID)
 	{
 		if (button->getToggleState())
-        {
             currentRecordingSound = soundButtons.indexOf(button);
-        }		
 	}
 }
 
@@ -316,7 +306,17 @@ void RecordTrainingSetComponent::comboBoxChanged(ComboBox * comboBoxThatHasChang
 			saveButton.setButtonText("Save Test Set");
 		}
 
+		auto numInstances = processor.getClassifier().getInstancesPerSound(currentDataSetType);
+		instanceSizeSlider.setValue(numInstances, juce::NotificationType::dontSendNotification);
+
 	}
+}
+
+//===============================================================================
+void RecordTrainingSetComponent::handleNewTrainingSetLoaded()
+{
+	auto numInstances = processor.getClassifier().getInstancesPerSound(AudioClassifyOptions::DataSetType::trainingSet);
+	instanceSizeSlider.setValue(numInstances, juce::NotificationType::dontSendNotification);
 }
 
 //===============================================================================

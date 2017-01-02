@@ -155,8 +155,14 @@ void SelectClassifierComponent::buttonClicked(Button * button)
 			auto filePath = fileChosen.getFullPathName();
 
 			std::string errorString;
-			processor.getClassifier().loadDataSet(filePath.toStdString(), AudioClassifyOptions::DataSetType::trainingSet ,errorString);
-			processor.getClassifier().train();
+			auto success = processor.getClassifier().loadDataSet(filePath.toStdString(), AudioClassifyOptions::DataSetType::trainingSet ,errorString);
+			if (!success)
+			{
+				auto icon = AlertWindow::AlertIconType::WarningIcon;
+				AlertWindow::showMessageBox(icon, "Error Loading", errorString, "Close", this);
+			}
+			else
+				sendChangeMessage();
 		}
 	}
 	else if (buttonID == trainClassifierButtonID)

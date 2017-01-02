@@ -227,6 +227,17 @@ void BufferHandlingComponent::sliderValueChanged(Slider * slider)
 }
 
 //==============================================================================
+void BufferHandlingComponent::handleNewTrainingSetLoaded()
+{
+
+	auto numStftFrames = processor.getClassifier().getSTFTFramesPerBuffer();
+	stftNumFramesSlider.setValue(numStftFrames, juce::NotificationType::dontSendNotification);
+
+	auto numDelayedBuffers = processor.getClassifier().getNumBuffersDelayed();
+	bufferDelaySlider.setValue(numDelayedBuffers, juce::NotificationType::dontSendNotification);
+}
+
+//==============================================================================
 void BufferHandlingComponent::setActive(bool active) const
 {
 	/** The below could be improved upon. This logic would need to be 

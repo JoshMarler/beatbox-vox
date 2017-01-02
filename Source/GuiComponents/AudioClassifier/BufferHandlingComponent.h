@@ -33,6 +33,8 @@ public:
 	void buttonClicked(Button* button) override;
 	void sliderValueChanged(Slider* slider) override;
 
+	void handleNewTrainingSetLoaded();
+
 	//Component ID's
 	static String headingLabelID;
 	static String activateButtonID;

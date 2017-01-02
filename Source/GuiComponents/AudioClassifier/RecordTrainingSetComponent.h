@@ -33,7 +33,8 @@ public:
 	void sliderValueChanged(Slider* slider) override;
 	void comboBoxChanged(ComboBox* comboBOxThatHasChanged) override;
 
-
+	//Bit of duplication here that could be cleaned up in future
+	void handleNewTrainingSetLoaded();
 
 	//Control ID's
 	static String headingLabelID;

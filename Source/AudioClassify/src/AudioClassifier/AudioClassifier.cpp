@@ -37,7 +37,7 @@ AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int in
 
 	currentClassfierType.store(AudioClassifyOptions::ClassifierType::naiveBayes);
 
-	//JWM - Do we need to add configureDataSets here ? 
+	resetClassifierState();
 }
 
 //==============================================================================
@@ -335,6 +335,7 @@ void AudioClassifier<T>::train()
     //JWM - Potentially return boolean and return false if checkTrainingSetReady() returns false.
 }
 
+//==============================================================================
 template<typename T>
 void AudioClassifier<T>::setInstancesPerSound(int newNumInstances, AudioClassifyOptions::DataSetType dataSetType)
 {
@@ -362,10 +363,10 @@ template<typename T>
 int AudioClassifier<T>::getInstancesPerSound(AudioClassifyOptions::DataSetType dataSetType)
 {
 	if (dataSetType == AudioClassifyOptions::DataSetType::trainingSet)
-		trainingSet->getInstancesPerSound();
+		return trainingSet->getInstancesPerSound();
 
 	if (dataSetType == AudioClassifyOptions::DataSetType::testSet)
-		testSet->getInstancesPerSound();
+		return testSet->getInstancesPerSound();
 
 	//Invalid dataSetType
 	return -1;

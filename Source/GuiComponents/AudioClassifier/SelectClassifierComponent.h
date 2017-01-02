@@ -16,6 +16,7 @@
 #include "TestClassifierComponent.h"
 
 class SelectClassifierComponent : public Component,
+								  public ChangeBroadcaster,
 								  Timer,
 								  ButtonListener,
 								  ComboBoxListener
@@ -30,6 +31,7 @@ public:
 	void timerCallback() override;
 	void buttonClicked(Button* button) override;
 	void comboBoxChanged(ComboBox* comboBoxThatHasChanged) override;
+
 
 	//ComponentID Strings
 	static String classifierCmbBoxID;
