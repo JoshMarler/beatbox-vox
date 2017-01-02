@@ -59,8 +59,6 @@ BufferHandlingComponent::BufferHandlingComponent(BeatboxVoxAudioProcessor& p)
 	numSamplesUsedLbl.setColour(Label::textColourId, Colours::greenyellow);
 	addAndMakeVisible(numSamplesUsedLbl);
 
-	//JWM - Eventually replace hard coded num samples with val calculated in timer callback
-	numSamplesUsedVal.setText("256", NotificationType::dontSendNotification);
 	numSamplesUsedVal.setFont(Font("Cracked", 14.0f, Font::plain));
 	numSamplesUsedVal.setColour(Label::textColourId, Colours::greenyellow);
 	addAndMakeVisible(numSamplesUsedVal);
@@ -71,8 +69,6 @@ BufferHandlingComponent::BufferHandlingComponent(BeatboxVoxAudioProcessor& p)
 	addAndMakeVisible(numBuffersUsedLbl);
 
 
-	//JWM - Eventually replace hard coded num buffers with val calculated in timer callback based on if local max used etc in OSD
-	numBuffersUsedVal.setText("1", NotificationType::dontSendNotification);
 	numBuffersUsedVal.setFont(Font("Cracked", 14.0f, Font::plain));
 	numBuffersUsedVal.setColour(Label::textColourId, Colours::greenyellow);
 	addAndMakeVisible(numBuffersUsedVal);
@@ -93,13 +89,20 @@ BufferHandlingComponent::BufferHandlingComponent(BeatboxVoxAudioProcessor& p)
 	stftNumFramesSlider.addListener(this);
 	addAndMakeVisible(stftNumFramesSlider);
 
+	stftFramesPerBufferLbl.setText("STFT Frames Per Buffer", NotificationType::dontSendNotification);
+	stftFramesPerBufferLbl.setFont(Font("Cracked", 14.0f, Font::plain));
+	stftFramesPerBufferLbl.setColour(Label::textColourId, Colours::greenyellow);
+	addAndMakeVisible(stftFramesPerBufferLbl);
+
+	stftFramePerBufferVal.setFont(Font("Cracked", 14.0f, Font::plain));
+	stftFramePerBufferVal.setColour(Label::textColourId, Colours::greenyellow);
+	addAndMakeVisible(stftFramePerBufferVal);
 
 	stftFrameSizeLbl.setText("STFT Frame Size: ", NotificationType::dontSendNotification);
 	stftFrameSizeLbl.setFont(Font("Cracked", 14.0f, Font::plain));
 	stftFrameSizeLbl.setColour(Label::textColourId, Colours::greenyellow);
 	addAndMakeVisible(stftFrameSizeLbl);
 
-	stftFrameSizeVal.setText("", NotificationType::dontSendNotification);
 	stftFrameSizeVal.setFont(Font("Cracked", 14.0f, Font::plain));
 	stftFrameSizeVal.setColour(Label::textColourId, Colours::greenyellow);
 	addAndMakeVisible(stftFrameSizeVal);
@@ -112,6 +115,8 @@ BufferHandlingComponent::BufferHandlingComponent(BeatboxVoxAudioProcessor& p)
 
 	activateButton.setToggleState(false, NotificationType::sendNotification);
 	setActive(false);
+
+	updateStatusLabels();
 }
 
 //==============================================================================
@@ -181,7 +186,11 @@ void BufferHandlingComponent::resized()
 	setNumFramesButtonArea.reduce(setNumFramesArea.getWidth() / 5, setNumFramesArea.getHeight() / 9);
 	stftFramesUpdateButton.setBounds(setNumFramesButtonArea.removeFromBottom(setNumFramesButtonArea.getHeight() / 1.5f));
 
-	auto stftFrameSizeLblArea = rightCenter.removeFromTop(rightCenter.getHeight() / 2);
+	auto stftFramesPerBufferLblArea = rightCenter.removeFromTop(rightCenter.getHeight() / 2);
+	stftFramesPerBufferLbl.setBounds(stftFramesPerBufferLblArea.removeFromLeft(stftFramesPerBufferLblArea.getWidth() / 2));
+	stftFramePerBufferVal.setBounds(stftFramesPerBufferLblArea);
+
+	auto stftFrameSizeLblArea = rightCenter;
 	stftFrameSizeLbl.setBounds(stftFrameSizeLblArea.removeFromLeft(stftFrameSizeLblArea.getWidth() / 2));
 	stftFrameSizeVal.setBounds(stftFrameSizeLblArea);
 }
@@ -194,9 +203,15 @@ void BufferHandlingComponent::buttonClicked(Button * button)
 	if (id == activateButtonID)
 		setActive(button->getToggleState());
 	else if (id == bufferDelayUpdateButtonID)
+	{
 		processor.getClassifier().setNumBuffersDelayed(static_cast<unsigned int>(bufferDelaySlider.getValue()));
+		updateStatusLabels();
+	}
 	else if (id == stftFramesUpdateButtonID)
+	{
 		processor.getClassifier().setSTFTFramesPerBuffer(static_cast<unsigned int>(stftNumFramesSlider.getValue()));
+		updateStatusLabels();
+	}
 
 	setNeedsUpdate(false, *button);
 }
@@ -235,6 +250,8 @@ void BufferHandlingComponent::handleNewTrainingSetLoaded()
 
 	auto numDelayedBuffers = processor.getClassifier().getNumBuffersDelayed();
 	bufferDelaySlider.setValue(numDelayedBuffers, juce::NotificationType::dontSendNotification);
+
+	updateStatusLabels();
 }
 
 //==============================================================================
@@ -281,6 +298,20 @@ void BufferHandlingComponent::setNeedsUpdate(bool needsUpdate, Button& button)
 		button.setColour(TextButton::textColourOffId, Colours::greenyellow);
 	}
 
+}
+
+//==============================================================================
+void BufferHandlingComponent::updateStatusLabels()
+{
+	auto buffersDelayed = processor.getClassifier().getNumBuffersDelayed() + 1;
+	auto samplesPerInstance = buffersDelayed * processor.getClassifier().getCurrentBufferSize();
+	auto stftFramesPerBuffer = processor.getClassifier().getSTFTFramesPerBuffer();
+	auto stftFrameSize = processor.getClassifier().getSTFTFrameSize();
+
+	numBuffersUsedVal.setText(String::formatted("%d", buffersDelayed), NotificationType::dontSendNotification);
+	numSamplesUsedVal.setText(String::formatted("%d", samplesPerInstance), NotificationType::dontSendNotification);
+	stftFramePerBufferVal.setText(String::formatted("%d", stftFramesPerBuffer), NotificationType::dontSendNotification);
+	stftFrameSizeVal.setText(String::formatted("%d", stftFrameSize), NotificationType::dontSendNotification);
 }
 
 //==============================================================================

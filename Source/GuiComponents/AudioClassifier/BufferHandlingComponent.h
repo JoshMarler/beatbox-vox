@@ -15,10 +15,6 @@
 #include "../../PluginProcessor.h"
 
 //==============================================================================
-
-/**
- *
- */
 class BufferHandlingComponent : public Component,
 								   ButtonListener,
 								   SliderListener
@@ -30,9 +26,18 @@ public:
     void paint (Graphics&) override;
     void resized() override;
 
+
 	void buttonClicked(Button* button) override;
 	void sliderValueChanged(Slider* slider) override;
 
+	/**
+	 * Eventually it may be more effective to have AudioClassifier use more of JUCE
+	 * and set AudioClassifier to be some form of change broadcaster. Then the various Audio Classifier/Beatbox Vox
+	 * child components could take in a reference to the audio classifier and add themselves as a listener to
+	 * broadcasted state changes such as numStftFrames updates etc.
+	 * 
+	 * If time allows before project end this may be added. 
+	 */
 	void handleNewTrainingSetLoaded();
 
 	//Component ID's
@@ -69,11 +74,16 @@ private:
 	Slider stftNumFramesSlider;
 	TextButton stftFramesUpdateButton;
 
+	Label stftFramesPerBufferLbl;
+	Label stftFramePerBufferVal;
+
 	Label stftFrameSizeLbl;
 	Label stftFrameSizeVal;
 
 	void setActive(bool active) const;
 	static void setNeedsUpdate(bool needsUpdate, Button& button);
+	
+	void updateStatusLabels();
 };
 
 

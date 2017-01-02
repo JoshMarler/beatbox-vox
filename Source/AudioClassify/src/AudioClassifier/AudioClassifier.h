@@ -69,6 +69,8 @@ public:
 	void setSTFTFramesPerBuffer(const unsigned int newNumSTFTFrames);
 	int getSTFTFramesPerBuffer() const;
 
+	int getSTFTFrameSize() const;
+
 	/** This method sets the classifier type/learning algorithm to be used.
 	 * @param classifierType the classifier type to be used i.e. AudioClassifyOptions::ClassifierType::knn
 	 */

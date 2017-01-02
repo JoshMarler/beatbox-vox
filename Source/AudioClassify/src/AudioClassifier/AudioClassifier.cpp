@@ -282,6 +282,13 @@ int AudioClassifier<T>::getSTFTFramesPerBuffer() const
 
 //==============================================================================
 template<typename T>
+int AudioClassifier<T>::getSTFTFrameSize() const
+{
+	return stftFrameSize;
+}
+
+//==============================================================================
+template<typename T>
 void AudioClassifier<T>::setClassifierType(AudioClassifyOptions::ClassifierType classifierType)
 {
 	currentClassfierType.store(classifierType);
