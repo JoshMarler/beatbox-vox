@@ -19,10 +19,7 @@ AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int in
 	  osDetector(initBufferSize / 2, initSampleRate),
 	  featureExtractor(initBufferSize, static_cast<int>(initSampleRate)),
 	  nbc(initNumSounds, 21),
-	  knn(21, initNumSounds, initNumTrainingInstances),
-	  trainingSet(std::make_unique<AudioDataSet<T>>(initNumSounds, initNumTrainingInstances, initBufferSize)),
-	  testSet(std::make_unique<AudioDataSet<T>>(initNumSounds, 10, initBufferSize))
-
+	  knn(21, initNumSounds, initNumTrainingInstances)
 {
 	bufferSize = initBufferSize;
 	sampleRate = initSampleRate;
@@ -37,7 +34,7 @@ AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int in
 
 	currentClassfierType.store(AudioClassifyOptions::ClassifierType::naiveBayes);
 
-	resetClassifierState();
+	configureDataSets();
 }
 
 //==============================================================================
@@ -284,7 +281,7 @@ int AudioClassifier<T>::getSTFTFramesPerBuffer() const
 template<typename T>
 int AudioClassifier<T>::getSTFTFrameSize() const
 {
-	return stftFrameSize;
+	return bufferSize / stftFramesPerBuffer;
 }
 
 //==============================================================================
@@ -302,7 +299,7 @@ AudioClassifyOptions::ClassifierType AudioClassifier<T>::getClassifierType() con
 }
 
 //==============================================================================
-//JWM - NOTE: revist later - will need assertion if user uses sound value out of range 0 - numSounds
+//NOTE: revist later - will need assertion if user uses sound value out of range 0 - numSounds
 template<typename T>
 void AudioClassifier<T>::setSoundRecording(int sound, AudioClassifyOptions::DataSetType dataSetType)
 {
@@ -333,8 +330,17 @@ void AudioClassifier<T>::train()
     //If all sound samples collected for training set train model.
     if (trainingSet->isReady())
     {
-        nbc.Train(trainingSet->getData(), trainingSet->getSoundLabels()); 
-		knn.train(trainingSet->getData(), trainingSet->getSoundLabels());
+		if (reducedVarianceSize > 0)
+		{
+			nbc.Train(trainingSetReduced->getData(), trainingSetReduced->getSoundLabels());
+			knn.train(trainingSetReduced->getData(), trainingSetReduced->getSoundLabels());
+		}
+		else
+		{
+			nbc.Train(trainingSet->getData(), trainingSet->getSoundLabels()); 
+			knn.train(trainingSet->getData(), trainingSet->getSoundLabels());
+		}
+
 
         classifierReady.store(true);    
     }
@@ -437,24 +443,19 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer, const int numSampl
 
 	if (hasOnset)
 	{
-		////Change to greater than 1 ?
-		//if (numStftFrames > 0)
-		//	processSTFTFrame(buffer);
-		//else
-		//{
-		//	featureExtractor.processFrame(buffer, bufferSize);
-		//	processCurrentInstance();
-		//}
-
 		while (stftProcessedCount < stftFramesPerBuffer)
 		{
 			//Later allow use of hopSize/overlap ?
+			auto stftFrameSize = bufferSize / stftFramesPerBuffer;
 			auto readPosition = stftFrameSize * stftProcessedCount;
 			auto* readPtr = buffer + readPosition;
 				
 			featureExtractor.processFrame(readPtr, stftFrameSize);
 
-			processCurrentInstance();
+			if (reducedVarianceSize > 0 && !isRecording())
+				processCurrentInstanceReduced();
+			else
+				processCurrentInstance();
 
 			++stftProcessedCount;
 		}
@@ -474,7 +475,7 @@ void AudioClassifier<T>::processAudioBuffer (const T* buffer, const int numSampl
 template<typename T>
 void AudioClassifier<T>::setupStft()
 {
-		stftFrameSize = bufferSize / stftFramesPerBuffer;
+		auto stftFrameSize = bufferSize / stftFramesPerBuffer;
 		featureExtractor.setFrameSize(stftFrameSize);
 }
 
@@ -483,11 +484,7 @@ template<typename T>
 void AudioClassifier<T>::processCurrentInstance()
 {
 	auto instanceReady = false;
-	auto frameNumber = stftProcessedCount + 1;
-
-	//Features used by trainingSet and testSet should always match.
-	auto featuresProcessed = (stftProcessedCount + (delayedProcessedCount * stftFramesPerBuffer)) * AudioClassifyOptions::totalNumAudioFeatures;
-
+	auto frameNumber = (stftProcessedCount + 1) + (stftFramesPerBuffer * delayedProcessedCount);
 
 	for (auto i = 0; i < AudioClassifyOptions::totalNumAudioFeatures; ++i)
 	{
@@ -499,13 +496,16 @@ void AudioClassifier<T>::processCurrentInstance()
 
 			currentInstanceVector[featureIndex] = featureVal;
 
-			++featuresProcessed;
+			++featuresProcessedCount;
 		}
 	}
 
 
-	if (featuresProcessed == trainingSet->getNumFeatures())
+	if (featuresProcessedCount == trainingSet->getNumFeatures())
+	{
 		instanceReady = true;
+		featuresProcessedCount = 0;
+	}
 
 
 	if (instanceReady)
@@ -537,12 +537,41 @@ void AudioClassifier<T>::processCurrentInstance()
 
 //==============================================================================
 template<typename T>
+void AudioClassifier<T>::processCurrentInstanceReduced()
+{
+	auto frameNumber = (stftProcessedCount + 1) + (stftFramesPerBuffer * delayedProcessedCount);
+
+	for (auto i = 0; i < AudioClassifyOptions::totalNumAudioFeatures; ++i)
+	{
+		auto feature = static_cast<AudioClassifyOptions::AudioFeature>(i);
+		if (trainingSetReduced->usingFeature(frameNumber, feature))
+		{
+			auto featureVal = featureExtractor.getFeature(feature);
+			auto featureIndex = trainingSetReduced->getFeatureIndex(frameNumber, feature);
+
+			currentInstanceVectorReduced[featureIndex] = featureVal;
+
+			++featuresProcessedCountReduced;
+		}
+	}
+
+	if (featuresProcessedCountReduced == trainingSetReduced->getNumFeatures())
+		featuresProcessedCountReduced = 0;
+}
+
+//==============================================================================
+template<typename T>
 void AudioClassifier<T>::resetClassifierState()
 {
     classifierReady.store(false);
+
+	reducedVarianceSize = 0;
+	featuresProcessedCount = 0;
+	featuresProcessedCountReduced = 0;
+
 	currentSoundRecording.store(-1);
 
-	//May remove these as set when recording instance for sound complete. 
+	//NOTE: May remove these as set when recording instance for sound complete. 
 	recordingTrainingData.store(false);
 	recordingTestData.store(false);
 }
@@ -575,16 +604,66 @@ int AudioClassifier<T>::classify()
 	    switch (currentClassfierType.load())
 	    {
 			case AudioClassifyOptions::ClassifierType::nearestNeighbour:
-				sound = knn.classify(currentInstanceVector);
+				if (reducedVarianceSize > 0)
+					sound = knn.classify(currentInstanceVectorReduced);
+				else
+					sound = knn.classify(currentInstanceVector);
 				break;
 			case AudioClassifyOptions::ClassifierType::naiveBayes:
-				sound = nbc.Classify(currentInstanceVector);
+				if (reducedVarianceSize > 0)
+					sound = nbc.Classify(currentInstanceVectorReduced);
+				else
+					sound = nbc.Classify(currentInstanceVector);
 				break;
 			default: break; // Sound returned -1 (Invalid label. Valid labels are 0 to numSounds)
 	    }
     }
 
     return sound;
+}
+
+//==============================================================================
+template<typename T>
+void AudioClassifier<T>::reduceFeaturesByVariance(unsigned numFeaturesToTake)
+{
+	//NOTE: Should we check whether training set is ready and return void?
+
+	auto numFeaturesToUse = 0;
+
+	resetClassifierState();
+
+	//NOTE: - Need to check this. Torn state issues etc.
+	trainingSetReduced.reset(new AudioDataSet<T>(trainingSet->getVarianceReducedCopy(numFeaturesToTake)));
+
+
+	//Set Current Instance Vector;
+	if (numFeaturesToTake > 0)
+	{
+		numFeaturesToUse = numFeaturesToTake;
+		currentInstanceVectorReduced.set_size(numFeaturesToTake);
+		currentInstanceVectorReduced.zeros();
+	}
+	else
+	{
+		numFeaturesToUse = trainingSet->getNumFeatures();
+		currentInstanceVectorReduced.clear();
+	}
+
+
+	reducedVarianceSize = numFeaturesToTake;
+
+	nbc.setNumFeatures(numFeaturesToUse);
+	knn.setNumFeatures(numFeaturesToUse);
+}
+
+//==============================================================================
+template<typename T>
+int AudioClassifier<T>::getNumFeaturesUsed()
+{
+	if (reducedVarianceSize > 0)
+		return reducedVarianceSize;
+	else
+		return trainingSet->getNumFeatures();
 }
 
 //==============================================================================
@@ -614,31 +693,6 @@ bool AudioClassifier<T>::checkSoundReady(int sound, AudioClassifyOptions::DataSe
 }
 
 //==============================================================================
-//template<typename T>
-//void AudioClassifier<T>::configTrainingSetMatrix()
-//{
-//	/** Currently a naive implementation as just discards the existing
-//	 * training set data and requires training set to be re-gathered/populated
-//	 * followed by re-train of classifier. 
-//	 */
-//
-//	//Training set and current instance no longer valid so reset state
-//	resetClassifierState();
-//
-//	trainingData.set_size(numFeatures, trainingSetSize);
-//	trainingData.zeros();
-//
-//	trainingLabels.set_size(trainingSetSize);
-//
-//	//Consider making trainingLabel <int> rather than unsigned to init with -1 label vals
-//	for (auto i = 0; i < trainingLabels.n_elem; ++i)
-//		 trainingLabels[i] = 0;
-//
-//	currentInstanceVector.set_size(numFeatures);
-//	currentInstanceVector.zeros();
-//}
-
-//==============================================================================
 template<typename T>
 void AudioClassifier<T>::configureDataSets()
 {
@@ -647,11 +701,13 @@ void AudioClassifier<T>::configureDataSets()
 	trainingSet.reset(new AudioDataSet<T>(numSounds, trainingInstancesPerSound, bufferSize, stftFramesPerBuffer, numDelayedBuffers));
 	testSet.reset(new AudioDataSet<T>(numSounds, testInstancesPerSound, bufferSize, stftFramesPerBuffer, numDelayedBuffers));
 
+	currentInstanceVector.set_size(trainingSet->getNumFeatures());
+	currentInstanceVector.zeros();
+
 	trainingSetReduced.reset(nullptr);
 	testSetReduced.reset(nullptr);
+	currentInstanceVectorReduced.clear();
 
-	currentInstanceVector.set_size(trainingSet->getNumFeatures());
-	//Also reset reduced data sets
 
 	knn.setNumFeatures(trainingSet->getNumFeatures());
 	nbc.setNumFeatures(trainingSet->getNumFeatures());
@@ -661,7 +717,7 @@ void AudioClassifier<T>::configureDataSets()
 template<typename T>
 float AudioClassifier<T>::test(std::vector<std::pair<unsigned int, unsigned int>>& outputResults)
 {
-	//Possibly add an error string input param if test set not ready
+	//NOTE: Possibly add an error string input param if test set not ready
 	if (testSet->isReady())
 		return 0.0f;
 

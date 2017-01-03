@@ -44,7 +44,6 @@ AudioDataSet<T>::~AudioDataSet()
 }
 
 //==============================================================================
-//JWM - NOTE: Potentially change to return bool for success and take in output data set ? 
 template<typename T>
 bool AudioDataSet<T>::load(const std::string & absoluteFilePath, std::string & errorString)
 {
@@ -253,6 +252,13 @@ int AudioDataSet<T>::getFeatureIndex(int stftFrameNumber, AudioClassifyOptions::
 
 	//Feature not being used.
 	return -1;
+}
+
+//==============================================================================
+template<typename T>
+std::vector<FeatureFramePair> AudioDataSet<T>::getFeaturesUsed() const
+{
+	return featuresUsed;
 }
 
 //==============================================================================

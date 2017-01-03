@@ -16,20 +16,21 @@
 #define ARMA_64BIT_WORD
 #endif
 
-#include <string>
 #include <memory>
 #include <atomic>
 
 #include <armadillo.h>
 
 #include "../../Gist/src/Gist.h"
+
 #include "../AudioClassifyOptions/AudioClassifyOptions.h"
+#include "../AudioDataSet/AudioDataSet.h"
+
 #include "../OnsetDetection/OnsetDetector.h"
 #include "../FeatureExtractor/FeatureExtractor.h"
+
 #include "../NaiveBayes/NaiveBayes.h"
 #include "../NearestNeighbour/NearestNeighbour.h"
-
-#include "../AudioDataSet/AudioDataSet.h"
 
 //==============================================================================
 template<typename T>
@@ -141,12 +142,14 @@ public:
     //This function will return -1 for unclassified sounds 
     int classify();
 
+	void reduceFeaturesByVariance(unsigned numFeaturesToTake);
+	int getNumFeaturesUsed();
+
 private:
 
 	//==============================================================================
     int bufferSize = 0;
 	int delayedBufferSize = 0;
-	int stftFrameSize = 0;
 
 	//==============================================================================
 	int numDelayedBuffers = 0;
@@ -154,6 +157,10 @@ private:
 	unsigned int stftFramesPerBuffer = 1;
 	unsigned int stftProcessedCount = 0;
 
+	//==============================================================================
+	//Holds the number of features processed so far for the current instance
+	unsigned int featuresProcessedCount = 0;
+	unsigned int featuresProcessedCountReduced = 0;
 	//==============================================================================
 	int trainingInstancesPerSound = 0;
 	int testInstancesPerSound = 0;
@@ -164,6 +171,8 @@ private:
 	//==============================================================================
 	bool hasOnset = false;
 
+	//==============================================================================
+	unsigned reducedVarianceSize = 0;
 	//==============================================================================
 	T sampleRate = static_cast<T>(0.0);
 	
@@ -188,11 +197,6 @@ private:
     std::unique_ptr<T[]> magSpectrumOSD;
 
 	//==============================================================================
-    
-    //Holds the the feature values/vector for the current instance/block.
-    arma::Col<T> currentInstanceVector;
-   
-	//==============================================================================
     Gist<T> gistOSD;
     OnsetDetector<T> osDetector;
 	FeatureExtractor<T> featureExtractor;
@@ -212,9 +216,15 @@ private:
 	std::unique_ptr<AudioDataSet<T>> testSet;
 	std::unique_ptr<AudioDataSet<T>> testSetReduced;
 
+    //Holds the the feature values/vector for the current instance/block.
+	arma::Col<T> currentInstanceVector;
+	arma::Col<T> currentInstanceVectorReduced;
+
 	//==============================================================================
 	void setupStft();
+
     void processCurrentInstance();
+	void processCurrentInstanceReduced();
 
 	void resetClassifierState();
 

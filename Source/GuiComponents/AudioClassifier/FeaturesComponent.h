@@ -17,21 +17,52 @@
 //==============================================================================
 /*
 */
-class FeaturesComponent    : public Component
+class FeaturesComponent    : public Component,
+							 Timer,	
+							 ButtonListener
 {
 public:
-	explicit FeaturesComponent(BeatboxVoxAudioProcessor& p);
+    FeaturesComponent(BeatboxVoxAudioProcessor& p);
     ~FeaturesComponent();
 
     void paint (Graphics&) override;
     void resized() override;
+
+	void timerCallback() override;
+
+	void buttonClicked(Button *button) override;
+
+	static String headingLabelID;
+	static String showVariancesButtonID;
+	static String updateFeatureVariancesButtonID;
+
+	void setActive(bool active);
 
 private:
 	JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FeaturesComponent)
 
 	BeatboxVoxAudioProcessor& processor;
 
+	int varianceReduceButtonsGroupID = 1;
+	int numFeaturesToUse = 0;
+
+	std::unique_ptr<LookAndFeel> componentLookAndFeel;
+
 	Label headingLabel;
+
+
+	Label numFeaturesInUseLbl;
+	Label numFeaturesInUseVal;
+
+	Label varianceReduceControlsHeadingLabel;
+	OwnedArray<Button> varianceReduceValueButtons;
+	OwnedArray<Label> varianceReduceLabels;
+	TextButton showVariancesButton;
+	TextButton updateFeatureVariancesButton;
+
+	void setupVarianceReduceValueButtons();
+
+	void setNeedsUpdate(bool needsUpdate);
 };
 
 

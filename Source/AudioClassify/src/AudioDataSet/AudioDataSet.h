@@ -45,6 +45,12 @@ public:
 	bool usingFeature(int stftFrameNumber, AudioClassifyOptions::AudioFeature feature);
 	int getFeatureIndex(int stftFrameNumber, AudioClassifyOptions::AudioFeature feature);
 
+	/** Returns a vector of Feature-Frame pairs containing all features used by this dataset.
+	 * Note: This method shold not be called from an audio callback thread as it returns a 
+	 * std::vector which will allocate.
+	 **/
+	std::vector<FeatureFramePair> getFeaturesUsed() const;
+
 	const arma::Mat<T>& getData() const;
 	const arma::Row<int>& getSoundLabels() const;
 
