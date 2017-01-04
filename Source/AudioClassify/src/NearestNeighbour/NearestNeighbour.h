@@ -18,14 +18,11 @@
 #endif
 
 #include<memory>
+
 #include <armadillo.h>
 
 #include "../PreProcessing/PreProcessing.h"
 
-/**
- *
- *
- */
 template<typename T>
 class NearestNeighbour
 {

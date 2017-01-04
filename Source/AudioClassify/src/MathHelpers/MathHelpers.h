@@ -14,9 +14,7 @@
 #include <algorithm>
 
 #ifdef _WIN64
-
 #include <numeric>
-
 #endif // _WIN64
 
 /** This namespace contains some quick and dirty math functions for the purposes of this 

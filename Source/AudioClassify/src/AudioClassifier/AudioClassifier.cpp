@@ -113,7 +113,7 @@ bool AudioClassifier<T>::loadDataSet(const std::string & fileName, AudioClassify
 
 		if (success)
 		{
-			//JWM - Check buffer sizes match?
+			//NOTE: - Check buffer sizes match?
 			stftFramesPerBuffer = trainingSet->getSTFTFramesPerBuffer();
 			numDelayedBuffers = trainingSet->getNumDelayedBuffers();
 			numSounds = trainingSet->getNumSounds();
@@ -135,8 +135,8 @@ bool AudioClassifier<T>::loadDataSet(const std::string & fileName, AudioClassify
 		return success;
 	}
 	
-	//JWM - Need to add checks to confirm test set has same structure as trainingSet
-	//Could add a checkStructuresMatch or something ?
+	//NOTE: - Need to add checks to confirm test set has same structure as trainingSet
+	//Could add a checkStructuresMatch or similar ?
 	if (dataSetType == AudioClassifyOptions::DataSetType::testSet)
 	{
 		//Also check buffer size same?	
@@ -319,7 +319,7 @@ void AudioClassifier<T>::setSoundRecording(int sound, AudioClassifyOptions::Data
 		recordingTrainingData.store(false);
 	}
 	
-	//Need to set AudioDataSet sound not ready ? 
+	//Need to set AudioDataSet sound not ready if re-recording ?
 	//trainingSoundsReady[currentTrainingSoundRecording.load()] = false;
 }
 
@@ -345,7 +345,7 @@ void AudioClassifier<T>::train()
         classifierReady.store(true);    
     }
 
-    //JWM - Potentially return boolean and return false if checkTrainingSetReady() returns false.
+    //NOTE: - Potentially return boolean and return false if checkTrainingSetReady() returns false.
 }
 
 //==============================================================================
@@ -571,7 +571,7 @@ void AudioClassifier<T>::resetClassifierState()
 
 	currentSoundRecording.store(-1);
 
-	//NOTE: May remove these as set when recording instance for sound complete. 
+	//NOTE: May remove these as should be set when recording instance for sound complete. 
 	recordingTrainingData.store(false);
 	recordingTestData.store(false);
 }
@@ -719,7 +719,7 @@ float AudioClassifier<T>::test(std::vector<std::pair<unsigned int, unsigned int>
 {
 	//NOTE: Possibly add an error string input param if test set not ready
 	if (testSet->isReady())
-		return 0.0f;
+		return -1.0f;
 
 	unsigned int numCorrect = 0;
 
@@ -750,7 +750,6 @@ float AudioClassifier<T>::test(std::vector<std::pair<unsigned int, unsigned int>
 	auto result = static_cast<float>(numCorrect) / static_cast<float>(testSet->getTotalNumInstances()) * 100.0f;
 	return result;
 }
-
 
 //==============================================================================
 template class AudioClassifier<float>;

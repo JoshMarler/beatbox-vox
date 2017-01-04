@@ -46,6 +46,7 @@ void FeatureExtractor<T>::processFrame(const T* audioFrame, const int frameSize)
 {
 	//May remove
 	assert(gist.getAudioFrameSize() == frameSize);
+
 	gist.processAudioFrame(audioFrame, frameSize);
 
 	gist.melFrequencyCepstralCoefficients(mfccs.get());

@@ -20,7 +20,6 @@
 #include <armadillo.h>
 
 
-
 template<typename T>
 class NaiveBayes
 {

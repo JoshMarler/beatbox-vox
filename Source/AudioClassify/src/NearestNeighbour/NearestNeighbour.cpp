@@ -109,10 +109,6 @@ void NearestNeighbour<T>::setNumFeatures(const unsigned int newNumFeatures)
 }
 
 //=======================================================================================================
-/* JWM - NOTE: May not be neccessary to use references here as requires the training data's life time 
- * to match this objects. The train method should be being called from the message/GUI thread in theory so making 
- * a copy at this point may not be an issue. This will need to be taken into consideration at library stage in particular. 
-*/
 template<typename T>
 void NearestNeighbour<T>::train(const arma::Mat<T>& newTrainingSet, const arma::Row<int>& newLabels)
 {

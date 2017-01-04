@@ -105,6 +105,12 @@ int NaiveBayes<T>::Classify(const arma::Col<T>& instance)
 
 	for (size_t j = 0; j < featureMeans.n_cols; ++j)
 	{
+		/*
+		 * In the below code diffs, featureMeans,freatureVariances, 
+		 * distribution, exponents, stdDev, testProbs and priorProbs are all 
+		 * Armadillo based Matrix or Vector types which would otherwise need to be represented
+		 * by arrays or user defined classes.  
+		 */
 		diffs = instance - featureMeans.col(j);
 		
 		/** Using log probabilities to eliminate/reduce floating point

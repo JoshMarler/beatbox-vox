@@ -16,10 +16,10 @@
 #define ARMA_64BIT_WORD
 #endif
 
+#include <armadillo.h>
+
 #include <memory>
 #include <atomic>
-
-#include <armadillo.h>
 
 #include "../../Gist/src/Gist.h"
 

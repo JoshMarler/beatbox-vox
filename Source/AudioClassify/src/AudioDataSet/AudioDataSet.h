@@ -16,6 +16,7 @@
 #endif
 
 #include <armadillo.h>
+
 #include "JuceHeader.h"
 
 #include "../AudioClassifyOptions/AudioClassifyOptions.h"
