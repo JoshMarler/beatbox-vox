@@ -27,6 +27,8 @@ BeatboxVoxAudioProcessorEditor::BeatboxVoxAudioProcessorEditor (BeatboxVoxAudioP
     componentLookAndFeel->setColour (TextButton::buttonOnColourId, componentLookAndFeel->findColour (TextButton::textColourOffId));
     componentLookAndFeel->setColour (TextButton::textColourOnId, componentLookAndFeel->findColour (TextButton::buttonColourId));
 
+	componentLookAndFeel->setColour(Slider::ColourIds::thumbColourId, Colours::greenyellow);
+
 	setLookAndFeel(componentLookAndFeel.get());
 
 

@@ -32,7 +32,7 @@ OnsetDetector<T>::OnsetDetector(int initFrameSize, unsigned int initSampleRate)
 
     meanCoeff.store(0.8f);
     medianCoeff.store(0.8f);
-    noiseRatio.store(40.0f);
+    noiseRatio.store(0.1f);
     
     //Set initial ODF type
     currentODFType.store(AudioClassifyOptions::ODFType::spectralDifference);
@@ -191,6 +191,9 @@ bool OnsetDetector<T>::checkForOnset(const T* magnitudeSpectrum, const std::size
 
 	//Get the onset detection funciton/feature value for peak picking/thresholding
 	featureValue = getODFValue();
+
+	//NORMALISATION TEST
+	featureValue = featureValue / (1 + featureValue);
 
 	//assert(!MathHelpers::isNaN(featureValue));
 

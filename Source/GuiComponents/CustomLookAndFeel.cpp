@@ -137,7 +137,7 @@ void CustomLookAndFeel::drawLinearSliderThumb (Graphics& g, int x, int y, int wi
         const auto sliderRadius = static_cast<float>(getSliderThumbRadius(slider));
 
 	    auto isDownOrDragging = slider.isEnabled() && (slider.isMouseOverOrDragging() || slider.isMouseButtonDown());
-	    auto knobColour (slider.findColour (Slider::rotarySliderFillColourId).withMultipliedSaturation ((slider.hasKeyboardFocus (false) || isDownOrDragging) ? 1.3f : 0.9f)
+	    auto knobColour (slider.findColour (Slider::thumbColourId).withMultipliedSaturation ((slider.hasKeyboardFocus (false) || isDownOrDragging) ? 1.3f : 0.9f)
                            .withMultipliedAlpha (slider.isEnabled() ? 1.0f : 0.7f));
         g.setColour (knobColour);
 

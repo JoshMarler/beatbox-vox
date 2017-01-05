@@ -45,15 +45,29 @@
           <FILE id="y9E7bv" name="TestClassifierComponent.h" compile="0" resource="0"
                 file="Source/GuiComponents/AudioClassifier/TestClassifierComponent.h"/>
         </GROUP>
+        <GROUP id="{51B2EE50-8711-EB48-4D23-C58F96753B57}" name="OnsetDetector">
+          <FILE id="rV5OG5" name="OnsetDetectionComponent.cpp" compile="1" resource="0"
+                file="Source/GuiComponents/OnsetDetector/OnsetDetectionComponent.cpp"/>
+          <FILE id="IPsQfJ" name="OnsetDetectionComponent.h" compile="0" resource="0"
+                file="Source/GuiComponents/OnsetDetector/OnsetDetectionComponent.h"/>
+          <FILE id="SYlA0E" name="OSDOptionsComponent.cpp" compile="1" resource="0"
+                file="Source/GuiComponents/OnsetDetector/OSDOptionsComponent.cpp"/>
+          <FILE id="DtFo4s" name="OSDOptionsComponent.h" compile="0" resource="0"
+                file="Source/GuiComponents/OnsetDetector/OSDOptionsComponent.h"/>
+          <FILE id="rqsB0V" name="OSDParametersComponent.cpp" compile="1" resource="0"
+                file="Source/GuiComponents/OnsetDetector/OSDParametersComponent.cpp"/>
+          <FILE id="IMaWIG" name="OSDParametersComponent.h" compile="0" resource="0"
+                file="Source/GuiComponents/OnsetDetector/OSDParametersComponent.h"/>
+          <FILE id="x7U5rx" name="OSDPreProcessingComponent.cpp" compile="1"
+                resource="0" file="Source/GuiComponents/OnsetDetector/OSDPreProcessingComponent.cpp"/>
+          <FILE id="aHbzme" name="OSDPreProcessingComponent.h" compile="0" resource="0"
+                file="Source/GuiComponents/OnsetDetector/OSDPreProcessingComponent.h"/>
+        </GROUP>
         <FILE id="j338eL" name="CustomLookAndFeel.cpp" compile="1" resource="0"
               file="Source/GuiComponents/CustomLookAndFeel.cpp"/>
         <FILE id="DZabwO" name="CustomLookAndFeel.h" compile="0" resource="0"
               file="Source/GuiComponents/CustomLookAndFeel.h"/>
         <FILE id="ER95zv" name="GuiComponents.h" compile="0" resource="0" file="Source/GuiComponents/GuiComponents.h"/>
-        <FILE id="aabJKX" name="OnsetDetectorComponent.cpp" compile="1" resource="0"
-              file="Source/GuiComponents/OnsetDetectorComponent.cpp"/>
-        <FILE id="AAofgR" name="OnsetDetectorComponent.h" compile="0" resource="0"
-              file="Source/GuiComponents/OnsetDetectorComponent.h"/>
       </GROUP>
       <GROUP id="{3F849092-9582-55CE-53ED-F19745D4D8B1}" name="Resources">
         <FILE id="AzFjzW" name="bassdrum.wav" compile="0" resource="1" file="Source/Resources/bassdrum.wav"/>

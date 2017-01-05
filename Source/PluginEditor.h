@@ -47,7 +47,7 @@ private:
     TabbedComponent tabs;
 
     AudioClassifierComponent classifierComponent;
-    OnsetDetectorComponent onsetDetectComponent;
+    OnsetDetectionComponent onsetDetectComponent;
 
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR (BeatboxVoxAudioProcessorEditor)
