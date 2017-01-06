@@ -33,8 +33,8 @@ NearestNeighbour<T>::NearestNeighbour(unsigned int initNumFeatures, unsigned int
 	auto neighboursSize = trainingSetSize;
 	neighbours = std::make_unique<Neighbour[]>(neighboursSize);
 
-	//Set default 3 K nearest neighbours
-	setNumNeighbours(5);
+	//Set default K nearest neighbours
+	setNumNeighbours(7);
 }
 
 //=======================================================================================================

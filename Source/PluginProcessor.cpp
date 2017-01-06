@@ -96,8 +96,8 @@ void BeatboxVoxAudioProcessor::setupParameters()
 	processorState.createAndAddParameter(paramOSDNoiseRatio,
 	                                     "OSD Noise Ratio",
 	                                     String(),
-	                                     NormalisableRange<float>(0.01f, 100.0f, 0.01f),
-	                                     40.0f,
+	                                     NormalisableRange<float>(0.01f, 1.0f, 0.01f),
+	                                     0.5f,
 	                                     nullptr,
 	                                     nullptr);
 
@@ -129,7 +129,7 @@ void BeatboxVoxAudioProcessor::setupParameters()
 	processorState.createAndAddParameter(paramOSDMsBetweenOnsets,
 	                                     "OSD Ms Between Onsets",
 	                                     String("ms"),
-	                                     NormalisableRange<float>(0.0f, 100.0f, 5.0f),
+	                                     NormalisableRange<float>(0.0f, 200.0f, 5.0f),
 	                                     70.0f,
 	                                     nullptr,
 	                                     nullptr);
@@ -161,7 +161,7 @@ void BeatboxVoxAudioProcessor::parameterChanged(const String& paramID, float new
 
 void BeatboxVoxAudioProcessor::initialiseSynth()
 {
-	/** JWM - Quick and dirty sample drum synth for prototype
+	/** NOTE: - Quick and dirty sample drum synth for prototype
 	 *  In future versions will ideally allow user to select sample to use and
 	 *  also manage sample rate changes effect on loaded samples. 
 	 */
@@ -303,7 +303,10 @@ void BeatboxVoxAudioProcessor::processBlock(AudioSampleBuffer& buffer, MidiBuffe
 	}
 
 
-	//Now classification complete clear the input buffer/signal. We only want synth output.
+	/** Now classification complete clear the input buffer/signal. 
+	 *	We only want synth response output, no a blend of input vocal
+	 *	signal + synth output.
+	 **/
 	buffer.clear();
 
 	if (usingOSDTestSound.load())

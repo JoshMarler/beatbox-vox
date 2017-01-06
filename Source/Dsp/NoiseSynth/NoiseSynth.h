@@ -40,7 +40,6 @@ private:
 
 
 //==============================================================================
-/** A simple demo synth voice that just plays a sine wave.. */
 class NoiseVoice  : public SynthesiserVoice
 {
 public:
@@ -82,12 +81,10 @@ public:
 
     void pitchWheelMoved (int /*newValue*/) override
     {
-        // not implemented for the purposes of this demo!
     }
 
     void controllerMoved (int /*controllerNumber*/, int /*newValue*/) override
     {
-        // not implemented for the purposes of this demo!
     }
 
     void renderNextBlock (AudioSampleBuffer& outputBuffer, int startSample, int numSamples) override

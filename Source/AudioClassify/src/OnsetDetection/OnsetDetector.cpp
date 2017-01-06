@@ -192,7 +192,7 @@ bool OnsetDetector<T>::checkForOnset(const T* magnitudeSpectrum, const std::size
 	//Get the onset detection funciton/feature value for peak picking/thresholding
 	featureValue = getODFValue();
 
-	//NORMALISATION TEST
+	//NORMALISATION
 	featureValue = featureValue / (1 + featureValue);
 
 	//assert(!MathHelpers::isNaN(featureValue));
@@ -233,9 +233,6 @@ bool OnsetDetector<T>::checkForPeak(T featureValue)
     } 
 
     previousValues[0] = featureValue;
-
-    if (isOnset && (previousValues[1] > largestPeak))
-        largestPeak = previousValues[1];
 
     return isOnset;
         

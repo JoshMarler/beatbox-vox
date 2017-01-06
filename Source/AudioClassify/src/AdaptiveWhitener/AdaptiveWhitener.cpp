@@ -5,6 +5,19 @@
     Created: 10 Oct 2016 1:59:31pm
     Author:  Joshua.Marler
 
+	Based on the Adaptive whitening concept as propose by Dan Stowell and Mark Plumbley (2007)
+    of Queen Mary University Of London. 
+
+	Stowell, D. and Plumbley, M. (2007) August. 
+	Adaptive whitening for improved real-time audio onset detection.
+	In Proceedings of the International Computer Music Conference (ICMC’07) (Vol. 18).
+	[Online] Available at: http://c4dm.eecs.qmul.ac.uk/papers/2007/StowellPlumbley07-icmc.pdf
+	[Accessed: 05 Jan, 2016]
+
+	See the following link also for code samples of the original algorithm:
+    https://code.soundsoftware.ac.uk/projects/qm-vamp-plugins/files
+
+	
   ==============================================================================
 */
 
@@ -75,7 +88,7 @@ void AdaptiveWhitener<T>::process(const T* inputFrame, T* outputFrame)
 
 	for (auto i = 0; i < fftFrameSize; i++)
 	{
-		T val = outputFrame[i];
+		T val = inputFrame[i];
 
 		/* If value less than previous bin peak this updates val and then the current peak 
 		 * value for this FFT bin by multiplying with the memory decay rate coefficient.
@@ -112,13 +125,14 @@ template <typename T>
 void AdaptiveWhitener<T>::updateMemoryDecayCoeff()
 {
 
-	//NOTE: Potentially change this to compile time constant ?nstexpr
+	//NOTE: Potentially change this to compile time constant ? constexpr
 	//log/0.0 - 1.0 db conversions for -60db decay rate calculations
-	auto dbRatio = std::pow(10, (-60 / 20));
+	auto dbRatio = std::pow(10, (-40 / 20));
 	auto logDbDecayRatio = std::log(dbRatio);
 
 	//Calculate the memory coefficient from the specified decay rate in seconds
 	memoryRateCoeff = (decayRate == 0) ? static_cast<T>(0.0) : std::exp((logDbDecayRatio * fftFrameSize) / (decayRate * sampleRate));
+	//memoryRateCoeff = 0.9997;
 }
 
 //==============================================================================

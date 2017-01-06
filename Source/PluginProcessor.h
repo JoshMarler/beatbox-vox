@@ -82,7 +82,7 @@ public:
 
     //==============================================================================
     //Returns reference to plugins AudioClassifier for GUI to set classification settings.
-    //JWM - NOTE should eventually change to accept templated precision. 
+    //NOTE: should eventually change to accept templated precision. 
     AudioClassifier<float>& getClassifier();
 
 

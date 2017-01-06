@@ -72,6 +72,7 @@ void AudioClassifier<T>::setCurrentBufferSize (int newBufferSize)
 	magSpectrumOSD.reset(new T[bufferSize / 2]);    
 	std::fill(magSpectrumOSD.get(), (magSpectrumOSD.get() + (bufferSize / 2)), static_cast<T>(0.0));
 
+	osDetector.setCurrentFrameSize(bufferSize / 2);
 	gistOSD.setAudioFrameSize(bufferSize);
 
 }
