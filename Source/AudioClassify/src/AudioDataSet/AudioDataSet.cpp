@@ -193,7 +193,6 @@ AudioDataSet<T> AudioDataSet<T>::getVarianceReducedCopy(int numFeatures)
 	reduced.soundLabels = soundLabels;
 	reduced.featuresUsed = reducedFeaturesUsed;
 
-
 	return reduced;
 }
 
@@ -242,7 +241,7 @@ bool AudioDataSet<T>::usingFeature(int stftFrameNumber, AudioClassifyOptions::Au
 
 //==============================================================================
 template<typename T>
-int AudioDataSet<T>::getFeatureIndex(int stftFrameNumber, AudioClassifyOptions::AudioFeature feature)
+int AudioDataSet<T>::getFeatureRowIndex(int stftFrameNumber, AudioClassifyOptions::AudioFeature feature)
 {
 	for (auto i = 0; i < featuresUsed.size(); ++i)
 	{
@@ -261,6 +260,27 @@ std::vector<FeatureFramePair> AudioDataSet<T>::getFeaturesUsed() const
 	return featuresUsed;
 }
 
+//==============================================================================
+template<typename T>
+void AudioDataSet<T>::setFeaturesUsed(const std::vector<FeatureFramePair>& newFeaturesUsed)
+{
+	auto numFeatures = newFeaturesUsed.size();
+	arma::Mat<T> reducedData(numFeatures, getTotalNumInstances());
+
+	for (auto i = 0; i < numFeatures; ++i)
+	{
+		auto feature = newFeaturesUsed[i];
+		auto index = getFeatureRowIndex(feature.first, feature.second);
+		
+		reducedData.row(i) = data.row(index);
+	}
+
+	data.copy_size(reducedData);
+	data = reducedData;
+
+	featuresUsed.resize(0);
+	featuresUsed = newFeaturesUsed;
+}
 //==============================================================================
 template<typename T>
 const arma::Mat<T>& AudioDataSet<T>::getData() const
@@ -372,14 +392,6 @@ void AudioDataSet<T>::setSoundLabels(const arma::Row<int>& newLabels)
 {
 	soundLabels.clear();
 	soundLabels = newLabels;
-}
-
-//==============================================================================
-template<typename T>
-void AudioDataSet<T>::setFeaturesUsed(const std::vector<FeatureFramePair>& newFeaturesUsed)
-{
-	featuresUsed.resize(0);
-	featuresUsed = newFeaturesUsed;
 }
 
 //==============================================================================

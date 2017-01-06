@@ -44,13 +44,14 @@ public:
 
 	//NOTE: Potentially add setUsingFeature method in future to allow explicit on/off of features. 
 	bool usingFeature(int stftFrameNumber, AudioClassifyOptions::AudioFeature feature);
-	int getFeatureIndex(int stftFrameNumber, AudioClassifyOptions::AudioFeature feature);
+	int getFeatureRowIndex(int stftFrameNumber, AudioClassifyOptions::AudioFeature feature);
 
 	/** Returns a vector of Feature-Frame pairs containing all features used by this dataset.
 	 * Note: This method shold not be called from an audio callback thread as it returns a 
 	 * std::vector which will allocate.
 	 **/
 	std::vector<FeatureFramePair> getFeaturesUsed() const;
+	void setFeaturesUsed(const std::vector<FeatureFramePair>& newFeaturesUsed);
 
 	const arma::Mat<T>& getData() const;
 	const arma::Row<int>& getSoundLabels() const;
@@ -96,7 +97,6 @@ private:
 
 	void setData(const arma::Mat<T>& newData);
 	void setSoundLabels(const arma::Row<int>& newLabels);
-	void setFeaturesUsed(const std::vector<FeatureFramePair>& newFeaturesUsed);
 
 	void initialise();
 };

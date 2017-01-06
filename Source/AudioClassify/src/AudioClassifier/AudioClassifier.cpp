@@ -342,7 +342,6 @@ void AudioClassifier<T>::train()
 			knn.train(trainingSet->getData(), trainingSet->getSoundLabels());
 		}
 
-
         classifierReady.store(true);    
     }
 
@@ -493,7 +492,7 @@ void AudioClassifier<T>::processCurrentInstance()
 		if (trainingSet->usingFeature(frameNumber, feature))
 		{
 			auto featureVal = featureExtractor.getFeature(feature);
-			auto featureIndex = trainingSet->getFeatureIndex(frameNumber, feature);
+			auto featureIndex = trainingSet->getFeatureRowIndex(frameNumber, feature);
 
 			currentInstanceVector[featureIndex] = featureVal;
 
@@ -548,7 +547,7 @@ void AudioClassifier<T>::processCurrentInstanceReduced()
 		if (trainingSetReduced->usingFeature(frameNumber, feature))
 		{
 			auto featureVal = featureExtractor.getFeature(feature);
-			auto featureIndex = trainingSetReduced->getFeatureIndex(frameNumber, feature);
+			auto featureIndex = trainingSetReduced->getFeatureRowIndex(frameNumber, feature);
 
 			currentInstanceVectorReduced[featureIndex] = featureVal;
 
@@ -633,21 +632,29 @@ void AudioClassifier<T>::reduceFeaturesByVariance(unsigned numFeaturesToTake)
 
 	resetClassifierState();
 
-	//NOTE: - Need to check this. Torn state issues etc.
-	trainingSetReduced.reset(new AudioDataSet<T>(trainingSet->getVarianceReducedCopy(numFeaturesToTake)));
-
-
 	//Set Current Instance Vector;
 	if (numFeaturesToTake > 0)
 	{
-		numFeaturesToUse = numFeaturesToTake;
+		//NOTE: - Need to check this. Torn state issues etc.
+		trainingSetReduced.reset(new AudioDataSet<T>(trainingSet->getVarianceReducedCopy(numFeaturesToTake)));
+
+		//Set test set to use same reduced features as training set.
+		testSetReduced.reset(new AudioDataSet<T>(*testSet.get()));
+		testSetReduced->setFeaturesUsed(trainingSetReduced->getFeaturesUsed());
+
 		currentInstanceVectorReduced.set_size(numFeaturesToTake);
 		currentInstanceVectorReduced.zeros();
+
+		numFeaturesToUse = numFeaturesToTake;
 	}
 	else
 	{
-		numFeaturesToUse = trainingSet->getNumFeatures();
+		trainingSetReduced.reset(nullptr);
+		testSetReduced.reset(nullptr);
+
 		currentInstanceVectorReduced.clear();
+
+		numFeaturesToUse = trainingSet->getNumFeatures();
 	}
 
 
@@ -719,15 +726,27 @@ template<typename T>
 float AudioClassifier<T>::test(std::vector<std::pair<unsigned int, unsigned int>>& outputResults)
 {
 	//NOTE: Possibly add an error string input param if test set not ready
-	if (testSet->isReady())
+	if (!testSet->isReady())
 		return -1.0f;
 
 	unsigned int numCorrect = 0;
 
-	for (auto i = 0; i < testSet->getTotalNumInstances(); ++i)
+	const AudioDataSet<T>*  testSetToUse;
+
+	//Check if using reduced feature set.
+	/** NOTE: Would prefer to alter this in future as slightly messy. Better not to be carrying 
+	 * two data set copies all the time. OK for research stage.
+	 **/
+	if (reducedVarianceSize > 0)
+		testSetToUse = testSetReduced.get();
+	else
+		testSetToUse = testSet.get();
+
+
+	for (auto i = 0; i < testSetToUse->getTotalNumInstances(); ++i)
 	{
-		arma::Col<T> testInstance = testSet->getData().col(i);
-		auto actual = testSet->getSoundLabels()[i];
+		arma::Col<T> testInstance = testSetToUse->getData().col(i);
+		auto actual = testSetToUse->getSoundLabels()[i];
 		auto predicted = -1;
 		
 	    switch (currentClassfierType.load())
@@ -748,7 +767,10 @@ float AudioClassifier<T>::test(std::vector<std::pair<unsigned int, unsigned int>
 	}
 
 	//Return percentage accuracy
-	auto result = static_cast<float>(numCorrect) / static_cast<float>(testSet->getTotalNumInstances()) * 100.0f;
+	auto result = static_cast<float>(numCorrect) / static_cast<float>(testSetToUse->getTotalNumInstances()) * 100.0f;
+
+	testSetToUse = nullptr;
+
 	return result;
 }
 

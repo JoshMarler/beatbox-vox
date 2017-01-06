@@ -22,8 +22,7 @@ SelectClassifierComponent::SelectClassifierComponent(BeatboxVoxAudioProcessor& p
 	  classifierCmbBox("ClassifierSelector"),
 	  loadTrainingDataButton("Load Training Data Set"),
 	  testClassifierButton("Test"),
-	  trainClassifierButton("Train"),
-	  testComponent(std::make_unique<TestClassifierComponent>(processor))
+	  trainClassifierButton("Train")
 {
 	//Initialise training sets directory path
 	auto path = File::getSpecialLocation(File::SpecialLocationType::userApplicationDataDirectory).getFullPathName()
@@ -171,6 +170,8 @@ void SelectClassifierComponent::buttonClicked(Button * button)
 	}
 	else if (buttonID == testClassifierButtonID)
 	{
+		testComponent.reset(new TestClassifierComponent(processor));
+
 		DialogWindow::LaunchOptions dialog;
 		dialog.dialogTitle = "Test Classifier";
 		dialog.dialogBackgroundColour = Colours::black;
