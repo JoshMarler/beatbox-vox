@@ -81,6 +81,9 @@ public:
 
 	AudioClassifyOptions::ClassifierType getClassifierType() const;
 
+	void setKNNNumNeighbours(int newNumNeighbours);
+	int getKNNNumNeighbours();
+
 	/**
 	 *
 	 */

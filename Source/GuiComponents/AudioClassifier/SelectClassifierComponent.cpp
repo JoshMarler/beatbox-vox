@@ -13,6 +13,7 @@
 //===============================================================================
 String SelectClassifierComponent::classifierCmbBoxID("classifier_cmb");
 String SelectClassifierComponent::loadTrainingDateButtonID("loadTraining_btn");
+String SelectClassifierComponent::numNeighboursSliderID("numNeighbours_sld");
 String SelectClassifierComponent::testClassifierButtonID("test_classifier_btn");
 String SelectClassifierComponent::trainClassifierButtonID("train_classifier_btn");
 
@@ -43,6 +44,32 @@ SelectClassifierComponent::SelectClassifierComponent(BeatboxVoxAudioProcessor& p
 	loadTrainingDataButton.setComponentID(loadTrainingDateButtonID);
     loadTrainingDataButton.addListener(this);
 	addAndMakeVisible(loadTrainingDataButton);
+
+	numNeighboursLabel.setText("KNN Num Neighbours", NotificationType::dontSendNotification);
+	numNeighboursLabel.setFont(Font("Cracked", 14.0f, Font::plain));
+	numNeighboursLabel.setColour(Label::textColourId, Colours::greenyellow);
+	numNeighboursLabel.setEnabled(false);
+	addAndMakeVisible(numNeighboursLabel);
+
+	numNeighboursSlider.setComponentID(numNeighboursSliderID);
+	numNeighboursSlider.setSliderStyle (Slider::IncDecButtons);
+	numNeighboursSlider.setRange (3.0, 11.0, 2.0);
+	numNeighboursSlider.setIncDecButtonsMode (Slider::incDecButtonsDraggable_Horizontal);
+	numNeighboursSlider.setTextBoxStyle(Slider::TextBoxRight, true, 90, 20);
+	numNeighboursSlider.setColour(Slider::textBoxBackgroundColourId, Colours::black);
+	numNeighboursSlider.setColour(Slider::textBoxTextColourId, Colours::greenyellow);
+	numNeighboursSlider.setColour(Slider::textBoxOutlineColourId, Colours::black);
+	numNeighboursSlider.addListener(this);
+	numNeighboursSlider.setValue(processor.getClassifier().getKNNNumNeighbours(), NotificationType::dontSendNotification);
+	numNeighboursSlider.setEnabled(false);
+	addAndMakeVisible (numNeighboursSlider);
+
+	auto classifierType = processor.getClassifier().getClassifierType();
+	if (classifierType == AudioClassifyOptions::ClassifierType::nearestNeighbour)
+	{
+		numNeighboursLabel.setEnabled(true);
+		numNeighboursSlider.setEnabled(true);
+	}
 
 	testClassifierButton.setComponentID(testClassifierButtonID);
 	testClassifierButton.addListener(this);
@@ -103,13 +130,25 @@ void SelectClassifierComponent::resized()
 	auto boundsRight = bounds;
 	boundsRight.reduce(boundsRight.getWidth() / 20, 0);
 
-	auto trainClassifierBounds = boundsRight.removeFromLeft(boundsRight.getWidth() / 2);
-	trainClassifierBounds.reduce(trainClassifierBounds.getWidth() / 10, trainClassifierBounds.getHeight() / 3);
+	auto rightTopArea = boundsRight.removeFromBottom(boundsRight.getHeight() / 2);
+	rightTopArea.reduce(0, rightTopArea.getHeight() / 8);
+
+	auto trainClassifierBounds = rightTopArea.removeFromLeft(boundsRight.getWidth() / 2);
+	trainClassifierBounds.reduce(trainClassifierBounds.getWidth() / 10, 0);
 	trainClassifierButton.setBounds(trainClassifierBounds);
 
-	auto testClassifierBounds = boundsRight;
-	testClassifierBounds.reduce(testClassifierBounds.getWidth() / 10, testClassifierBounds.getHeight() / 3);
-	testClassifierButton.setBounds(testClassifierBounds);	
+	auto testClassifierBounds = rightTopArea;
+	testClassifierBounds.reduce(testClassifierBounds.getWidth() / 10, 0);
+	testClassifierButton.setBounds(testClassifierBounds);
+
+	auto rightBottomArea = boundsRight;
+	rightBottomArea.reduce(rightBottomArea.getWidth() / 26, 0);
+
+	auto neighboursBounds = rightBottomArea.removeFromBottom(rightBottomArea.getHeight() / 1.5f);
+	numNeighboursLabel.setBounds(neighboursBounds.removeFromTop(neighboursBounds.getHeight() / 4));
+
+	neighboursBounds.reduce(0, neighboursBounds.getHeight() / 10);
+	numNeighboursSlider.setBounds(neighboursBounds);
 
 }
 
@@ -192,9 +231,25 @@ void SelectClassifierComponent::comboBoxChanged(ComboBox* comboBoxThatHasChanged
 	if (id == classifierCmbBoxID)
 	{
 		auto& classifier = processor.getClassifier();
-		auto classifierType = comboBoxThatHasChanged->getSelectedId() - 1;
+		auto classifierType = static_cast<AudioClassifyOptions::ClassifierType>(comboBoxThatHasChanged->getSelectedId() - 1);
 
-		classifier.setClassifierType(static_cast<AudioClassifyOptions::ClassifierType>(classifierType));
+		classifier.setClassifierType(classifierType);
+
+		if (classifierType == AudioClassifyOptions::ClassifierType::nearestNeighbour)
+		{
+			numNeighboursLabel.setEnabled(true);
+			numNeighboursSlider.setEnabled(true);
+		}
+	}
+}
+
+//===============================================================================
+void SelectClassifierComponent::sliderValueChanged(Slider * slider)
+{
+	if (slider->getComponentID() == numNeighboursSliderID)
+	{
+		auto numNeighbours = static_cast<int>(slider->getValue());
+		processor.getClassifier().setKNNNumNeighbours(numNeighbours);
 	}
 }
 

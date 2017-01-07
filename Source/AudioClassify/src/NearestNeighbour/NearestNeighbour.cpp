@@ -34,7 +34,7 @@ NearestNeighbour<T>::NearestNeighbour(unsigned int initNumFeatures, unsigned int
 	neighbours = std::make_unique<Neighbour[]>(neighboursSize);
 
 	//Set default K nearest neighbours
-	setNumNeighbours(7);
+	setNumNeighbours(5);
 }
 
 //=======================================================================================================
@@ -84,6 +84,13 @@ template<typename T>
 void NearestNeighbour<T>::setNumNeighbours(const unsigned int newNumNeighbours)
 {
 	numNeighbours = newNumNeighbours;
+}
+
+//=======================================================================================================
+template<typename T>
+int NearestNeighbour<T>::getNumNeighbours()
+{
+	return numNeighbours;
 }
 
 //=======================================================================================================

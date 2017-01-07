@@ -19,7 +19,8 @@ class SelectClassifierComponent : public Component,
 								  public ChangeBroadcaster,
 								  Timer,
 								  ButtonListener,
-								  ComboBoxListener
+								  ComboBoxListener,
+								  SliderListener
 {
 public:
 	explicit SelectClassifierComponent(BeatboxVoxAudioProcessor& p);
@@ -31,11 +32,13 @@ public:
 	void timerCallback() override;
 	void buttonClicked(Button* button) override;
 	void comboBoxChanged(ComboBox* comboBoxThatHasChanged) override;
+	void sliderValueChanged(Slider* slider) override;
 
 
 	//ComponentID Strings
 	static String classifierCmbBoxID;
 	static String loadTrainingDateButtonID;
+	static String numNeighboursSliderID;
 	static String testClassifierButtonID;
 	static String trainClassifierButtonID;
 	
@@ -50,6 +53,9 @@ private:
 	ComboBox classifierCmbBox;
 
 	TextButton loadTrainingDataButton;
+
+	Label numNeighboursLabel;
+	Slider numNeighboursSlider;	
 
 	TextButton testClassifierButton;
 	TextButton trainClassifierButton;

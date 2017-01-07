@@ -18,8 +18,8 @@ AudioClassifier<T>::AudioClassifier(int initBufferSize, T initSampleRate, int in
 	: gistOSD(initBufferSize, static_cast<int>(initSampleRate)), //JWM - Eventually initialise with slice size?
 	  osDetector(initBufferSize / 2, initSampleRate),
 	  featureExtractor(initBufferSize, static_cast<int>(initSampleRate)),
-	  nbc(initNumSounds, 21),
-	  knn(21, initNumSounds, initNumTrainingInstances)
+	  nbc(initNumSounds, AudioClassifyOptions::totalNumAudioFeatures),
+	  knn(AudioClassifyOptions::totalNumAudioFeatures, initNumSounds, initNumTrainingInstances)
 {
 	bufferSize = initBufferSize;
 	sampleRate = initSampleRate;
@@ -297,6 +297,22 @@ template<typename T>
 AudioClassifyOptions::ClassifierType AudioClassifier<T>::getClassifierType() const
 {
 	return currentClassfierType.load();
+}
+
+template<typename T>
+void AudioClassifier<T>::setKNNNumNeighbours(int newNumNeighbours)
+{
+	if (newNumNeighbours % 2)
+		knn.setNumNeighbours(newNumNeighbours);
+	else
+		return;
+}
+
+//==============================================================================
+template<typename T>
+int AudioClassifier<T>::getKNNNumNeighbours()
+{
+	return knn.getNumNeighbours();
 }
 
 //==============================================================================

@@ -50,6 +50,12 @@ public:
 	*/
 	void setNumNeighbours(const unsigned int newNumNeighbours);
 
+	/**
+	 * Returns the number of nearest neighbours (K) currently used in the classification
+	 * method.
+	 */
+	int getNumNeighbours();
+
 	/** Sets the number of instance to be used per class for the training set.
 	 * @param newNumInstances the number of instances per class
 	 */
