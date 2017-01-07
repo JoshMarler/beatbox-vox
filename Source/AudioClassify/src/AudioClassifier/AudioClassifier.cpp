@@ -676,6 +676,13 @@ int AudioClassifier<T>::getNumFeaturesUsed()
 
 //==============================================================================
 template<typename T>
+std::vector<std::pair<FeatureFramePair, T>> AudioClassifier<T>::getFeatureVariances()
+{
+	return trainingSet->getFeatureVariances();
+}
+
+//==============================================================================
+template<typename T>
 bool AudioClassifier<T>::checkDataSetReady(AudioClassifyOptions::DataSetType dataSetType) const
 {
 	if (dataSetType == AudioClassifyOptions::DataSetType::trainingSet)

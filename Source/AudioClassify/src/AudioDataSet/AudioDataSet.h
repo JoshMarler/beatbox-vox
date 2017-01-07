@@ -39,6 +39,7 @@ public:
 	bool save(const std::string& absoluteFilePath, std::string& errorString);
 
 	AudioDataSet<T> getVarianceReducedCopy(int numFeatures);
+	std::vector<std::pair<FeatureFramePair, T>> getFeatureVariances();
 
 	void addInstance(const arma::Col<T>& instance, int soundLabel);
 

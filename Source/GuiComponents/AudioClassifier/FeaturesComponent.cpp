@@ -10,6 +10,7 @@
 
 #include "../JuceLibraryCode/JuceHeader.h"
 #include "FeaturesComponent.h"
+#include "FeatureVariancesComponent.h"
 
 //==============================================================================
 String FeaturesComponent::headingLabelID("heading_lbl");
@@ -157,7 +158,15 @@ void FeaturesComponent::buttonClicked(Button * button)
 	}
 	else if (button->getComponentID() == showVariancesButtonID)
 	{
-		//Show feature variances	
+		DialogWindow::LaunchOptions dialog;
+		dialog.dialogTitle = "Feature Variances";
+		dialog.dialogBackgroundColour = Colours::black;
+		dialog.content.setOwned(new FeatureVariancesComponent(processor.getClassifier().getFeatureVariances()));
+		dialog.componentToCentreAround = this->getParentComponent();
+		dialog.useNativeTitleBar = false;
+		dialog.resizable = false;
+		dialog.escapeKeyTriggersCloseButton = true;
+		dialog.launchAsync();
 	}
 	else if (button->getComponentID() == updateFeatureVariancesButtonID)
 	{

@@ -173,9 +173,9 @@ bool AudioDataSet<T>::save(const std::string & absoluteFilePath, std::string & e
 template<typename T>
 AudioDataSet<T> AudioDataSet<T>::getVarianceReducedCopy(int numFeatures)
 {
-	arma::Col<T> variances = arma::var(data, 0, 1);
+	arma::Col<T> variances = arma::var(data, 1, 1);
 
-	arma::uvec sorted = arma::sort_index(variances);
+	arma::uvec sorted = arma::sort_index(variances, 1);
 	
 	arma::Mat<T> reducedData(numFeatures, data.n_cols);
 	std::vector<FeatureFramePair> reducedFeaturesUsed;
@@ -194,6 +194,21 @@ AudioDataSet<T> AudioDataSet<T>::getVarianceReducedCopy(int numFeatures)
 	reduced.featuresUsed = reducedFeaturesUsed;
 
 	return reduced;
+}
+
+//==============================================================================
+template <typename T>
+std::vector<std::pair<FeatureFramePair, T>> AudioDataSet<T>::getFeatureVariances()
+{
+	std::vector<std::pair<FeatureFramePair, T>> results;
+
+	arma::Col<T> variances = arma::var(data, 1, 1);
+	arma::uvec sorted = arma::sort_index(variances, 1);
+
+	for (auto i = 0; i < sorted.n_elem; ++i)
+		results.push_back(std::make_pair(featuresUsed[sorted[i]], variances[sorted[i]]));
+
+	return results;
 }
 
 //==============================================================================

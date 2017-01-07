@@ -33,6 +33,8 @@
 #include "../NearestNeighbour/NearestNeighbour.h"
 
 //==============================================================================
+using FeatureFramePair = std::pair<int, AudioClassifyOptions::AudioFeature>;
+
 template<typename T>
 class AudioClassifier
 {
@@ -144,6 +146,8 @@ public:
 
 	void reduceFeaturesByVariance(unsigned numFeaturesToTake);
 	int getNumFeaturesUsed();
+	std::vector<std::pair<FeatureFramePair, T>> getFeatureVariances();
+
 
 private:
 
