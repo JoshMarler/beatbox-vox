@@ -240,6 +240,11 @@ void SelectClassifierComponent::comboBoxChanged(ComboBox* comboBoxThatHasChanged
 			numNeighboursLabel.setEnabled(true);
 			numNeighboursSlider.setEnabled(true);
 		}
+		else
+		{
+			numNeighboursLabel.setEnabled(false);
+			numNeighboursSlider.setEnabled(false);
+		}
 	}
 }
 

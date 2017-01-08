@@ -83,6 +83,7 @@ private:
 	void setActive(bool active) const;
 	static void setNeedsUpdate(bool needsUpdate, Button& button);
 	
+	void updateStatusControls();
 	void updateStatusLabels();
 };
 

@@ -11,6 +11,8 @@
 #include "AudioDataSet.h"
 #include <cassert>
 
+#include "../PreProcessing/PreProcessing.h"
+
 template<typename T>
 AudioDataSet<T>::AudioDataSet()
 	: bufferSize(0),
@@ -173,7 +175,10 @@ bool AudioDataSet<T>::save(const std::string & absoluteFilePath, std::string & e
 template<typename T>
 AudioDataSet<T> AudioDataSet<T>::getVarianceReducedCopy(int numFeatures)
 {
-	arma::Col<T> variances = arma::var(data, 1, 1);
+	arma::Mat<T> dataNormalised(data);
+	PreProcessing::normalise(dataNormalised);
+
+	arma::Col<T> variances = arma::var(dataNormalised, 1, 1);
 
 	arma::uvec sorted = arma::sort_index(variances, 1);
 	
@@ -202,7 +207,10 @@ std::vector<std::pair<FeatureFramePair, T>> AudioDataSet<T>::getFeatureVariances
 {
 	std::vector<std::pair<FeatureFramePair, T>> results;
 
-	arma::Col<T> variances = arma::var(data, 1, 1);
+	arma::Mat<T> dataNormalised(data);
+	PreProcessing::normalise(dataNormalised);
+
+	arma::Col<T> variances = arma::var(dataNormalised, 1, 1);
 	arma::uvec sorted = arma::sort_index(variances, 1);
 
 	for (auto i = 0; i < sorted.n_elem; ++i)

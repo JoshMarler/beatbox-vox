@@ -116,6 +116,7 @@ BufferHandlingComponent::BufferHandlingComponent(BeatboxVoxAudioProcessor& p)
 	activateButton.setToggleState(false, NotificationType::sendNotification);
 	setActive(false);
 
+	updateStatusControls();
 	updateStatusLabels();
 }
 
@@ -244,13 +245,7 @@ void BufferHandlingComponent::sliderValueChanged(Slider * slider)
 //==============================================================================
 void BufferHandlingComponent::handleNewTrainingSetLoaded()
 {
-
-	auto numStftFrames = processor.getClassifier().getSTFTFramesPerBuffer();
-	stftNumFramesSlider.setValue(numStftFrames, juce::NotificationType::dontSendNotification);
-
-	auto numDelayedBuffers = processor.getClassifier().getNumBuffersDelayed();
-	bufferDelaySlider.setValue(numDelayedBuffers, juce::NotificationType::dontSendNotification);
-
+	updateStatusControls();
 	updateStatusLabels();
 }
 
@@ -298,6 +293,15 @@ void BufferHandlingComponent::setNeedsUpdate(bool needsUpdate, Button& button)
 		button.setColour(TextButton::textColourOffId, Colours::greenyellow);
 	}
 
+}
+
+void BufferHandlingComponent::updateStatusControls()
+{
+	auto numStftFrames = processor.getClassifier().getSTFTFramesPerBuffer();
+	stftNumFramesSlider.setValue(numStftFrames, juce::NotificationType::dontSendNotification);
+
+	auto numDelayedBuffers = processor.getClassifier().getNumBuffersDelayed();
+	bufferDelaySlider.setValue(numDelayedBuffers, juce::NotificationType::dontSendNotification);
 }
 
 //==============================================================================

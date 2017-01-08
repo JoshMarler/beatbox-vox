@@ -20,13 +20,29 @@
 
 namespace PreProcessing
 {
-	/** Normalises each element to 0 - 1 range. 
+	/** Normalises each row (attributes) between 0 and 1. 
 	 * @param mat The input matrix to normalise.
 	 */	
 	template<typename T>
 	void normalise(arma::Mat<T>& mat)
 	{
-		mat.transform([](T val) { val = std::abs(val); return val / (1 + val); });
+		for (auto i = 0; i < mat.n_rows; ++i)
+		{
+			T min = mat.row(i).min();
+			T max = mat.row(i).max();
+
+			mat.row(i).transform([min, max](T val) { return (val - min) / (max - min); });
+		}
+	}
+
+	template<typename T>
+	void normalise(arma::Col<T>& col)
+	{
+		T min = col.min();
+		T max = col.max();
+
+		col.transform([min, max](T val) { return (val - min) / (max - min); });
+
 	}
 
 	template<typename T>
